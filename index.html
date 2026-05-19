@@ -445,21 +445,88 @@
     /* ── DIVIDER ── */
     .grad-divider { height: 2px; background: var(--grad); opacity: 0.6; }
 
+    /* ── TABLET (≤900px) ── */
     @media (max-width: 900px) {
       nav { padding: 0 20px; height: 80px; }
-      .nav-logo { height: 70px; width: 70px; }
-      .spark-logo-nav { display: none; }
-      .hero { padding: 56px 24px 48px; }
-      .hero h1 { font-size: 34px; }
-      .hero-logo { height: 160px; width: 160px; }
+      .nav-logo { height: 64px; width: 64px; }
+      .spark-logo-nav { height: 22px; }
+      .btn-nav-contact { font-size: 12px; padding: 8px 16px; }
+
+      .hero { padding: 52px 24px 44px; }
+      .hero-logo { width: min(380px, 90vw); height: auto; }
+      .hero h1 { font-size: 32px; }
+      .hero-sub { font-size: 15px; }
+
       h2 { font-size: 30px; }
       .community-header { font-size: 28px; }
-      .problem-grid, .downloads-grid, .council-domains,
-      .footer-inner, .stat-bar { grid-template-columns: 1fr; }
+      .section { padding: 52px 24px; }
+      .section-lead { font-size: 15px; }
+
+      .stat-bar { grid-template-columns: 1fr; border: none; gap: 0; }
+      .stat-item { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.08); padding: 20px 0 !important; }
+      .stat-item:last-child { border-bottom: none; }
+
+      .problem-grid { grid-template-columns: 1fr; }
+      .prob-solution { flex-direction: column; gap: 12px; }
+
       .pillars-grid { grid-template-columns: 1fr; }
       .pillar-card { grid-column: auto !important; }
-      .section { padding: 52px 24px; }
-      .contact-cards { flex-direction: column; align-items: center; }
+
+      .downloads-grid { grid-template-columns: 1fr; }
+
+      .council-domains { grid-template-columns: 1fr 1fr; }
+
+      .contact-cards { flex-direction: column; align-items: stretch; }
+      .contact-person { width: 100%; }
+      .contact-btns { flex-direction: column; align-items: stretch; }
+      .btn-contact, .btn-outline-dark { text-align: center; width: 100%; box-sizing: border-box; }
+
+      .footer-inner { grid-template-columns: 1fr; gap: 36px; }
+      .footer-logo { height: 100px; width: 100px; }
+    }
+
+    /* ── MOBILE (≤600px) ── */
+    @media (max-width: 600px) {
+      nav { height: 68px; padding: 0 16px; }
+      .nav-logo { height: 52px; width: 52px; }
+      .spark-logo-nav { display: none; }
+      .btn-nav-contact { font-size: 11px; padding: 7px 14px; }
+
+      .hero { padding: 40px 20px 36px; }
+      .hero-logo { width: min(280px, 85vw); }
+      .hero h1 { font-size: 26px; letter-spacing: -0.025em; }
+      .hero-sub { font-size: 14px; }
+      .btn-primary { width: 100%; text-align: center; }
+
+      h2 { font-size: 24px; letter-spacing: -0.02em; }
+      .community-header { font-size: 22px; }
+      .section { padding: 44px 20px; }
+      .section-lead { font-size: 14px; }
+
+      .powered-by { flex-wrap: wrap; gap: 8px; font-size: 13px; }
+      .spark-logo-light { height: 24px; }
+
+      .stat-num { font-size: 28px; }
+
+      .prob-card { padding: 24px 20px; }
+      .prob-card h3 { font-size: 17px; }
+
+      .council-domains { grid-template-columns: 1fr; }
+
+      .pillar-card { padding: 22px 20px; }
+      .pillar-num { width: 32px; height: 32px; font-size: 11px; }
+
+      .download-card { padding: 24px 20px; }
+
+      .council-announce { padding: 36px 24px; }
+
+      .contact-person { padding: 16px 18px; }
+      .contact-person-name { font-size: 15px; }
+
+      footer { padding: 40px 20px; }
+      .footer-logo { height: 80px; width: 80px; }
+      .footer-desc { font-size: 13px; }
+      .footer-bottom { flex-direction: column; gap: 6px; text-align: center; }
     }
   </style>
 </head>
@@ -516,7 +583,7 @@
 
 <!-- THE INDUSTRY CHALLENGE -->
 <section class="section section-alt" id="mission" style="position:relative;overflow:hidden;">
-  <div aria-hidden="true" style="position:absolute;inset:0;background:url('snake_and_ladder_2.jpg') center center / cover no-repeat;opacity:0.2;pointer-events:none;z-index:0;"></div>
+  <div aria-hidden="true" style="position:absolute;inset:0;background:url('snake_and_ladder_2.jpg') center center / cover no-repeat;opacity:0.2;filter:grayscale(100%);pointer-events:none;z-index:0;"></div>
   <div class="section-inner" style="position:relative;z-index:1;">
     <div class="section-label" style="color:#b85c00;">Answering the Call to</div>
     <h2 style="color:#0a0a0a;">The Industry Challenge</h2>
