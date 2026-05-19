@@ -270,7 +270,7 @@
       background: var(--black);
       border-radius: 10px;
       padding: 24px 28px;
-      display: flex; align-items: center; gap: 18px;
+      display: flex; flex-direction: column;
     }
     .sol-icon { font-size: 26px; flex-shrink: 0; }
     .prob-solution p { font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.7; }
@@ -609,8 +609,15 @@
     </div>
 
     <div class="prob-solution">
-      <div class="sol-icon">⚖️</div>
-      <p>SafeAI.sg is established to close this gap — Singapore's industry-led Centre of Excellence providing <strong>risk-weighted, use-case-specific governance</strong> that enables confident AI deployment at the appropriate level of rigour, for any organisation, at any scale.</p>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+        <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" style="height:128px; width:128px; object-fit:contain; flex-shrink:0;" />
+        <span style="color:var(--orange); font-size:20px; font-weight:400;">•</span>
+        <span style="font-size:17px; font-weight:800; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em;">Managing the Delicate Governance Balance</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:18px;">
+        <div class="sol-icon">⚖️</div>
+        <p>SafeAI.sg is established to close this gap — Singapore's industry-led Centre of Excellence providing <strong>risk-weighted, use-case-specific governance</strong> that enables confident AI deployment at the appropriate level of rigour, for any organisation, at any scale.</p>
+      </div>
     </div>
   </div>
 </section>
