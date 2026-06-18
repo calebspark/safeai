@@ -407,6 +407,16 @@
       width: 100%; height: 100%; display: block; border-radius: 50%;
       object-fit: cover; object-position: top center; background: #FFFFFF;
     }
+    /* zoom-crop a specific photo onto the face (e.g. seated full-body portraits) */
+    .member-photo-zoom {
+      width: 104px; height: 104px; border-radius: 50%;
+      margin: 0 auto 16px; padding: 4px; box-sizing: content-box; background: var(--grad);
+    }
+    .member-photo-zoom .crop { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #FFFFFF; }
+    .member-photo-zoom img {
+      width: 100%; height: 100%; display: block; object-fit: cover;
+      object-position: 58% 8%; transform: scale(1.6); transform-origin: 58% 8%;
+    }
     .member-name { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 5px; }
     .member-role { font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,0.62); line-height: 1.45; margin-bottom: 6px; }
     .member-org { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--orange); }
@@ -771,7 +781,7 @@
           <div class="member-org">Temasek Holdings</div>
         </div>
         <div class="member-card">
-          <img class="member-photo" src="SAFEAI_PHOTO/rodney tan 2.png" alt="Rodney Tan" />
+          <div class="member-photo-zoom"><div class="crop"><img src="SAFEAI_PHOTO/rodney tan 2.png" alt="Rodney Tan" /></div></div>
           <div class="member-name">Rodney Tan</div>
           <div class="member-role">Director, Cybersecurity Engineering Centre</div>
           <div class="member-org">CSA</div>
