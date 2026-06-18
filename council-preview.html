@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SafeAI.sg — Advisory Council preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --black:#0D0D0D; --dark:#141414; --purple:#9B2880; --orange:#E97132;
+    --grad:linear-gradient(135deg,#9B2880 0%,#E97132 100%);
+    --white:#FFFFFF; --muted:#888;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif; background:#111111; color:var(--white); }
+  .section { padding:96px 0; }
+  .section-inner { max-width:1120px; margin:0 auto; padding:0 28px; }
+  .section-label { font-size:12px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--orange); margin-bottom:14px; }
+  h2 { font-size:38px; font-weight:800; line-height:1.12; margin-bottom:18px; }
+  .section-lead { font-size:16px; color:rgba(255,255,255,0.45); line-height:1.78; max-width:760px; margin-bottom:8px; }
+
+  /* ── council roster ── */
+  .council-group { margin-top:52px; }
+  .council-group-label {
+    font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase;
+    color:rgba(255,255,255,0.55); margin-bottom:22px; padding-bottom:12px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .council-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
+  .member-card {
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:14px; padding:26px 20px; text-align:center;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .member-card:hover { border-color:rgba(233,113,50,0.45); transform:translateY(-3px); }
+  /* gradient ring + solid white fill — for transparent-background photos */
+  .member-photo-ring {
+    width:104px; height:104px; border-radius:50%;
+    margin:0 auto 16px; padding:4px; box-sizing:content-box;
+    background:var(--grad);
+  }
+  .member-photo-ring img {
+    width:100%; height:100%; display:block; border-radius:50%;
+    object-fit:cover; object-position:top center;
+    background:#FFFFFF;
+  }
+  .member-photo {
+    width:104px; height:104px; border-radius:50%; object-fit:cover; object-position:top center;
+    margin:0 auto 16px; display:block;
+    border:2px solid transparent; background:var(--grad);
+    padding:2px; /* gradient ring */
+  }
+  .member-name { font-size:15px; font-weight:700; color:var(--white); margin-bottom:5px; }
+  .member-role { font-size:12.5px; font-weight:500; color:rgba(255,255,255,0.62); line-height:1.45; margin-bottom:6px; }
+  .member-org { font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--orange); }
+
+  @media (max-width:900px){ .council-grid{ grid-template-columns:repeat(2,1fr);} h2{font-size:30px;} }
+  @media (max-width:520px){ .council-grid{ grid-template-columns:repeat(2,1fr); gap:12px;} }
+</style>
+</head>
+<body>
+<section class="section" id="council">
+  <div class="section-inner">
+    <div class="section-label">Governance Body</div>
+    <h2>Founding Advisory Council</h2>
+    <p class="section-lead">SafeAI.sg's Advisory Council is the primary governance and direction-setting body of the Centre — providing strategic oversight, domain expertise, and institutional credibility across government, enterprise, cybersecurity, academia, and international partnerships.</p>
+
+    <!-- SPECIAL ADVISORS -->
+    <div class="council-group">
+      <div class="council-group-label">Special Advisors</div>
+      <div class="council-grid">
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/Kelly-Headshot-scaled-e1729751836464.jpg" alt="Kelly Forbes" />
+          <div class="member-name">Kelly Forbes</div>
+          <div class="member-role">President &amp; Executive Director</div>
+          <div class="member-org">AI Asia Pacific Institute</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/Prof.-Annie-Koh-scaled-aspect-ratio-300-300.webp" alt="Prof. Annie Koh" />
+          <div class="member-name">Prof. Annie Koh</div>
+          <div class="member-role">Professor Emeritus of Finance (Practice); Senior Advisor, BFI</div>
+          <div class="member-org">Singapore Management University</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COUNCIL MEMBERS -->
+    <div class="council-group">
+      <div class="council-group-label">Council Members</div>
+      <div class="council-grid">
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/edward_chen.png" alt="BG Edward Chen" />
+          <div class="member-name">BG Edward Chen</div>
+          <div class="member-role">Chief AI Officer</div>
+          <div class="member-org">NCS</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/Cheri-Lim.png" alt="Cheri Lim" />
+          <div class="member-name">Cheri Lim</div>
+          <div class="member-role">Chief Information Security Officer</div>
+          <div class="member-org">Temasek Holdings</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/rodney tan 2.png" alt="Rodney Tan" />
+          <div class="member-name">Rodney Tan</div>
+          <div class="member-role">Director, Cybersecurity Engineering Centre</div>
+          <div class="member-org">CSA</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/luis carlos .jpg" alt="Luis Carlos Cruz Huertas" />
+          <div class="member-name">Luis Carlos Cruz Huertas</div>
+          <div class="member-role">Executive Director, Head of Data Platforms &amp; AI</div>
+          <div class="member-org">DBS Bank</div>
+        </div>
+        <div class="member-card">
+          <div class="member-photo-ring"><img src="SAFEAI_PHOTO/Nikhil Dwarakanath.png.webp" alt="Nikhil Dwarakanath" /></div>
+          <div class="member-name">Nikhil Dwarakanath</div>
+          <div class="member-role">Group Head of Data &amp; Analytics</div>
+          <div class="member-org">Grab</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/BASKARA RAO.jpeg" alt="Baskara Rao" />
+          <div class="member-name">Baskara Rao</div>
+          <div class="member-role">Chief Technology Officer</div>
+          <div class="member-org">Temasek Holdings</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/glen francis _ new.jpeg" alt="Glen Francis" />
+          <div class="member-name">Glen Francis</div>
+          <div class="member-role">CTO, APAC</div>
+          <div class="member-org">Google</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/DAVID ALLOTT.jpeg" alt="David Allott" />
+          <div class="member-name">David Allott</div>
+          <div class="member-role">Field CISO, APJ</div>
+          <div class="member-org">Veeam Software</div>
+        </div>
+        <div class="member-card">
+          <img class="member-photo" src="SAFEAI_PHOTO/Tang Bing Wan.jpg" alt="Tang Bing Wan" />
+          <div class="member-name">Tang Bing Wan</div>
+          <div class="member-role">Chief Digital Officer, Digital Technology</div>
+          <div class="member-org">JTC Corporation</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</body>
+</html>

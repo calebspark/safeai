@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeAI.sg — Centre of Excellence for AI Technical Safety & Governance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:       #0D0D0D;
+      --dark:        #141414;
+      --purple:      #9B2880;
+      --orange:      #E97132;
+      --grad:        linear-gradient(135deg, #9B2880 0%, #E97132 100%);
+      --grad-v:      linear-gradient(180deg,  #9B2880 0%, #E97132 100%);
+      --white:       #FFFFFF;
+      --off-white:   #F8F5F2;
+      --muted:       #888888;
+      --text:        #0D0D0D;
+      --text-light:  #555555;
+      --border:      #E8E0E8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.65;
+    }
+
+    /* ── GRADIENT TEXT UTILITY ── */
+    .grad-text {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 52px;
+      height: 64px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+    .nav-logo {
+      height: 52px;
+      width: 52px;
+      object-fit: contain;
+      display: block;
+    }
+    .nav-spark {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.35);
+      border-left: 1px solid rgba(233,113,50,0.25);
+      padding-left: 14px;
+    }
+    .nav-spark strong { color: var(--orange); font-weight: 700; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--orange); }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--black);
+      padding: 100px 52px 88px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-inner {
+      max-width: 780px;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(155,40,128,0.22) 0%, rgba(233,113,50,0.10) 50%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-logo {
+      height: 140px;
+      width: 140px;
+      object-fit: contain;
+      margin-bottom: 28px;
+      display: block;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 50px;
+      font-weight: 900;
+      line-height: 1.08;
+      color: var(--white);
+      letter-spacing: -0.035em;
+      margin-bottom: 22px;
+    }
+    .hero-sub {
+      font-size: 16px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.8;
+      margin-bottom: 38px;
+      max-width: 600px;
+    }
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--grad);
+      color: var(--white);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 14px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: opacity 0.2s, transform 0.15s;
+      display: inline-block;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-outline {
+      border: 1.5px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 14px 28px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+      display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--orange); background: rgba(233,113,50,0.08); }
+
+    /* ── SECTIONS ── */
+    .section { padding: 88px 52px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-alt { background: var(--off-white); }
+    .section-dark { background: var(--black); }
+    .section-charcoal { background: #111111; }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .section-dark h2,
+    .section-charcoal h2 { color: var(--white); }
+    .section-lead {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text-light);
+      max-width: 600px;
+      line-height: 1.78;
+      margin-bottom: 52px;
+    }
+    .section-dark .section-lead,
+    .section-charcoal .section-lead { color: rgba(255,255,255,0.45); }
+
+    /* ── STAT BAR ── */
+    .stat-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid rgba(0,0,0,0.08);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      margin-bottom: 56px;
+    }
+    .stat-item {
+      padding: 28px 0;
+      border-right: 1px solid rgba(0,0,0,0.08);
+    }
+    .stat-item:last-child { border-right: none; padding-left: 32px; }
+    .stat-item:first-child { padding-right: 32px; }
+    .stat-item:nth-child(2) { padding: 28px 32px; }
+    .stat-num {
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-desc { font-size: 13px; color: var(--text-light); font-weight: 500; line-height: 1.5; }
+
+    /* ── PROBLEM ── */
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .prob-card {
+      border-radius: 10px;
+      padding: 30px;
+    }
+    .prob-under { background: #FFF4EE; border: 1.5px solid #F5C0A0; }
+    .prob-over  { background: #F8F0FF; border: 1.5px solid #D5A8F0; }
+    .prob-badge {
+      display: inline-block;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 4px; margin-bottom: 14px;
+    }
+    .badge-org { background: #FDE0CC; color: #8A3008; }
+    .badge-pur { background: #EDD8F8; color: #5A1080; }
+    .prob-card h3 { font-size: 17px; font-weight: 800; margin-bottom: 10px; color: var(--text); }
+    .prob-card p  { font-size: 14px; color: var(--text-light); line-height: 1.72; }
+    .prob-solution {
+      margin-top: 20px;
+      background: var(--black);
+      border-radius: 10px;
+      padding: 26px 30px;
+      display: flex; align-items: center; gap: 18px;
+    }
+    .sol-icon { font-size: 26px; flex-shrink: 0; }
+    .prob-solution p { font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+    .prob-solution p strong { color: var(--orange); font-weight: 700; }
+
+    /* ── FIVE PILLARS ── */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 22px;
+    }
+    .pillar-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 30px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .pillar-card:nth-child(-n+3) { grid-column: span 2; }
+    .pillar-card:nth-child(4)    { grid-column: 1 / span 3; }
+    .pillar-card:nth-child(5)    { grid-column: 4 / span 3; }
+    .pillar-card:hover { box-shadow: 0 8px 32px rgba(155,40,128,0.1); transform: translateY(-2px); }
+    .pillar-num {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      background: var(--grad);
+      color: var(--white);
+      font-size: 13px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .pillar-tag {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: 10px;
+    }
+    .pillar-card h3 { font-size: 17px; font-weight: 800; margin-bottom: 12px; color: var(--text); }
+    .pillar-card p  { font-size: 14px; color: var(--text-light); line-height: 1.72; }
+    .pillar-outcome {
+      margin-top: 18px; padding-top: 16px;
+      border-top: 1px solid var(--off-white);
+      font-size: 13px; color: var(--text-light);
+    }
+    .pillar-outcome strong { color: var(--purple); }
+
+    /* ── DOWNLOADS ── */
+    .downloads-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 8px;
+    }
+    .download-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .download-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      padding: 1px;
+      background: var(--grad);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .download-card:hover { background: rgba(255,255,255,0.08); }
+    .download-icon {
+      font-size: 28px;
+    }
+    .download-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--orange);
+    }
+    .download-card h3 {
+      font-size: 18px; font-weight: 800;
+      color: var(--white);
+      line-height: 1.25;
+    }
+    .download-card p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.65;
+      flex: 1;
+    }
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--grad);
+      color: var(--white);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 12px 22px;
+      border-radius: 6px;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: opacity 0.2s, transform 0.15s;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+    .btn-download:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-download svg { flex-shrink: 0; }
+
+    /* ── COUNCIL ── */
+    .council-announce {
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(233,113,50,0.35);
+      border-radius: 14px;
+      padding: 52px 40px;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .council-announce .announce-icon {
+      font-size: 36px;
+      margin-bottom: 18px;
+    }
+    .council-announce h3 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--white);
+      margin-bottom: 14px;
+    }
+    .council-announce p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.78;
+    }
+    .council-announce p strong {
+      color: var(--orange);
+    }
+    .council-domains {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 48px;
+    }
+    .domain-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .domain-card h4 {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 8px;
+    }
+    .domain-card p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.6;
+    }
+
+    /* ── CONTACT ── */
+    .contact-box {
+      max-width: 680px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .contact-box p {
+      font-size: 16px;
+      color: var(--text-light);
+      line-height: 1.78;
+      margin-bottom: 36px;
+    }
+    .contact-person {
+      display: inline-flex;
+      align-items: center;
+      gap: 18px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 30px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .contact-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--grad);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: var(--white);
+      flex-shrink: 0;
+    }
+    .contact-person-name {
+      font-size: 16px; font-weight: 800; color: var(--text);
+    }
+    .contact-person-title {
+      font-size: 13px; color: var(--text-light); margin-top: 2px;
+    }
+    .btn-contact {
+      display: inline-block;
+      background: var(--grad);
+      color: var(--white);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 16px 36px;
+      border-radius: 6px;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-contact:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      padding: 52px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .footer-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
+    }
+    .footer-logo { height: 56px; width: 56px; object-fit: contain; margin-bottom: 10px; display: block; }
+    .footer-by { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+    .footer-by strong { color: var(--orange); font-weight: 700; }
+    .footer-desc { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.8; max-width: 380px; margin-top: 16px; }
+    .footer-contact h4 { font-size: 10px; font-weight: 700; color: var(--white); margin-bottom: 16px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .fc-item { font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+    .fc-item strong { color: rgba(255,255,255,0.75); }
+    .footer-bottom {
+      margin-top: 40px; padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: rgba(255,255,255,0.2);
+      max-width: 1100px; margin-left: auto; margin-right: auto;
+    }
+
+    /* ── DIVIDER ── */
+    .grad-divider {
+      height: 2px;
+      background: var(--grad);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 900px) {
+      .hero { padding: 64px 24px 48px; }
+      .hero h1 { font-size: 36px; }
+      .hero-logo { height: 44px; }
+      h2 { font-size: 30px; }
+      .problem-grid,
+      .downloads-grid,
+      .council-domains,
+      .footer-inner,
+      .stat-bar { grid-template-columns: 1fr; }
+      .pillars-grid { grid-template-columns: 1fr; }
+      .pillar-card { grid-column: auto !important; }
+      .section { padding: 56px 24px; }
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      .contact-person { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-brand">
+    <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" class="nav-logo" />
+    <span class="nav-spark">by <strong>SPARK</strong> · CIO Academy Asia</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#mission">Mission</a></li>
+    <li><a href="#pillars">Five Pillars</a></li>
+    <li><a href="#downloads">Downloads</a></li>
+    <li><a href="#council">Advisory Council</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" class="hero-logo" />
+    <div class="hero-eyebrow">Coming Soon · 2026–2027</div>
+    <h1>Singapore's Centre of Excellence for <span class="grad-text">AI Safety</span> & Governance</h1>
+    <p class="hero-sub">SafeAI.sg bridges the gap between national AI governance policy frameworks and practitioner-level implementation — enabling confident AI deployment at the appropriate level of rigour, for every organisation, at any scale.</p>
+    <div class="hero-ctas">
+      <a href="mailto:david@wahspark.com?subject=Keep Me Informed — SafeAI.sg" class="btn-primary">Keep Me Informed</a>
+    </div>
+  </div>
+</section>
+
+<div class="grad-divider"></div>
+
+<!-- STAT BAR -->
+<section class="section" style="padding: 0 52px;">
+  <div class="section-inner">
+    <div class="stat-bar">
+      <div class="stat-item">
+        <div class="stat-num">16,000+</div>
+        <div class="stat-desc">CIOs, CTOs & practitioners represented by SPARK across the region</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">10</div>
+        <div class="stat-desc">Founding Advisory Council members confirmed, spanning government, enterprise & academia</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">5</div>
+        <div class="stat-desc">Delivery pillars spanning risk scoring, governance tooling, workforce, agentic runtime, and AI cost governance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE PROBLEM -->
+<section class="section section-alt" id="mission">
+  <div class="section-inner">
+    <div class="section-label">The Governance Imperative</div>
+    <h2>Two Failure Modes.<br>One Solution.</h2>
+    <p class="section-lead">Singapore's enterprises are moving from AI pilots to production deployment — but the governance question remains unanswered at the use-case level.</p>
+
+    <div class="problem-grid">
+      <div class="prob-card prob-under">
+        <span class="prob-badge badge-org">Under-Governed</span>
+        <h3>AI Deployed Without Guardrails</h3>
+        <p>Enterprises adopt AI in ways that expose customers, staff, and society to avoidable harm — without adequate technical controls or accountability. The risk is not in moving fast. The risk is in treating AI governance as something to retrofit once problems emerge.</p>
+      </div>
+      <div class="prob-card prob-over">
+        <span class="prob-badge badge-pur">Over-Governed</span>
+        <h3>Innovation Paralysed by Compliance</h3>
+        <p>Blanket compliance processes designed for high-stakes scenarios are applied uniformly to low-risk tools — creating friction that stalls innovation and drives AI initiatives underground, where they are governed even less effectively.</p>
+      </div>
+    </div>
+
+    <div class="prob-solution">
+      <div class="sol-icon">⚖️</div>
+      <p>SafeAI.sg is established to close this gap — Singapore's industry-led Centre of Excellence providing <strong>risk-weighted, use-case-specific governance</strong> that enables confident AI deployment at the appropriate level of rigour, for any organisation, at any scale.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FIVE PILLARS -->
+<section class="section" id="pillars">
+  <div class="section-inner">
+    <div class="section-label">Mission Delivery</div>
+    <h2>Five Pillars.<br>Full Governance Lifecycle.</h2>
+    <p class="section-lead">SafeAI.sg delivers its mission through five mutually reinforcing pillars — spanning use-case risk assessment, technology demonstration, workforce capability, agentic runtime governance, and AI cost oversight.</p>
+
+    <div class="pillars-grid">
+      <div class="pillar-card">
+        <div class="pillar-num">01</div>
+        <div class="pillar-tag">Free · Open · Self-Service</div>
+        <h3>Open Risk Assessment Toolkit & UARS Standard</h3>
+        <p>A practitioner-validated, self-service scoring toolkit freely accessible online — no registration required. Any Singapore organisation applies the Universal AI Use-Case Risk Score (UARS) to determine the right governance tier for any AI use case in under 30 minutes.</p>
+        <div class="pillar-outcome"><strong>Outcome:</strong> Singapore enterprises gain immediate, actionable, cost-free access to calibrated AI governance guidance.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-num">02</div>
+        <div class="pillar-tag">Demonstrate · Not Endorse</div>
+        <h3>Technology Associate & Showcase Programme</h3>
+        <p>Technology companies demonstrate how AI governance controls work in real production environments — through reference architectures, case studies, and community events. SafeAI.sg does not test, certify, or endorse any Associate technology.</p>
+        <div class="pillar-outcome"><strong>Outcome:</strong> Singapore becomes a credible regional demonstration environment for enterprise AI governance, supporting EDB, JTC, and IMDA's positioning.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-num">03</div>
+        <div class="pillar-tag">Level 0 → Level 3</div>
+        <h3>Professional Certification & Skills Development</h3>
+        <p>Co-developed with Singapore's institutes of higher learning — four certification levels from career conversion for non-technical professionals through to Chief Architect for enterprise governance leaders. Aligned to SkillsFuture frameworks and eligible for applicable skills funding.</p>
+        <div class="pillar-outcome"><strong>Outcome:</strong> Singapore builds a sustainable, skilled AI governance workforce — ensuring responsible AI deployment is an organisational capability.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-num">04</div>
+        <div class="pillar-tag">Intent Window Principle</div>
+        <h3>Agentic Runtime Observability & Governance</h3>
+        <p>Govern declared agent intent before action is taken — not after. SafeAI.sg addresses three critical gaps the industry has not yet resolved: pre-execution intent interception, real-time trajectory monitoring, and adversarial context integrity. The key insight is that agentic AI systems declare intent before they act — that window is where governance must operate.</p>
+        <div class="pillar-outcome"><strong>Outcome:</strong> Singapore establishes a first-mover position in agentic AI governance — addressing risks that most enterprise security programmes have not yet incorporated.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-num">05</div>
+        <div class="pillar-tag">Inform · Optimise · Operate</div>
+        <h3>AI FinOps & Cost Governance</h3>
+        <p>Token economics (the cost and consumption of AI compute units, i.e. "tokens") as a governance concern — from budget controls and context hygiene to denial-of-wallet (DoW) attack detection and AI cost anomaly as a security signal. Responsible AI governance extends beyond safety and compliance: as AI workloads scale, unmanaged token spend creates material exposure.</p>
+        <div class="pillar-outcome"><strong>Outcome:</strong> Organisations gain the controls to treat AI cost as a shared governance responsibility — not just a billing line item.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="grad-divider"></div>
+
+<!-- DOWNLOADS -->
+<section class="section section-dark" id="downloads">
+  <div class="section-inner">
+    <div class="section-label">Resources</div>
+    <h2>Download SafeAI.sg<br>Framework Documents</h2>
+    <p class="section-lead">Access the foundational documents that underpin SafeAI.sg — the charter deck for a structured overview and the full preliminary charter for the complete governance framework.</p>
+
+    <div class="downloads-grid">
+      <div class="download-card">
+        <div class="download-icon">📊</div>
+        <div class="download-label">Slide Deck · PPTX</div>
+        <h3>SafeAI.sg Charter Summary</h3>
+        <p>A structured visual overview of the SafeAI.sg Advisory Council Charter — covering the mission, five delivery pillars, UARS framework, advisory council structure, and operating principles. Designed for senior stakeholder briefings.</p>
+        <a href="SafeAI sg Charter Deck v6 updated copy.pptx" download="SafeAI_Charter_Summary.pptx" class="btn-download">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M7 9l-3-3M7 9l3-3M1 11h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download Charter Summary
+        </a>
+      </div>
+      <div class="download-card">
+        <div class="download-icon">📄</div>
+        <div class="download-label">Full Document · PDF</div>
+        <h3>SafeAI.sg Preliminary Charter</h3>
+        <p>The complete preliminary charter document — including the full UARS methodology, governance tier controls, advisory council structure, operating principles, certification framework, and charter administration provisions.</p>
+        <a href="SafeAI_Launch_Ministerial_Briefing_Note_1.pdf" download="SafeAI_Preliminary_Charter.pdf" class="btn-download">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M7 9l-3-3M7 9l3-3M1 11h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download Preliminary Charter
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="grad-divider"></div>
+
+<!-- ADVISORY COUNCIL -->
+<section class="section section-charcoal" id="council">
+  <div class="section-inner">
+    <div class="section-label">Governance Body</div>
+    <h2>Founding Advisory Council</h2>
+    <p class="section-lead">SafeAI.sg's Advisory Council is the primary governance and direction-setting body of the Centre — providing strategic oversight, domain expertise, and institutional credibility across government, enterprise, cybersecurity, academia, and international partnerships.</p>
+
+    <div class="council-announce">
+      <div class="announce-icon">🔔</div>
+      <h3>Council Announcement Coming</h3>
+      <p>The Founding Advisory Council will be formally announced in <strong>late 2026</strong>, ahead of the SafeAI.sg public launch. Council members participate in a personal capacity — membership does not constitute endorsement by any member's employing organisation or regulatory body.</p>
+    </div>
+
+    <div class="council-domains">
+      <div class="domain-card">
+        <h4>Government & Digital Policy</h4>
+        <p>Representatives from government technology and digital policy bodies providing public sector context and alignment with national AI governance priorities.</p>
+      </div>
+      <div class="domain-card">
+        <h4>Cybersecurity & National Security</h4>
+        <p>Practitioners from national cybersecurity authorities providing security expertise, threat intelligence, and alignment with national cybersecurity frameworks.</p>
+      </div>
+      <div class="domain-card">
+        <h4>Financial Services & Regulated Industries</h4>
+        <p>Senior practitioners from regulated financial institutions and industries operating under the most demanding AI governance requirements.</p>
+      </div>
+      <div class="domain-card">
+        <h4>Academic & Research Institutions</h4>
+        <p>AI safety researchers and governance scholars providing research rigour and connection to the global AI safety literature.</p>
+      </div>
+      <div class="domain-card">
+        <h4>Enterprise Technology Leadership</h4>
+        <p>Sitting CIOs, CTOs, and CISOs from large enterprises bringing practitioner credibility and real-world deployment experience to framework development.</p>
+      </div>
+      <div class="domain-card">
+        <h4>International Partnerships</h4>
+        <p>Representatives from peer AI safety bodies in the United Kingdom, United States, and Asia-Pacific enabling global benchmarking and knowledge exchange.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section section-alt" id="contact">
+  <div class="section-inner">
+    <div class="section-label">Get In Touch</div>
+    <h2 style="text-align:center;">Contact Us</h2>
+    <div class="contact-box">
+      <p style="margin-top: 16px;">Whether you're interested in joining the Advisory Council, exploring a technology associate partnership, or simply want to stay informed about SafeAI.sg's progress — we'd love to hear from you.</p>
+      <div style="display:flex; justify-content:center; margin-bottom: 32px;">
+        <div class="contact-person">
+          <div class="contact-avatar">DC</div>
+          <div>
+            <div class="contact-person-name">David Chin</div>
+            <div class="contact-person-title">Chief Secretariat, SPARK · Founder, SafeAI.sg</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn-contact">Contact Us</a>
+        <a href="mailto:david@wahspark.com?subject=Keep Me Informed — SafeAI.sg" class="btn-outline" style="color: var(--text); border-color: rgba(0,0,0,0.15);">Keep Me Informed</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" class="footer-logo" />
+      <div class="footer-by">by <strong>SPARK</strong> · CIO Academy Asia</div>
+      <p class="footer-desc">Singapore's industry-led Centre of Excellence for AI technical safety and practical governance. Anchored at Punggol Digital District with institutional support from JTC Corporation, IMDA, and CSA.</p>
+      <p style="margin-top:16px;font-size:11px;color:rgba(255,255,255,0.18);letter-spacing:0.04em;">Grounded in Proportionality · Practicality · Independence</p>
+    </div>
+    <div class="footer-contact">
+      <h4>Contact</h4>
+      <div class="fc-item"><strong>David Chin</strong> — Chief Secretariat, SPARK · Founder, SafeAI.sg</div>
+      <div class="fc-item" style="margin-top:14px;">📧 david@wahspark.com</div>
+      <div class="fc-item">🌐 safeai.sg</div>
+      <div style="margin-top:22px;">
+        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn-primary" style="font-size:13px; padding: 11px 22px;">Contact Us</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SafeAI.sg · SPARK by CIO Academy Asia · Version 1.0</span>
+    <span>Coming Soon · Singapore · 2026–2027</span>
+  </div>
+</footer>
+
+</body>
+</html>

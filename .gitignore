@@ -1,0 +1,14 @@
+# OS cruft
+.DS_Store
+
+# Unused heavy source material (not referenced by the website)
+VEEAM Run Down.xlsx
+210526 SPARK X Veeam Dinner_V2 (1).pptx
+SafeAI sg Charter Deck copy.pptx
+IMG_3702.PNG
+SafeAI SG Advisory Council Charter.docx
+
+# Note: these binaries ARE kept because index.html links them as downloads:
+#   SafeAI sg Charter Deck v6 updated copy.pptx
+#   SafeAI_SG_Charter_Deck_v7_1.pdf
+#   SafeAI_Launch_Ministerial_Briefing_Note_1.pdf
