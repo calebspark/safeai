@@ -36,7 +36,8 @@ Rendered in the `#council` section. Roles sourced from the SPARK × Veeam launch
 | Baskara Rao | Chief Technology Officer | Temasek Holdings |
 | Glen Francis | CTO, APAC | Google |
 | David Allott | Field CISO, APJ | Veeam Software |
-| Tang Bing Wan | Chief Digital Officer, Digital Technology | JTC Corporation |
+
+> _On hold:_ Tang Bing Wan (Chief Digital Officer, Digital Technology — JTC Corporation) — card commented out in `index.html`, pending reinstatement.
 
 > Council members participate in a personal capacity; membership does not constitute endorsement by any member's employing organisation or regulatory body.
 
