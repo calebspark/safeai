@@ -3,581 +3,418 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafeAI.sg — Centre of Excellence for AI Technical Safety & Governance</title>
+  <title>SafeAI.sg, Centre of Excellence for AI Technical Safety and Governance</title>
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --black:       #0D0D0D;
-      --dark:        #141414;
-      --purple:      #9B2880;
-      --orange:      #E97132;
-      --grad:        linear-gradient(135deg, #9B2880 0%, #E97132 100%);
-      --white:       #FFFFFF;
-      --off-white:   #F8F5F2;
-      --muted:       #888888;
-      --text:        #0D0D0D;
-      --text-light:  #555555;
-      --border:      #E8E0E8;
+      /* ── ONE accent (brand orange). Gradient lives only inside the logo asset. ── */
+      --accent:     #E97132;
+      --accent-2:   #f08a52;            /* hover only */
+      --accent-ink: #16100b;            /* text on accent fill */
+
+      /* ── neutral ramp, dark canvas ── */
+      --bg:         #0c0c0e;
+      --surface-1:  #161618;            /* cards, button rest */
+      --surface-2:  #202023;            /* hover / elevated */
+      --surface-3:  #2a2a2e;            /* pressed */
+      --raised:     #121214;            /* faint section band, a hair above canvas */
+      --line:       rgba(255,255,255,.06);
+      --line-2:     rgba(255,255,255,.10);
+      --ink:        #f4f4f5;
+      --ink-2:      #a1a1aa;
+      --ink-3:      #71717a;
+      --success:    #3ecf8e;            /* semantic: success/confirm only */
+
+      /* ── shadows: soft, diffuse, never a hard slab ── */
+      --shadow:     0 14px 34px -18px rgba(0,0,0,.55);
+      --shadow-pop: 0 24px 50px -18px rgba(0,0,0,.72);
+      --raise:      inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.45);
+
+      /* ── spacing scale ── */
+      --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+      --gap:24px;
+
+      /* ── radii ── */
+      --r-sm:10px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+
+      /* ── type: mobile base 17px, desktop 13px; scale = multipliers ── */
+      --fs-base:17px;
+      --font:'Plus Jakarta Sans','DM Sans',-apple-system,system-ui,sans-serif;
+      --t-cap:  calc(var(--fs-base) * .80);
+      --t-body: var(--fs-base);
+      --t-lead: calc(var(--fs-base) * 1.18);
+      --t-h3:   calc(var(--fs-base) * 1.45);
+      --t-h2:   calc(var(--fs-base) * 1.95);
+      --t-h1:   calc(var(--fs-base) * 2.55);
+
+      --btn-py:12px;
     }
+    @media (min-width:1024px){ :root{ --fs-base:13px; } }
+    /* mobile: keep normal text at 17px, scale the headings down so they aren't oversized */
+    @media (max-width:600px){ :root{
+      --t-lead: calc(var(--fs-base) * 1.05);
+      --t-h3:   calc(var(--fs-base) * 1.25);
+      --t-h2:   calc(var(--fs-base) * 1.55);
+      --t-h1:   calc(var(--fs-base) * 1.92);
+    } }
 
-    html { scroll-behavior: smooth; }
-
+    html { scroll-behavior: smooth; -webkit-text-size-adjust:100%; }
     body {
-      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--text);
-      background: var(--white);
-      line-height: 1.65;
+      background: var(--bg);                /* flat, no spotlight */
+      color: var(--ink);
+      font: 500 var(--t-body)/1.6 var(--font);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
-    .grad-text {
-      background: var(--grad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    h1,h2,h3 { font-weight:600; line-height:1.12; letter-spacing:-.02em; }
+    .trim { text-box: trim-both cap alphabetic; }
+    @supports not (text-box: trim-both cap alphabetic){
+      .trim { text-box-trim:trim-both; text-box-edge:cap alphabetic; }
     }
+
+    a { color: inherit; }
+
+    /* ── eyebrow: sentence case, NEVER all-caps ── */
+    .eyebrow {
+      font-size: var(--t-cap);
+      font-weight: 600;
+      letter-spacing: .01em;
+      color: var(--accent);
+      margin-bottom: var(--s4);
+    }
+
+    .with-icon { display:inline-flex; align-items:center; gap:.5em; }
+    .ico { width:1em; height:1em; flex:none; display:block; }
+
+    /* ── TOOLTIP — pointer devices only ── */
+    [data-tip] { position: relative; }
+    @media (hover:hover){
+      [data-tip]:hover::after, [data-tip]:focus-visible::after {
+        content: attr(data-tip);
+        position:absolute; bottom:calc(100% + 8px); left:50%;
+        background: var(--surface-3); color: var(--ink);
+        font:500 var(--t-cap)/1.2 var(--font);
+        padding:6px 10px; border-radius:8px; white-space:nowrap;
+        box-shadow: var(--shadow); pointer-events:none; z-index:50;
+        opacity:0; transform:translateX(-50%) translateY(4px);
+        animation: av-tip .14s ease forwards;
+      }
+    }
+    @keyframes av-tip { to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
+    /* ── BUTTONS: grey by default, raised; accent reserved for the one primary action ── */
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:.5em;
+      padding: var(--btn-py) calc(var(--btn-py) * 2);
+      border-radius: var(--r-md);
+      border:1px solid transparent;
+      font:600 var(--t-body)/1 var(--font);
+      text-box: trim-both cap alphabetic;
+      color: var(--ink);
+      background: var(--surface-1);
+      box-shadow: var(--raise), var(--shadow);
+      text-decoration:none; cursor:pointer;
+      -webkit-tap-highlight-color:transparent;
+      transition: background .18s ease, transform .12s ease, box-shadow .2s ease;
+    }
+    .btn:hover { background: var(--surface-2); }
+    .btn:active { transform: translateY(1px) scale(.985); background: var(--surface-3); box-shadow: var(--raise); }
+    .btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    /* accent buttons: slight magenta hue shifting into orange */
+    .btn-accent { background: linear-gradient(115deg, #9b3b92 0%, #b84e6f 28%, #E97132 70%); color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.28), var(--shadow); }
+    .btn-accent:hover { background: linear-gradient(115deg, #ad479f 0%, #cc5a7c 28%, #f0853f 70%); }
+    .btn-accent:active { transform: translateY(1px) scale(.985); }
+    .btn-sm { --btn-py:9px; border-radius: var(--r-sm); font-size: var(--t-cap); }
 
     /* ── NAV ── */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: var(--black);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 48px;
-      height: 130px;
+      position: sticky; top:0; z-index:100;
+      background: rgba(12,12,14,.82);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 0 48px; height: 104px;
     }
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-    }
-    .nav-logo {
-      height: 120px;
-      width: 120px;
-      object-fit: contain;
-      display: block;
-    }
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 22px;
-    }
-    .spark-logo-nav {
-      height: 28px;
-      width: auto;
-      display: block;
-    }
-    .btn-nav-contact {
-      background: var(--grad);
-      color: var(--white);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 13px;
-      padding: 9px 22px;
-      border-radius: 5px;
-      text-decoration: none;
-      transition: opacity 0.2s, transform 0.15s;
-      white-space: nowrap;
-    }
-    .btn-nav-contact:hover { opacity: 0.85; transform: translateY(-1px); }
+    .nav-brand { display:flex; align-items:center; text-decoration:none; }
+    .nav-logo { height:46px; width:auto; display:block; }
+    .nav-right { display:flex; align-items:center; gap:24px; }
+    .spark-logo-nav { height:30px; width:auto; display:block; opacity:.9; }
+
+    /* ── layout shell ── */
+    .section { padding: 96px 52px; }
+    .section-inner { max-width: 1120px; margin:0 auto; }
+    .section-raised { background: var(--raised); }
+
+    .h2-lead { max-width: 620px; }
+    h2 { font-size: var(--t-h2); line-height:1.14; margin-bottom: var(--s5); }
+    .lead { font-size: var(--t-lead); color: var(--ink-2); line-height:1.85; max-width:620px; }
+    .lead-gap { margin-bottom: var(--s8); }
+
+    .hairline { height:1px; background: var(--line); border:0; max-width:1120px; margin:0 auto; }
 
     /* ── HERO ── */
-    .hero {
-      background: var(--black);
-      padding: 88px 52px 80px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-inner { max-width: 760px; }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -60px; right: -60px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(155,40,128,0.2) 0%, rgba(233,113,50,0.09) 50%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero-logo {
-      width: 840px;
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin-bottom: 24px;
-    }
-    .hero-eyebrow {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--orange);
-      margin-bottom: 18px;
-    }
-    .hero h1 {
-      font-size: 50px;
-      font-weight: 900;
-      line-height: 1.08;
-      color: var(--white);
-      letter-spacing: -0.035em;
-      margin-bottom: 20px;
-    }
-    .hero-sub {
-      font-size: 16px;
-      color: rgba(255,255,255,0.48);
-      line-height: 1.8;
-      margin-bottom: 36px;
-      max-width: 580px;
-    }
-    .btn-primary {
-      background: var(--grad);
-      color: var(--white);
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      padding: 14px 30px;
-      border-radius: 6px;
-      text-decoration: none;
-      display: inline-block;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
-
-    /* ── SECTIONS ── */
-    .section { padding: 80px 52px; }
-    .section-inner { max-width: 1100px; margin: 0 auto; }
-    .section-alt { background: var(--off-white); }
-    .section-dark { background: var(--black); }
-    .section-charcoal { background: #111111; }
-
-    .section-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--orange);
-      margin-bottom: 10px;
-    }
-    h2 {
-      font-size: 38px;
-      font-weight: 900;
-      letter-spacing: -0.035em;
-      line-height: 1.12;
-      margin-bottom: 14px;
-      color: var(--text);
-    }
-    .section-dark h2, .section-charcoal h2 { color: var(--white); }
-    .section-lead {
-      font-size: 16px;
-      color: var(--text-light);
-      max-width: 600px;
-      line-height: 1.78;
-      margin-bottom: 44px;
-    }
-    .section-dark .section-lead, .section-charcoal .section-lead { color: rgba(255,255,255,0.45); }
-
-    /* ── COMMUNITY SECTION ── */
-    .community-header {
-      font-size: 38px;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      color: var(--text);
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .powered-by {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-size: 15px;
-      color: var(--text-light);
-      font-weight: 500;
-      margin-bottom: 48px;
-    }
-    .spark-logo-light {
-      height: 30px;
-      width: auto;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .spark-logo-dark {
-      height: 24px;
-      width: auto;
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .footer-spark-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .footer-spark-wrap span {
-      font-size: 13px;
-      color: rgba(255,255,255,0.3);
-    }
+    .hero { padding: 104px 52px 96px; }
+    .hero-inner { max-width: 780px; }
+    .hero-logo { width: 840px; max-width: 100%; height:auto; display:block; margin-bottom: var(--s6); }
+    .hero .eyebrow { margin-bottom: var(--s4); }
+    .hero h1 { font-size: var(--t-h1); line-height:1.14; margin-bottom: var(--s6); max-width: 720px; }
+    .hero h1 .accent { color: var(--accent); }
+    .hero-sub { font-size: var(--t-lead); color: var(--ink-2); line-height:1.85; margin-bottom: var(--s8); max-width: 600px; }
+    .hero-cta { display:flex; gap: var(--s4); flex-wrap:wrap; }
+    .hero-cta .btn { --btn-py: 15px; }
 
     /* ── STAT BAR ── */
-    .stat-bar {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border-top: 1px solid rgba(0,0,0,0.08);
-      border-bottom: 1px solid rgba(0,0,0,0.08);
+    .community-head { text-align:center; margin-bottom: var(--s5); }
+    .powered-by {
+      display:flex; align-items:center; justify-content:center; gap:16px;
+      font-size: var(--t-lead); color: var(--ink-2); font-weight:500;
+      margin-top: var(--s4); margin-bottom: var(--s8);
     }
-    .stat-item { padding: 24px 0; border-right: 1px solid rgba(0,0,0,0.08); }
-    .stat-item:last-child { border-right: none; padding-left: 32px; }
-    .stat-item:first-child { padding-right: 32px; }
-    .stat-item:nth-child(2) { padding: 24px 32px; }
-    .stat-num {
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      background: var(--grad);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1;
-      margin-bottom: 5px;
+    .spark-logo-light { height:42px; width:auto; }
+    .stat-bar { display:grid; grid-template-columns: repeat(3,1fr); gap: var(--gap); }
+    .stat-item {
+      background: var(--surface-1); border-radius: var(--r-lg);
+      padding: var(--card-pad, 28px); box-shadow: var(--raise), var(--shadow);
     }
-    .stat-desc { font-size: 13px; color: var(--text-light); font-weight: 500; line-height: 1.5; }
+    .stat-num { font-size: calc(var(--fs-base) * 2.6); font-weight:600; letter-spacing:-.03em; line-height:1; margin-bottom: var(--s3); color: var(--ink); }
+    .stat-desc { font-size: var(--t-cap); color: var(--ink-2); line-height:1.55; }
+
+    /* ── CARD base ── */
+    .card {
+      background: var(--surface-1); border-radius: var(--r-lg);
+      padding: 32px; box-shadow: var(--raise), var(--shadow);
+    }
 
     /* ── PROBLEM ── */
-    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .prob-card {
-      border-radius: 8px;
-      padding: 34px;
-      background: var(--white);
-      border: 1px solid #e0e0e0;
-      box-shadow: 0 2px 14px rgba(0,0,0,0.045);
-    }
-    .prob-card-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #aaa;
-      margin-bottom: 14px;
-    }
-    .prob-card h3 { font-size: 19px; font-weight: 800; margin-bottom: 12px; color: var(--text); line-height: 1.25; }
-    .prob-card p  { font-size: 14px; color: #6b6b6b; line-height: 1.82; }
-    .prob-solution {
-      margin-top: 20px;
-      background: var(--black);
-      border-radius: 10px;
-      padding: 24px 28px;
-      display: flex; flex-direction: column;
-    }
-    .sol-icon { font-size: 26px; flex-shrink: 0; }
-    .prob-solution p { font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.7; }
-    .prob-solution p strong { color: var(--orange); font-weight: 700; }
+    .problem-grid { display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+    .prob-label { font-size: var(--t-cap); font-weight:600; color: var(--ink-3); margin-bottom: var(--s3); }
+    .prob-card h3 { font-size: var(--t-h3); margin-bottom: var(--s3); }
+    .prob-card p { font-size: var(--t-body); color: var(--ink-2); line-height:1.7; }
 
-    /* ── FIVE PILLARS ── */
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 22px;
+    .solution {
+      margin-top: var(--gap);
+      background: var(--surface-1); border-radius: var(--r-lg);
+      padding: 32px; box-shadow: var(--raise), var(--shadow);
     }
+    .solution-head { display:flex; align-items:center; gap:14px; margin-bottom: var(--s4); }
+    .solution-head img { height:128px; width:128px; object-fit:contain; flex:none; }
+    .solution-head .title { font-size: var(--t-h3); font-weight:600; letter-spacing:-.02em; }
+    .solution-body { display:flex; align-items:flex-start; gap:16px; }
+    .solution-body .ico-wrap {
+      width:40px; height:40px; flex:none; border-radius: var(--r-md);
+      background: var(--surface-2); display:flex; align-items:center; justify-content:center;
+      color: var(--accent);
+    }
+    .solution-body .ico-wrap .ico { width:20px; height:20px; }
+    .solution-body p { font-size: var(--t-body); color: var(--ink-2); line-height:1.7; }
+    .solution-body p strong { color: var(--ink); font-weight:600; }
+
+    /* ── PILLARS CAROUSEL — continuously rotating; arrows to pause and browse ── */
+    .pillar-carousel { position: relative; }
+    .pillar-viewport { overflow: hidden; padding: 4px; margin: -4px; }
+    .pillar-track { display:flex; gap: var(--gap); align-items: stretch; will-change: transform; }
+    .pillar-slide { flex: 0 0 calc((100% - 2 * var(--gap)) / 3); display:flex; }
+    .pillar-slide > .pillar-card { width:100%; }
     .pillar-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 28px;
-      transition: box-shadow 0.2s, transform 0.2s;
+      background: var(--surface-1); border-radius: var(--r-lg); padding: 28px;
+      box-shadow: var(--raise), var(--shadow);
+      display:flex; flex-direction:column;
+      transition: background .2s ease;
     }
-    .pillar-card:nth-child(-n+3) { grid-column: span 2; }
-    .pillar-card:nth-child(4)    { grid-column: 1 / span 3; }
-    .pillar-card:nth-child(5)    { grid-column: 4 / span 3; }
-    .pillar-card:hover { box-shadow: 0 8px 32px rgba(155,40,128,0.1); transform: translateY(-2px); }
+    .pillar-card:hover { background: var(--surface-2); }
+    .carousel-arrow {
+      position:absolute; top:50%; transform:translateY(-50%); z-index:5;
+      width:48px; height:48px; border-radius:50%; border:1px solid transparent;
+      display:flex; align-items:center; justify-content:center;
+      background: var(--surface-2); color: var(--ink);
+      box-shadow: var(--raise), var(--shadow-pop); cursor:pointer;
+      transition: background .18s ease, transform .12s ease;
+    }
+    .carousel-arrow:hover { background: var(--surface-3); }
+    .carousel-arrow:active { transform: translateY(-50%) scale(.94); }
+    .carousel-arrow:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .carousel-arrow .ico { width:20px; height:20px; }
+    .carousel-arrow.prev { left:-16px; }
+    .carousel-arrow.next { right:-16px; }
+    @media (max-width:1023px){ .pillar-slide { flex-basis: calc((100% - var(--gap)) / 2); } }
+    @media (max-width:600px){
+      .pillar-slide { flex-basis: 100%; }
+      .pillar-carousel { padding-bottom: 68px; }
+      .carousel-arrow { top:auto; bottom:0; transform:none; width:44px; height:44px; }
+      .carousel-arrow:active { transform: scale(.94); }
+      .carousel-arrow.prev { left: calc(50% - 50px); right:auto; }
+      .carousel-arrow.next { right: calc(50% - 50px); left:auto; }
+    }
     .pillar-num {
-      width: 38px; height: 38px; border-radius: 8px;
-      background: var(--grad); color: var(--white);
-      font-size: 13px; font-weight: 900;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
+      width:40px; height:40px; border-radius: var(--r-md);
+      background: var(--surface-2); color: var(--ink);
+      font-size: var(--t-body); font-weight:600;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom: var(--s4); box-shadow: var(--raise);
     }
-    .pillar-tag {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--orange); margin-bottom: 10px;
-    }
-    .pillar-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 14px; color: var(--text); }
-    .pillar-outcome {
-      font-size: 14px;
-      color: var(--text-light);
-      line-height: 1.7;
-    }
+    .pillar-tag { font-size: var(--t-cap); font-weight:600; color: var(--accent); margin-bottom: var(--s2); }
+    .pillar-card h3 { font-size: var(--t-h3); margin-bottom: var(--s3); line-height:1.2; }
+    .pillar-outcome { font-size: var(--t-body); color: var(--ink-2); line-height:1.65; }
 
-    /* ── DOWNLOADS ── */
-    .downloads-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 8px; }
+    /* ── DOWNLOAD ── */
     .download-card {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 32px;
-      display: flex; flex-direction: column; gap: 14px;
-      position: relative;
-      transition: background 0.2s;
+      background: var(--surface-1); border-radius: var(--r-lg); padding: 36px;
+      box-shadow: var(--raise), var(--shadow);
+      display:flex; flex-direction:column; gap: var(--s4); align-items:flex-start;
     }
-    .download-card::before {
-      content: '';
-      position: absolute; inset: 0; border-radius: 12px; padding: 1px;
-      background: var(--grad);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor; mask-composite: exclude;
-      pointer-events: none;
+    .download-icon {
+      width:48px; height:48px; border-radius: var(--r-md);
+      background: var(--surface-2); display:flex; align-items:center; justify-content:center;
+      color: var(--accent); box-shadow: var(--raise);
     }
-    .download-card:hover { background: rgba(255,255,255,0.08); }
-    .download-icon { font-size: 28px; }
-    .download-label {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--orange);
-    }
-    .download-card h3 { font-size: 18px; font-weight: 800; color: var(--white); line-height: 1.25; }
-    .download-card p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.65; flex: 1; }
-    .btn-download {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--grad); color: var(--white);
-      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 13px;
-      padding: 12px 22px; border-radius: 6px; text-decoration: none;
-      transition: opacity 0.2s, transform 0.15s; align-self: flex-start; margin-top: 4px;
-    }
-    .btn-download:hover { opacity: 0.85; transform: translateY(-1px); }
+    .download-icon .ico { width:22px; height:22px; }
+    .download-label { font-size: var(--t-cap); font-weight:600; color: var(--accent); }
+    .download-card h3 { font-size: var(--t-h3); }
+    .download-card p { font-size: var(--t-body); color: var(--ink-2); line-height:1.7; max-width:680px; }
 
     /* ── COUNCIL ── */
-    .council-announce {
-      background: rgba(255,255,255,0.04);
-      border: 1px dashed rgba(233,113,50,0.35);
-      border-radius: 14px;
-      padding: 52px 40px;
-      text-align: center;
-      max-width: 660px;
-      margin: 0 auto;
-    }
-    .council-announce .announce-icon { font-size: 36px; margin-bottom: 16px; }
-    .council-announce h3 { font-size: 22px; font-weight: 800; color: var(--white); margin-bottom: 12px; }
-    .council-announce p { font-size: 15px; color: rgba(255,255,255,0.5); line-height: 1.78; }
-    .council-announce p strong { color: var(--orange); }
-    .council-domains {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 44px;
-    }
-    .domain-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 10px; padding: 18px 20px;
-    }
-    .domain-card h4 {
-      font-size: 11px; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--orange); margin-bottom: 8px;
-    }
-    .domain-card p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.6; }
-
-    /* ── COUNCIL ROSTER ── */
-    .council-group { margin-top: 52px; }
+    .council-group { margin-top: var(--s7); }
     .council-group-label {
-      font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-      color: rgba(255,255,255,0.55); margin-bottom: 22px; padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: var(--t-cap); font-weight:600; letter-spacing:.02em;
+      color: var(--ink-2); margin-bottom: var(--s5);
+      padding-bottom: var(--s3); border-bottom: 1px solid var(--line);
     }
-    .council-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .council-grid { display:grid; grid-template-columns: repeat(4,1fr); gap: var(--gap); }
     .member-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 14px; padding: 26px 20px; text-align: center;
-      transition: border-color .2s ease, transform .2s ease;
+      background: var(--surface-1); border-radius: var(--r-lg);
+      padding: 28px 20px; text-align:center;
+      box-shadow: var(--raise), var(--shadow);
+      transition: transform .2s ease, background .2s ease;
     }
-    .member-card:hover { border-color: rgba(233,113,50,0.45); transform: translateY(-3px); }
+    .member-card:hover { transform: translateY(-3px); background: var(--surface-2); }
     .member-photo {
-      width: 104px; height: 104px; border-radius: 50%; object-fit: cover; object-position: top center;
-      margin: 0 auto 16px; display: block;
-      border: 2px solid transparent; background: var(--grad); padding: 2px;
+      width:104px; height:104px; border-radius:50%; object-fit:cover; object-position: top center;
+      margin:0 auto var(--s4); display:block; background:#fff;
+      box-shadow: 0 0 0 1px var(--line-2), var(--shadow);
     }
-    /* gradient ring + solid white fill — for transparent-background photos */
-    .member-photo-ring {
-      width: 104px; height: 104px; border-radius: 50%;
-      margin: 0 auto 16px; padding: 4px; box-sizing: content-box; background: var(--grad);
+    .member-photo-plate {
+      width:104px; height:104px; border-radius:50%;
+      margin:0 auto var(--s4); background:#fff; overflow:hidden;
+      box-shadow: 0 0 0 1px var(--line-2), var(--shadow);
     }
-    .member-photo-ring img {
-      width: 100%; height: 100%; display: block; border-radius: 50%;
-      object-fit: cover; object-position: top center; background: #FFFFFF;
-    }
-    /* zoom-crop a specific photo onto the face (e.g. seated full-body portraits) */
-    .member-photo-zoom {
-      width: 104px; height: 104px; border-radius: 50%;
-      margin: 0 auto 16px; padding: 4px; box-sizing: content-box; background: var(--grad);
-    }
-    .member-photo-zoom .crop { width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #FFFFFF; }
-    .member-photo-zoom img {
-      width: 100%; height: 100%; display: block; object-fit: cover;
-      object-position: 58% 8%; transform: scale(1.6); transform-origin: 58% 8%;
-    }
-    .member-name { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 5px; }
-    .member-role { font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,0.62); line-height: 1.45; margin-bottom: 6px; }
-    .member-org { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--orange); }
-    @media (max-width: 900px) { .council-grid { grid-template-columns: repeat(2, 1fr); } }
+    .member-photo-plate img { width:100%; height:100%; display:block; object-fit:cover; object-position: top center; }
+    .member-photo-plate.zoom img { object-position:58% 8%; transform:scale(1.6); transform-origin:58% 8%; }
+    .member-name { font-size: var(--t-body); font-weight:600; color: var(--ink); }
 
     /* ── CONTACT ── */
-    .contact-box { max-width: 760px; margin: 0 auto; text-align: center; }
-    .contact-box > p { font-size: 16px; color: var(--text-light); line-height: 1.78; margin-bottom: 36px; }
-    .contact-cards {
-      display: flex; justify-content: center; gap: 16px;
-      flex-wrap: wrap; margin-bottom: 36px;
-    }
+    .contact-box { max-width: 780px; margin:0 auto; text-align:center; }
+    .contact-box > p { font-size: var(--t-lead); color: var(--ink-2); line-height:1.7; margin: var(--s4) auto var(--s7); max-width:620px; }
+    .contact-cards { display:flex; justify-content:center; gap: var(--gap); flex-wrap:wrap; margin-bottom: var(--s7); }
     .contact-person {
-      display: flex; align-items: center; gap: 16px;
-      background: var(--white); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px 26px;
-      text-align: left;
+      position: relative;
+      display:flex; align-items:center; gap:16px; text-align:left;
+      background: var(--surface-1); border-radius: var(--r-lg);
+      padding: 20px 26px; box-shadow: var(--raise), var(--shadow);
+      cursor: pointer; -webkit-tap-highlight-color:transparent;
+      transition: background .18s ease, transform .12s ease;
     }
+    .contact-person:hover { background: var(--surface-2); }
+    .contact-person:active { transform: scale(.99); }
+    .contact-person:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    /* success microinteraction: neutral surface, coloured icon */
+    .contact-person .copied-badge {
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:.5em;
+      background: var(--surface-2); border-radius: var(--r-lg);
+      color: var(--ink); font:600 var(--t-body)/1 var(--font);
+      opacity:0; pointer-events:none; transition: opacity .2s ease;
+    }
+    .contact-person .copied-badge .ico { width:1.15em; height:1.15em; color: var(--success); }
+    .contact-person.is-copied .copied-badge { opacity:1; }
     .contact-avatar {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: var(--grad);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 900; color: var(--white); flex-shrink: 0;
+      width:46px; height:46px; border-radius:50%; flex:none;
+      background: var(--surface-2); color: var(--ink);
+      display:flex; align-items:center; justify-content:center;
+      font-size: var(--t-body); font-weight:600; box-shadow: var(--raise);
     }
-    .contact-person-name { font-size: 16px; font-weight: 800; color: var(--text); }
-    .contact-person-title { font-size: 12px; color: var(--text-light); margin-top: 2px; }
-    .contact-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .btn-contact {
-      display: inline-block;
-      background: var(--grad); color: var(--white);
-      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px;
-      padding: 15px 34px; border-radius: 6px; text-decoration: none;
-      transition: opacity 0.2s, transform 0.15s;
-    }
-    .btn-contact:hover { opacity: 0.88; transform: translateY(-1px); }
-    .btn-outline-dark {
-      display: inline-block;
-      border: 1.5px solid rgba(0,0,0,0.15); color: var(--text);
-      font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px;
-      padding: 15px 34px; border-radius: 6px; text-decoration: none;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .btn-outline-dark:hover { border-color: var(--orange); background: rgba(233,113,50,0.05); }
+    .contact-person-name { font-size: var(--t-body); font-weight:600; color: var(--ink); }
+    .contact-person-title { font-size: var(--t-cap); color: var(--ink-2); margin-top:2px; }
+    .contact-btns { display:flex; gap: var(--s3); justify-content:center; flex-wrap:wrap; }
 
     /* ── FOOTER ── */
-    footer {
-      background: var(--black);
-      padding: 52px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-    .footer-inner {
-      max-width: 1100px; margin: 0 auto;
-      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
-    }
-    .footer-logo { height: 168px; width: 168px; object-fit: contain; margin-bottom: 8px; display: block; }
-    .footer-by { font-size: 13px; color: rgba(255,255,255,0.3); }
-    .footer-by strong { color: var(--orange); font-weight: 700; }
-    .footer-desc { font-size: 14px; color: rgba(255,255,255,0.35); line-height: 1.8; max-width: 380px; margin-top: 14px; }
-    .footer-contact h4 { font-size: 10px; font-weight: 700; color: var(--white); margin-bottom: 14px; letter-spacing: 0.12em; text-transform: uppercase; }
-    .fc-item { font-size: 13px; color: #888; margin-bottom: 5px; }
-    .fc-item strong { color: rgba(255,255,255,0.75); }
+    footer { background: var(--raised); padding: 64px 52px 40px; border-top: 1px solid var(--line); }
+    .footer-inner { max-width:1120px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items:start; }
+    .footer-logo { width:300px; max-width:80%; height:auto; display:block; margin-bottom: var(--s3); }
+    .footer-spark { display:flex; align-items:center; gap:8px; margin-bottom: var(--s4); }
+    .footer-spark span { font-size: var(--t-cap); color: var(--ink-3); }
+    .footer-spark img { height:22px; width:auto; opacity:.85; }
+    .footer-desc { font-size: var(--t-body); color: var(--ink-2); line-height:1.7; max-width:400px; }
+    .footer-tag { margin-top: var(--s4); font-size: var(--t-cap); color: var(--ink-3); }
+    .footer-contact h4 { font-size: var(--t-cap); font-weight:600; color: var(--ink); margin-bottom: var(--s4); letter-spacing:.02em; }
+    .fc-item { font-size: var(--t-body); color: var(--ink-2); margin-bottom: var(--s2); }
+    .fc-item.with-icon { display:flex; align-items:center; gap:.5em; }
+    .fc-item strong { color: var(--ink); font-weight:600; }
+    .fc-item .ico { color: var(--ink-3); }
     .footer-bottom {
-      margin-top: 40px; padding-top: 22px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 12px; color: rgba(255,255,255,0.2);
-      max-width: 1100px; margin-left: auto; margin-right: auto;
+      max-width:1120px; margin: var(--s7) auto 0; padding-top: var(--s5);
+      border-top: 1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center; gap: var(--s3);
+      font-size: var(--t-cap); color: var(--ink-3);
     }
 
-    /* ── DIVIDER ── */
-    .grad-divider { height: 2px; background: var(--grad); opacity: 0.6; }
-
-    /* ── TABLET (≤900px) ── */
-    @media (max-width: 900px) {
-      nav { padding: 0 20px; height: 80px; }
-      .nav-logo { height: 64px; width: 64px; }
-      .spark-logo-nav { height: 22px; }
-      .btn-nav-contact { font-size: 12px; padding: 8px 16px; }
-
-      .hero { padding: 52px 24px 44px; }
-      .hero-logo { width: min(380px, 90vw); height: auto; }
-      .hero h1 { font-size: 32px; }
-      .hero-sub { font-size: 15px; }
-
-      h2 { font-size: 30px; }
-      .community-header { font-size: 28px; }
-      .section { padding: 52px 24px; }
-      .section-lead { font-size: 15px; }
-
-      .stat-bar { grid-template-columns: 1fr; border: none; gap: 0; }
-      .stat-item { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.08); padding: 20px 0 !important; }
-      .stat-item:last-child { border-bottom: none; }
-
+    /* ── TABLET ── */
+    @media (max-width:900px){
+      nav { padding: 0 20px; height:72px; }
+      .nav-logo { height:38px; width:auto; }
+      .section { padding: 64px 24px; }
+      .hero { padding: 64px 24px 56px; }
+      .hero-logo { width: min(380px, 90vw); }
+      .stat-bar { grid-template-columns: 1fr; }
       .problem-grid { grid-template-columns: 1fr; }
-      .prob-solution { flex-direction: column; gap: 12px; }
-
-      .pillars-grid { grid-template-columns: 1fr; }
-      .pillar-card { grid-column: auto !important; }
-
-      .downloads-grid { grid-template-columns: 1fr; }
-
-      .council-domains { grid-template-columns: 1fr 1fr; }
-
-      .contact-cards { flex-direction: column; align-items: stretch; }
-      .contact-person { width: 100%; }
-      .contact-btns { flex-direction: column; align-items: stretch; }
-      .btn-contact, .btn-outline-dark { text-align: center; width: 100%; box-sizing: border-box; }
-
-      .footer-inner { grid-template-columns: 1fr; gap: 36px; }
-      .footer-logo { height: 100px; width: 100px; }
+      .council-grid { grid-template-columns: repeat(2,1fr); }
+      .footer-logo { width:240px; }
+      .footer-inner { grid-template-columns: 1fr; gap: var(--s6); }
     }
 
-    /* ── MOBILE (≤600px) ── */
-    @media (max-width: 600px) {
-      nav { height: 68px; padding: 0 16px; }
-      .nav-logo { height: 52px; width: 52px; }
-      .spark-logo-nav { display: none; }
-      .btn-nav-contact { font-size: 11px; padding: 7px 14px; }
+    /* ── MOBILE ── */
+    @media (max-width:600px){
+      nav { padding: 0 16px; height:56px; }
+      .nav-logo { height:32px; width:auto; }
+      .spark-logo-nav { display:none; }
+      .section { padding: 56px 20px; }
 
-      .hero { padding: 40px 20px 36px; }
-      .hero-logo { width: min(280px, 85vw); }
-      .hero h1 { font-size: 26px; letter-spacing: -0.025em; }
-      .hero-sub { font-size: 14px; }
-      .btn-primary { width: 100%; text-align: center; }
+      /* dial the new breathing room back to a mobile-proportionate scale */
+      .hero { padding: 40px 20px 48px; }
+      .hero-logo { width: min(280px, 85vw); margin-bottom: var(--s5); }
+      .hero h1 { line-height: 1.16; margin-bottom: var(--s5); }
+      .hero-sub { line-height: 1.7; margin-bottom: var(--s6); }
+      .hero-cta { gap: var(--s3); }
+      .hero-cta .btn { width:100%; --btn-py: 14px; }
 
-      h2 { font-size: 24px; letter-spacing: -0.02em; }
-      .community-header { font-size: 22px; }
-      .section { padding: 44px 20px; }
-      .section-lead { font-size: 14px; }
+      h2 { margin-bottom: var(--s4); }
+      .lead { line-height: 1.7; }
+      .lead-gap { margin-bottom: var(--s6); }
 
-      .powered-by { flex-wrap: wrap; gap: 8px; font-size: 13px; }
-      .spark-logo-light { height: 24px; }
+      .community-head { margin-bottom: var(--s4); }
+      .powered-by { margin-top: var(--s3); margin-bottom: var(--s6); gap: 12px; }
+      .spark-logo-light { height: 34px; }
+      .stat-num { font-size: calc(var(--fs-base) * 2.1); }
 
-      .stat-num { font-size: 28px; }
-
-      .prob-card { padding: 18px 16px; }
-      .prob-card-label { font-size: 9px; margin-bottom: 10px; }
-      .prob-card h3 { font-size: 15px; margin-bottom: 8px; }
-      .prob-card p { font-size: 13px; line-height: 1.65; }
-      .problem-grid { gap: 14px; }
-      .prob-solution { padding: 18px 16px; gap: 10px; }
-      .prob-solution p { font-size: 13px; line-height: 1.65; }
-      .sol-icon { font-size: 20px; }
-
-      .council-domains { grid-template-columns: 1fr; }
-
-      .pillar-card { padding: 22px 20px; }
-      .pillar-num { width: 32px; height: 32px; font-size: 11px; }
-
-      .download-card { padding: 24px 20px; }
-
-      .council-announce { padding: 36px 24px; }
-
-      .contact-person { padding: 16px 18px; }
-      .contact-person-name { font-size: 15px; }
-
-      footer { padding: 40px 20px; }
-      .footer-logo { height: 80px; width: 80px; }
-      .footer-desc { font-size: 13px; }
-      .footer-bottom { flex-direction: column; gap: 6px; text-align: center; }
+      .footer-logo { width:200px; }
+      .solution-head img { height:80px; width:80px; }
+      .council-grid { grid-template-columns: 1fr; }
+      .contact-cards { flex-direction:column; }
+      .contact-person { width:100%; }
+      .contact-btns { flex-direction:column; }
+      .contact-btns .btn { width:100%; }
+      .footer-bottom { flex-direction:column; align-items:flex-start; }
     }
+
+    @media (prefers-reduced-motion:reduce){ *{ animation-duration:.01ms!important; transition:none!important; } }
   </style>
 </head>
 <body>
@@ -585,82 +422,84 @@
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-brand">
-    <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" class="nav-logo" />
+    <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
   </a>
   <div class="nav-right">
     <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-nav" />
-    <a href="#contact" class="btn-nav-contact">Contact Us</a>
+    <a href="#contact" class="btn btn-sm">Contact us</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
   <div class="hero-inner">
-    <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" class="hero-logo" />
-    <div class="hero-eyebrow">Coming Soon · 2026–2027</div>
-    <h1>Singapore's Centre of Excellence for <span class="grad-text">AI Safety</span> & Governance</h1>
-    <p class="hero-sub">SafeAI.sg bridges the gap between national AI governance policy frameworks and practitioner-level implementation — enabling confident AI deployment at the appropriate level of rigour, for every organisation, at any scale.</p>
-    <a href="mailto:david@wahspark.com?subject=Keep Me Informed — SafeAI.sg" class="btn-primary">Keep Me Informed</a>
+    <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="hero-logo" />
+    <div class="eyebrow">Coming Soon, 2026 to 2027</div>
+    <h1 class="trim">Singapore's Centre of Excellence for <span class="accent">AI Safety</span> and Governance</h1>
+    <p class="hero-sub">SafeAI.sg bridges national AI governance policy and practitioner-level implementation, so every organisation can deploy AI with confidence at the right level of rigour, at any scale.</p>
+    <div class="hero-cta">
+      <a href="mailto:david@wahspark.com?subject=Keep Me Informed, SafeAI.sg" class="btn btn-accent">Keep me informed</a>
+      <a href="#mission" class="btn">Explore the mission</a>
+    </div>
   </div>
 </section>
 
-<div class="grad-divider"></div>
+<hr class="hairline" />
 
-<!-- COMMUNITY SECTION -->
+<!-- COMMUNITY / STATS -->
 <section class="section" id="community">
   <div class="section-inner">
-    <h2 class="community-header">Led by Industry, Driven by Community</h2>
+    <h2 class="community-head trim">Led by Industry, Driven by Community</h2>
     <p class="powered-by">
       Powered by
-      <img src="spark-logo-01.svg" alt="SPARK" class="spark-logo-light" />
+      <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-light" />
     </p>
     <div class="stat-bar">
       <div class="stat-item">
-        <div class="stat-num">16,000+</div>
-        <div class="stat-desc">CIOs, CTOs & practitioners represented by SPARK across the region</div>
+        <div class="stat-num trim">16,000+</div>
+        <div class="stat-desc">CIOs, CTOs and practitioners represented by SPARK across the region</div>
       </div>
       <div class="stat-item">
-        <div class="stat-num">10</div>
-        <div class="stat-desc">Founding Advisory Council members confirmed, spanning government, enterprise & academia</div>
+        <div class="stat-num trim">10</div>
+        <div class="stat-desc">Founding Advisory Council members confirmed, spanning government, enterprise and academia</div>
       </div>
       <div class="stat-item">
-        <div class="stat-num">5</div>
-        <div class="stat-desc">Delivery pillars spanning risk scoring, governance tooling, workforce, agentic runtime, and AI cost governance</div>
+        <div class="stat-num trim">5</div>
+        <div class="stat-desc">Delivery pillars: risk scoring, governance tooling, workforce, agentic runtime, and AI cost governance</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- THE INDUSTRY CHALLENGE -->
-<section class="section section-dark" id="mission">
+<section class="section section-raised" id="mission">
   <div class="section-inner">
-    <div class="section-label">Answering the Call to</div>
-    <h2>The Industry Challenge</h2>
-    <p class="section-lead">Singapore's enterprises are moving from AI pilots to production deployment — but the governance question remains unanswered at the use-case level.</p>
+    <h2 class="trim">The Industry Challenge</h2>
+    <p class="lead lead-gap">Singapore's enterprises are moving from AI pilots to production, but the governance question remains unanswered at the use-case level.</p>
 
-    <!-- Problem Cards -->
     <div class="problem-grid">
-      <div class="prob-card">
-        <div class="prob-card-label">Under-Governed</div>
-        <h3>AI Deployed Without Guardrails</h3>
-        <p>Enterprises adopt AI in ways that expose customers, staff, and society to avoidable harm — without adequate technical controls or accountability. The risk is not in moving fast. The risk is in treating AI governance as something to retrofit once problems emerge.</p>
+      <div class="card prob-card">
+        <div class="prob-label">Under-governed</div>
+        <h3 class="trim">AI Deployed Without Guardrails</h3>
+        <p>Enterprises adopt AI in ways that expose customers, staff, and society to avoidable harm, without adequate technical controls or accountability. The risk is not in moving fast. It is in treating AI governance as something to retrofit once problems emerge.</p>
       </div>
-      <div class="prob-card">
-        <div class="prob-card-label">Over-Governed</div>
-        <h3>Innovation Paralysed by Compliance</h3>
-        <p>Blanket compliance processes designed for high-stakes scenarios are applied uniformly to low-risk tools — creating friction that stalls innovation and drives AI initiatives underground, where they are governed even less effectively.</p>
+      <div class="card prob-card">
+        <div class="prob-label">Over-governed</div>
+        <h3 class="trim">Innovation Paralysed by Compliance</h3>
+        <p>Blanket compliance processes built for high-stakes scenarios get applied uniformly to low-risk tools. The friction stalls innovation and drives AI initiatives underground, where they are governed even less effectively.</p>
       </div>
     </div>
 
-    <div class="prob-solution">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
-        <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" style="height:128px; width:128px; object-fit:contain; flex-shrink:0;" />
-        <span style="color:var(--orange); font-size:20px; font-weight:400;">•</span>
-        <span style="font-size:17px; font-weight:800; background:var(--grad); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.02em;">Managing the Delicate Governance Balance</span>
+    <div class="solution">
+      <div class="solution-head">
+        <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" />
+        <span class="title trim">Managing the Delicate Governance Balance</span>
       </div>
-      <div style="display:flex; align-items:center; gap:18px;">
-        <div class="sol-icon">⚖️</div>
-        <p>SafeAI.sg is established to close this gap — Singapore's industry-led Centre of Excellence providing <strong>risk-weighted, use-case-specific governance</strong> that enables confident AI deployment at the appropriate level of rigour, for any organisation, at any scale.</p>
+      <div class="solution-body">
+        <span class="ico-wrap">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </span>
+        <p>SafeAI.sg is established to close this gap. Singapore's industry-led Centre of Excellence provides <strong>risk-weighted, use-case-specific governance</strong> that enables confident AI deployment at the appropriate level of rigour, for any organisation, at any scale.</p>
       </div>
     </div>
   </div>
@@ -669,83 +508,97 @@
 <!-- FIVE PILLARS -->
 <section class="section" id="pillars">
   <div class="section-inner">
-    <div class="section-label">Mission Delivery</div>
-    <h2>Five Pillars.<br>Full Stack Governance.</h2>
-    <p class="section-lead">SafeAI.sg delivers its mission through five mutually reinforcing pillars — spanning risk assessment, technology demonstration, workforce capability, agentic runtime governance, and AI cost oversight.</p>
+    <div class="eyebrow">Our Mission</div>
+    <h2 class="trim">Five Pillars. Full-Stack Governance.</h2>
+    <p class="lead lead-gap">SafeAI.sg delivers through five mutually reinforcing pillars, spanning risk assessment, technology demonstration, workforce capability, agentic runtime governance, and AI cost oversight.</p>
 
-    <div class="pillars-grid">
-
-      <div class="pillar-card">
-        <div class="pillar-num">01</div>
-        <div class="pillar-tag">Free · Open · Self-Service</div>
-        <h3>Open Risk Assessment Toolkit & Governance Standard</h3>
-        <div class="pillar-outcome">Singapore enterprises gain immediate, actionable, cost-free access to calibrated AI governance guidance.</div>
+    <div class="pillar-carousel" id="pillarCarousel">
+      <div class="pillar-viewport">
+      <div class="pillar-track" id="pillarTrack">
+        <div class="pillar-slide">
+          <div class="pillar-card">
+            <div class="pillar-num trim">01</div>
+            <div class="pillar-tag">Free, open, self-service</div>
+            <h3 class="trim">Open Risk Assessment Toolkit and Governance Standard</h3>
+            <div class="pillar-outcome">Singapore enterprises gain immediate, actionable, cost-free access to calibrated AI governance guidance.</div>
+          </div>
+        </div>
+        <div class="pillar-slide">
+          <div class="pillar-card">
+            <div class="pillar-num trim">02</div>
+            <div class="pillar-tag">Demonstrate, not endorse</div>
+            <h3 class="trim">Technology Associate and Showcase Programme</h3>
+            <div class="pillar-outcome">Singapore becomes a credible regional demonstration environment for enterprise AI governance, supporting MNCs and attracting leading AI companies to leverage the Singapore ecosystem for global growth.</div>
+          </div>
+        </div>
+        <div class="pillar-slide">
+          <div class="pillar-card">
+            <div class="pillar-num trim">03</div>
+            <div class="pillar-tag">Level 0 to Level 3</div>
+            <h3 class="trim">Professional Certification and Skills Development</h3>
+            <div class="pillar-outcome">Singapore builds a sustainable, skilled AI governance workforce, making responsible AI deployment an organisational capability.</div>
+          </div>
+        </div>
+        <div class="pillar-slide">
+          <div class="pillar-card">
+            <div class="pillar-num trim">04</div>
+            <div class="pillar-tag">Intent window principle</div>
+            <h3 class="trim">Agentic Runtime Observability and Governance</h3>
+            <div class="pillar-outcome">Singapore takes a first-mover position in agentic AI governance, addressing risks most enterprise security programmes have not yet incorporated.</div>
+          </div>
+        </div>
+        <div class="pillar-slide">
+          <div class="pillar-card">
+            <div class="pillar-num trim">05</div>
+            <div class="pillar-tag">Inform, optimise, operate</div>
+            <h3 class="trim">AI FinOps and Cost Governance</h3>
+            <div class="pillar-outcome">Organisations gain the controls to treat AI cost as a shared governance responsibility, not just a billing line item.</div>
+          </div>
+        </div>
       </div>
-
-      <div class="pillar-card">
-        <div class="pillar-num">02</div>
-        <div class="pillar-tag">Demonstrate · Not Endorse</div>
-        <h3>Technology Associate & Showcase Programme</h3>
-        <div class="pillar-outcome">Singapore becomes a credible regional demonstration environment for enterprise AI governance, supporting the MNCs, attracting leading AI companies to leverage the Singapore ecosystem for global growth.</div>
       </div>
-
-      <div class="pillar-card">
-        <div class="pillar-num">03</div>
-        <div class="pillar-tag">Level 0 → Level 3</div>
-        <h3>Professional Certification & Skills Development</h3>
-        <div class="pillar-outcome">Singapore builds a sustainable, skilled AI governance workforce — ensuring responsible AI deployment is an organisational capability.</div>
-      </div>
-
-      <div class="pillar-card">
-        <div class="pillar-num">04</div>
-        <div class="pillar-tag">Intent Window Principle</div>
-        <h3>Agentic Runtime Observability & Governance</h3>
-        <div class="pillar-outcome">Singapore establishes a first-mover position in agentic AI governance — addressing risks that most enterprise security programmes have not yet incorporated.</div>
-      </div>
-
-      <div class="pillar-card">
-        <div class="pillar-num">05</div>
-        <div class="pillar-tag">Inform · Optimise · Operate</div>
-        <h3>AI FinOps & Cost Governance</h3>
-        <div class="pillar-outcome">Organisations gain the controls to treat AI cost as a shared governance responsibility — not just a billing line item.</div>
-      </div>
-
+      <button class="carousel-arrow prev" id="pillarPrev" aria-label="Previous pillars">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <button class="carousel-arrow next" id="pillarNext" aria-label="Next pillars">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
     </div>
   </div>
 </section>
 
-<div class="grad-divider"></div>
+<hr class="hairline" />
 
 <!-- DOWNLOADS -->
-<section class="section section-dark" id="downloads">
+<section class="section" id="downloads">
   <div class="section-inner">
-    <div class="section-label">Resources</div>
-    <h2>Download SafeAI.sg<br>Framework Documents</h2>
-    <p class="section-lead">Access the foundational documents that underpin SafeAI.sg — the charter deck for a structured overview and the full preliminary charter for the complete governance framework.</p>
-    <div class="downloads-grid" style="grid-template-columns: 1fr;">
-      <div class="download-card">
-        <div class="download-icon">📊</div>
-        <div class="download-label">Charter Deck · PDF</div>
-        <h3>SafeAI.sg Charter Summary</h3>
-        <p>A structured visual overview of the SafeAI.sg Advisory Council Charter — covering the mission, five delivery pillars, advisory council structure, and operating principles. Designed for senior stakeholder briefings.</p>
-        <a href="SafeAI_SG_Charter_Deck_v7_1.pdf" download="SafeAI_Charter_Summary_v7.1.pdf" class="btn-download">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M7 9l-3-3M7 9l3-3M1 11h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download Charter Summary
-        </a>
-      </div>
+    <div class="eyebrow">Resources</div>
+    <h2 class="trim">Framework Documents</h2>
+    <p class="lead lead-gap">Access the foundational documents behind SafeAI.sg. The charter deck gives a structured overview of the mission, the five pillars, and the council.</p>
+    <div class="download-card">
+      <span class="download-icon">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+      </span>
+      <div class="download-label">Charter deck, PDF</div>
+      <h3 class="trim">SafeAI.sg Charter Summary</h3>
+      <p>A structured visual overview of the SafeAI.sg Advisory Council Charter, covering the mission, five delivery pillars, council structure, and operating principles. Built for senior stakeholder briefings.</p>
+      <a href="SafeAI_SG_Charter_Deck_v7_1.pdf" download="SafeAI_Charter_Summary_v7.1.pdf" class="btn btn-accent">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M12 15l-4-4M12 15l4-4M5 21h14"/></svg>
+        Download charter summary
+      </a>
     </div>
   </div>
 </section>
 
-<div class="grad-divider"></div>
+<hr class="hairline" />
 
 <!-- ADVISORY COUNCIL -->
-<section class="section section-charcoal" id="council">
+<section class="section section-raised" id="council">
   <div class="section-inner">
-    <div class="section-label">Governance Body</div>
-    <h2>Founding Advisory Council</h2>
-    <p class="section-lead">SafeAI.sg's Advisory Council is the primary governance and direction-setting body of the Centre — providing strategic oversight, domain expertise, and institutional credibility across government, enterprise, cybersecurity, academia, and international partnerships.</p>
-    <!-- SPECIAL ADVISORS -->
+    <div class="eyebrow">Governance Body</div>
+    <h2 class="trim">Founding Advisory Council</h2>
+    <p class="lead">The Advisory Council is the primary governance and direction-setting body of the Centre, providing strategic oversight, domain expertise, and institutional credibility across government, enterprise, cybersecurity, academia, and international partnerships.</p>
+
     <div class="council-group">
       <div class="council-group-label">Special Advisors</div>
       <div class="council-grid">
@@ -760,7 +613,6 @@
       </div>
     </div>
 
-    <!-- COUNCIL MEMBERS -->
     <div class="council-group">
       <div class="council-group-label">Council Members</div>
       <div class="council-grid">
@@ -773,7 +625,7 @@
           <div class="member-name">Cheri Lim</div>
         </div>
         <div class="member-card">
-          <div class="member-photo-zoom"><div class="crop"><img src="SAFEAI_PHOTO/rodney tan 2.png" alt="Rodney Tan" /></div></div>
+          <div class="member-photo-plate zoom"><img src="SAFEAI_PHOTO/rodney tan 2.png" alt="Rodney Tan" /></div>
           <div class="member-name">Rodney Tan</div>
         </div>
         <div class="member-card">
@@ -781,7 +633,7 @@
           <div class="member-name">Luis Carlos Cruz Huertas</div>
         </div>
         <div class="member-card">
-          <div class="member-photo-ring"><img src="SAFEAI_PHOTO/Nikhil Dwarakanath.png.webp" alt="Nikhil Dwarakanath" /></div>
+          <div class="member-photo-plate"><img src="SAFEAI_PHOTO/Nikhil Dwarakanath.png.webp" alt="Nikhil Dwarakanath" /></div>
           <div class="member-name">Nikhil Dwarakanath</div>
         </div>
         <div class="member-card">
@@ -796,43 +648,46 @@
           <img class="member-photo" src="SAFEAI_PHOTO/DAVID ALLOTT.jpeg" alt="David Allott" />
           <div class="member-name">David Allott</div>
         </div>
-        <!-- ON HOLD — Tang Bing Wan; uncomment to reinstate
-        <div class="member-card">
-          <img class="member-photo" src="SAFEAI_PHOTO/Tang Bing Wan.jpg" alt="Tang Bing Wan" />
-          <div class="member-name">Tang Bing Wan</div>
-        </div>
-        -->
       </div>
     </div>
   </div>
 </section>
 
+<hr class="hairline" />
+
 <!-- CONTACT -->
-<section class="section section-alt" id="contact">
+<section class="section" id="contact">
   <div class="section-inner">
-    <div class="section-label" style="text-align:center;">Get In Touch</div>
-    <h2 style="text-align:center;">Contact Us</h2>
+    <div class="eyebrow" style="text-align:center;">Get in Touch</div>
+    <h2 class="trim" style="text-align:center;">Contact Us</h2>
     <div class="contact-box">
-      <p style="margin-top:14px;">Whether you're interested in joining the Advisory Council, exploring a technology associate partnership, or simply want to stay informed about SafeAI.sg's progress — we'd love to hear from you.</p>
+      <p>Whether you want to join the Advisory Council, explore a technology associate partnership, or simply stay informed about SafeAI.sg's progress, we would like to hear from you.</p>
       <div class="contact-cards">
-        <div class="contact-person">
-          <div class="contact-avatar">DC</div>
+        <div class="contact-person" role="button" tabindex="0" data-tip="Click to copy email" data-email="david@wahspark.com">
+          <div class="contact-avatar trim">DC</div>
           <div>
             <div class="contact-person-name">David Chin</div>
             <div class="contact-person-title">Chief Secretariat, SPARK · SafeAI.sg</div>
           </div>
+          <span class="copied-badge" aria-hidden="true">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Email copied
+          </span>
         </div>
-        <div class="contact-person">
-          <div class="contact-avatar">LF</div>
+        <div class="contact-person" role="button" tabindex="0" data-tip="Click to copy email" data-email="laura@wahspark.com">
+          <div class="contact-avatar trim">LF</div>
           <div>
             <div class="contact-person-name">Laura Flores</div>
             <div class="contact-person-title">Assistant Chief Secretariat, SPARK · SafeAI.sg</div>
           </div>
+          <span class="copied-badge" aria-hidden="true">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Email copied
+          </span>
         </div>
       </div>
       <div class="contact-btns">
-        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn-contact">Contact Us</a>
-        <a href="mailto:david@wahspark.com?subject=Keep Me Informed — SafeAI.sg" class="btn-outline-dark">Keep Me Informed</a>
+        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn btn-accent">Contact Us</a>
       </div>
     </div>
   </div>
@@ -842,31 +697,142 @@
 <footer>
   <div class="footer-inner">
     <div>
-      <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" class="footer-logo" />
-      <div class="footer-spark-wrap">
+      <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="footer-logo" />
+      <div class="footer-spark">
         <span>by</span>
-        <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-dark" />
+        <img src="spark-logo-02.svg" alt="SPARK" />
       </div>
       <p class="footer-desc">Singapore's industry-led Centre of Excellence for AI technical safety and practical governance. Anchored at Punggol Digital District with institutional support from government agencies and industry partners.</p>
-      <p style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.18);letter-spacing:0.04em;">Grounded in Proportionality · Practicality · Independence</p>
+      <p class="footer-tag">Grounded in proportionality, practicality, and independence</p>
     </div>
     <div class="footer-contact">
       <h4>Contact</h4>
-      <div class="fc-item"><strong>David Chin</strong> — Chief Secretariat, SPARK · SafeAI.sg</div>
-      <div class="fc-item"><strong>Laura Flores</strong> — Assistant Chief Secretariat, SPARK · SafeAI.sg</div>
-      <div class="fc-item" style="margin-top:12px;">📧 david@wahspark.com</div>
-      <div class="fc-item">📧 laura@wahspark.com</div>
-      <div class="fc-item" style="margin-top:4px;">🌐 safeai.sg</div>
-      <div style="margin-top:20px;">
-        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn-primary" style="font-size:13px;padding:10px 22px;">Contact Us</a>
+      <div class="fc-item"><strong>David Chin</strong>, Chief Secretariat, SPARK · SafeAI.sg</div>
+      <div class="fc-item"><strong>Laura Flores</strong>, Assistant Chief Secretariat, SPARK · SafeAI.sg</div>
+      <div class="fc-item with-icon" style="margin-top:14px;">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
+        david@wahspark.com
+      </div>
+      <div class="fc-item with-icon">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
+        laura@wahspark.com
+      </div>
+      <div class="fc-item with-icon">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z"/></svg>
+        safeai.sg
+      </div>
+      <div style="margin-top:24px;">
+        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn btn-sm btn-accent">Contact us</a>
       </div>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 SafeAI.sg · SPARK by CIO Academy Asia · Version 1.0</span>
-    <span>Coming Soon · Singapore · 2026–2027</span>
+    <span>© 2026 SafeAI.sg · SPARK by CIO Academy Asia · Version 2.0</span>
+    <span>Coming soon · Singapore · 2026 to 2027</span>
   </div>
 </footer>
+
+<script>
+  // Contact cards: click (or Enter/Space) to copy the email, with a success microinteraction.
+  (function () {
+    function legacyCopy(text) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        var ok = document.execCommand('copy'); document.body.removeChild(ta); return ok;
+      } catch (e) { return false; }
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.contact-person'), function (card) {
+      var email = card.getAttribute('data-email');
+      function showSuccess() {
+        card.classList.add('is-copied');
+        if (card._t) clearTimeout(card._t);
+        card._t = setTimeout(function () { card.classList.remove('is-copied'); }, 2200);
+      }
+      function fire() {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(email).then(showSuccess).catch(function () {
+            if (legacyCopy(email)) showSuccess();
+          });
+        } else if (legacyCopy(email)) {
+          showSuccess();
+        }
+      }
+      card.addEventListener('click', fire);
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); fire(); }
+      });
+    });
+  })();
+
+  // Pillars carousel: constant rotation, pause on hover, arrows to step and browse.
+  (function () {
+    var carousel = document.getElementById('pillarCarousel');
+    var track = document.getElementById('pillarTrack');
+    if (!carousel || !track) return;
+    var prevBtn = document.getElementById('pillarPrev');
+    var nextBtn = document.getElementById('pillarNext');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var originals = Array.prototype.slice.call(track.children);
+    // duplicate the full set once so the scroll loops seamlessly
+    originals.forEach(function (s) { track.appendChild(s.cloneNode(true)); });
+
+    var loopDist = 0;   // width of one full set, including gaps
+    function measure() { loopDist = track.children[originals.length].offsetLeft; }
+    measure();
+
+    var offset = 0;
+    var SPEED = 48;     // px per second
+    var hoverPaused = false;
+    var manualPaused = false;
+    var manualTimer = null;
+    var last = null;
+
+    function wrap() {
+      if (loopDist <= 0) return;
+      while (offset >= loopDist) offset -= loopDist;
+      while (offset < 0) offset += loopDist;
+    }
+
+    function render(animate) {
+      track.style.transition = animate ? 'transform .5s cubic-bezier(.4,0,.2,1)' : 'none';
+      track.style.transform = 'translateX(' + (-offset) + 'px)';
+    }
+
+    function frame(t) {
+      if (last === null) last = t;
+      var dt = (t - last) / 1000; last = t;
+      if (!reduce && !hoverPaused && !manualPaused) {
+        offset += SPEED * dt;
+        wrap();
+        render(false);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function step(dir) {
+      var unit = track.children[1].offsetLeft;   // one slide + gap
+      manualPaused = true;
+      if (manualTimer) clearTimeout(manualTimer);
+      manualTimer = setTimeout(function () { manualPaused = false; last = null; }, 4000);
+      offset += dir * unit;
+      wrap();
+      render(true);
+    }
+
+    carousel.addEventListener('mouseenter', function () { hoverPaused = true; });
+    carousel.addEventListener('mouseleave', function () { hoverPaused = false; last = null; });
+    if (prevBtn) prevBtn.addEventListener('click', function () { step(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { step(1); });
+    window.addEventListener('resize', function () { measure(); wrap(); render(false); });
+
+    render(false);
+    requestAnimationFrame(frame);
+  })();
+</script>
 
 </body>
 </html>
