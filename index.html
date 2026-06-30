@@ -73,6 +73,7 @@
       font: 500 var(--t-body)/1.6 var(--font);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      text-wrap: pretty;
     }
 
     h1,h2,h3 { font-weight:600; line-height:1.12; letter-spacing:-.02em; }
@@ -121,6 +122,7 @@
       text-box: trim-both cap alphabetic;
       color: var(--ink);
       background: var(--surface-1);
+      background-clip: padding-box;
       box-shadow: var(--raise), var(--shadow);
       text-decoration:none; cursor:pointer;
       -webkit-tap-highlight-color:transparent;
@@ -234,7 +236,11 @@
 
     /* ── PILLARS CAROUSEL — continuously rotating; arrows to pause and browse ── */
     .pillar-carousel { position: relative; }
-    .pillar-viewport { overflow: hidden; padding: 4px; margin: -4px; }
+    .pillar-viewport {
+      overflow: hidden; padding: 4px; margin: -4px;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
+    }
     .pillar-track { display:flex; gap: var(--gap); align-items: stretch; will-change: transform; }
     .pillar-slide { flex: 0 0 calc((100% - 2 * var(--gap)) / 3); display:flex; }
     .pillar-slide > .pillar-card { width:100%; }
@@ -457,8 +463,8 @@
     <h1 class="trim">Singapore's Centre of Excellence for <span class="accent">AI Safety</span> and Governance</h1>
     <p class="hero-sub">SafeAI.sg bridges national AI governance policy and practitioner-level implementation, so every organisation can deploy AI with confidence at the right level of rigour, at any scale.</p>
     <div class="hero-cta">
-      <a href="mailto:david@wahspark.com?subject=Keep Me Informed, SafeAI.sg" class="btn btn-accent">Keep me informed</a>
-      <a href="#mission" class="btn">Explore the mission</a>
+      <a href="#contact" class="btn btn-accent" data-tip="Contact Us">Keep me informed</a>
+      <a href="#mission" class="btn" data-tip="Scrolls below">Explore the mission</a>
     </div>
   </div>
 </section>
