@@ -151,8 +151,18 @@
 
     /* ---------- rating card (full width, comes after profile) ---------- */
     .tierpill{ display:inline-flex; align-items:center; gap:8px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*.86); padding:8px 16px; border-radius:var(--r-pill); }
-    .gauge-block{ display:flex; justify-content:center; padding:var(--s3) 0 0; }
+    .gauge-block{ display:flex; justify-content:center; padding:var(--s3) 0 0; animation:gaugeIn .55s cubic-bezier(.2,.8,.2,1); }
     .gauge-block svg{ width:100%; max-width:340px; height:auto; }
+    .gauge-legend{ animation:gaugeIn .55s cubic-bezier(.2,.8,.2,1) .05s both; }
+    @keyframes gaugeIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+    /* assessing progress state */
+    .assessing{ padding:var(--s7) var(--s4); text-align:center; }
+    .assessing .atext{ font-family:"Plus Jakarta Sans"; font-weight:600; font-size:calc(var(--fs-base)*1.1); color:var(--ink); }
+    .assessing .apct{ font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*2.6); line-height:1; margin-top:var(--s3); color:var(--accent); }
+    .assessing .abar{ max-width:420px; margin:var(--s5) auto 0; height:8px; border-radius:var(--r-pill); background:var(--surface-3); overflow:hidden; }
+    .assessing .abar i{ display:block; height:100%; width:0; border-radius:var(--r-pill); background:var(--accent); transition:width .25s linear; }
+    .assessing .anote{ color:var(--ink-3); font-size:calc(var(--fs-base)*.84); margin-top:var(--s4); }
     .gauge-block .gneedle{ transition:transform .7s cubic-bezier(.2,.9,.2,1); transform-origin:100px 100px; }
     .gauge-legend{ display:flex; flex-direction:column; align-items:center; gap:var(--s2); margin-top:calc(var(--s5) * -1); }
     .gauge-legend .big{ font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*2); line-height:1; }
@@ -162,11 +172,8 @@
     @media (min-width:1024px){ .drivers{ grid-template-columns:repeat(5,1fr); } }
     .dtile{ background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); }
     .dtile .k{ color:var(--ink-2); font-size:calc(var(--fs-base)*.86); }
-    .dtile .chip{ margin-top:var(--s2); display:inline-block; font-size:calc(var(--fs-base)*.82); font-weight:600; padding:3px 10px; border-radius:var(--r-pill); background:var(--surface-3); color:var(--ink-2); }
-    .dtile .v{ margin-top:8px; color:var(--ink-3); font-size:calc(var(--fs-base)*.82); line-height:1.45; }
-    .chip.hi{ background:var(--danger-soft); color:var(--danger); }
-    .chip.md{ background:var(--warn-soft); color:var(--warn); }
-    .chip.lo{ background:var(--success-soft); color:var(--success); }
+    .dtile .dlevel{ margin-top:6px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*1.05); }
+    .dtile .v{ margin-top:6px; color:var(--ink-3); font-size:calc(var(--fs-base)*.82); line-height:1.45; }
 
     /* ---------- assessment output ---------- */
     .banner{ display:flex; gap:var(--s3); align-items:flex-start; padding:var(--s4) var(--s5); border-radius:var(--r-md); font-size:calc(var(--fs-base)*.95); line-height:1.6; }
@@ -191,6 +198,7 @@
     table.risk td small{ color:var(--ink-2); }
     .lvl{ font-weight:600; white-space:nowrap; }
     .lvl.t1{ color:var(--t1);} .lvl.t2{ color:var(--t2);} .lvl.t3{ color:var(--t3);} .lvl.t4{ color:var(--t4);}
+    .sev-Low{ color:var(--success); } .sev-Medium{ color:var(--warn); } .sev-High{ color:var(--danger); } .sev-Severe{ color:var(--danger); }
 
     .acc{ border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden; }
     .acc + .acc{ margin-top:var(--s3); }
@@ -204,13 +212,19 @@
     .acc[open] .chev{ transform:rotate(180deg); }
     .acc .body{ padding:6px 18px 16px; }
     .acc ul{ margin:0; padding:0; list-style:none; }
-    .acc li{ display:flex; gap:var(--s3); padding:10px 0; border-top:1px solid var(--line); line-height:1.55; }
-    .acc li:first-child{ border-top:0; }
-    .acc li .mk{ width:20px; height:20px; flex:none; margin-top:1px; border-radius:6px; background:var(--surface-3); display:grid; place-items:center; color:var(--ink-3); }
-    .acc li .mk ion-icon{ font-size:13px; }
-    .acc li.req .mk{ background:var(--accent); color:var(--accent-ink); }
-    .acc li span{ color:var(--ink-2); }
-    .acc li.req span b{ color:var(--ink); }
+    .citem{ display:flex; align-items:center; gap:var(--s3); padding:11px 0; border-top:1px solid var(--line); line-height:1.5; }
+    .citem:first-child{ border-top:0; }
+    .chk{ width:21px; height:21px; flex:none; padding:0; border-radius:6px; border:1.5px solid var(--line-2); background:var(--surface-2); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
+    .chk ion-icon{ font-size:14px; color:#fff; opacity:0; transition:opacity .12s; }
+    .chk:hover{ border-color:var(--ink-3); }
+    .chk:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .chk[aria-checked="true"]{ background:var(--success); border-color:var(--success); }
+    .chk[aria-checked="true"] ion-icon{ opacity:1; }
+    .ctext{ flex:1; color:var(--ink); }
+    .citem[data-checked="true"] .ctext{ color:var(--ink-3); text-decoration:line-through; text-decoration-color:var(--ink-3); }
+    .prio{ flex:none; font-size:calc(var(--fs-base)*.74); font-weight:600; padding:3px 11px; border-radius:var(--r-pill); white-space:nowrap; }
+    .prio.req{ background:var(--danger-soft); color:var(--danger); border:1px solid var(--danger-line); }
+    .prio.rec{ background:var(--info-soft); color:var(--info); border:1px solid var(--info-line); }
 
     .empty{ text-align:center; color:var(--ink-3); padding:var(--s7) var(--s4); }
     .empty ion-icon{ font-size:34px; margin-bottom:var(--s3); color:var(--ink-3); }
@@ -380,7 +394,12 @@ const TIERS = {
   4:{n:4,name:"Severe risk",  color:"var(--t4)",soft:"var(--t4-soft)",line:"var(--t4-line)",banner:"danger"},
 };
 const LVLC  = {Low:"t1",Medium:"t2",High:"t3",Severe:"t4"};
-const CHIPC = {Low:"lo",Medium:"md",High:"hi"};
+const SEV   = {
+  Low:   {soft:"var(--success-soft)", line:"var(--success-line)", ink:"var(--success)"},
+  Medium:{soft:"var(--warn-soft)",    line:"var(--warn-line)",    ink:"var(--warn)"},
+  High:  {soft:"var(--danger-soft)",  line:"var(--danger-line)",  ink:"var(--danger)"},
+  Severe:{soft:"var(--danger-soft)",  line:"var(--danger-line)",  ink:"var(--danger)"},
+};
 const CAT_ICON = {
   "Cybersecurity":"shield-checkmark-outline",
   "Data protection & privacy":"lock-closed-outline",
@@ -422,7 +441,7 @@ function renderRating(d){
         <span class="score">Risk index ${pct} / 100</span>
       </div>
       <div class="drivers">
-        ${(d.drivers||[]).map(dr=>`<div class="dtile"><div class="k">${escapeHtml(dr.label)}</div><span class="chip ${CHIPC[dr.level]||''}">${escapeHtml(dr.level)}</span><div class="v">${escapeHtml(dr.note||'')}</div></div>`).join("")}
+        ${(d.drivers||[]).map(dr=>{ const sv=SEV[dr.level]||{soft:'var(--surface-2)',line:'var(--line)',ink:'var(--ink-2)'}; return `<div class="dtile" style="background:${sv.soft};border-color:${sv.line}"><div class="k">${escapeHtml(dr.label)}</div><div class="dlevel" style="color:${sv.ink}">${escapeHtml(dr.level)}</div><div class="v">${escapeHtml(dr.note||'')}</div></div>`;}).join("")}
       </div>
     </div>`;
 }
@@ -466,7 +485,7 @@ function renderOutput(vals, d){
             ${(d.scenarios||[]).map(s=>`<tr>
               <td><b>${escapeHtml(s.scenario)}</b></td>
               <td><b>${escapeHtml(s.impactType)}</b><small>${escapeHtml(s.impactNote)}</small></td>
-              <td><b>${escapeHtml(s.likelihood)}</b><small>${escapeHtml(s.likelihoodNote)}</small></td>
+              <td><b class="sev-${escapeHtml(s.likelihood)}">${escapeHtml(s.likelihood)}</b><small>${escapeHtml(s.likelihoodNote)}</small></td>
               <td>${escapeHtml(s.mitigation)}</td>
               <td><span class="lvl ${LVLC[s.initialLevel]||''}">Initial: ${escapeHtml(s.initialLevel)}</span><br><span class="lvl ${LVLC[s.residualLevel]||''}">Residual: ${escapeHtml(s.residualLevel)}</span></td>
             </tr>`).join("")}
@@ -484,9 +503,10 @@ function renderOutput(vals, d){
             <ion-icon class="chev" name="chevron-down-outline"></ion-icon>
           </summary>
           <div class="body"><ul>
-            ${(g.items||[]).map(i=>{ const rq=i.priority==="Required"; return `<li class="${rq?"req":""}">
-              <span class="mk"><ion-icon name="${rq?'checkmark':'ellipse-outline'}"></ion-icon></span>
-              <span>${rq?"<b>Required. </b>":"<b style='color:var(--ink-3)'>Recommended. </b>"}${escapeHtml(i.text)}</span>
+            ${(g.items||[]).map(i=>{ const rq=i.priority==="Required"; return `<li class="citem" data-checked="false">
+              <button type="button" class="chk" role="checkbox" aria-checked="false" aria-label="Mark as in place"><ion-icon name="checkmark"></ion-icon></button>
+              <span class="ctext">${escapeHtml(i.text)}</span>
+              <span class="prio ${rq?'req':'rec'}">${rq?'Required':'Recommended'}</span>
             </li>`;}).join("")}
           </ul></div>
         </details>`).join("")}
@@ -503,10 +523,26 @@ function renderOutput(vals, d){
   $("#rating").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
+let _apTimer=null;
 function ratingLoading(){
-  $("#rating").innerHTML = `<div class="card"><div class="empty" style="padding:var(--s6)"><div class="spin" style="display:block;margin:0 auto var(--s3);width:24px;height:24px;border-width:3px"></div>Claude is assessing your use case. This runs a live analysis, it takes a few seconds.</div></div>`;
+  $("#rating").innerHTML = `<div class="card">
+    <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Risk rating</h2></div></div>
+    <div class="assessing">
+      <div class="atext">Assessing your risk...</div>
+      <div class="apct" id="apct">0%</div>
+      <div class="abar"><i id="abarfill"></i></div>
+      <div class="anote">Claude is running a live analysis against the MindForge and CSA frameworks.</div>
+    </div></div>`;
   $("#output").innerHTML = "";
+  let p=0; clearInterval(_apTimer);
+  _apTimer=setInterval(()=>{
+    p += Math.max(0.5,(96-p)*0.045);        // ease toward ~96 over the wait
+    if(p>96) p=96;
+    const v=Math.round(p), el=$("#apct"), b=$("#abarfill");
+    if(el) el.textContent=v+"%"; if(b) b.style.width=v+"%";
+  },180);
 }
+function stopAssessing(){ clearInterval(_apTimer); _apTimer=null; const el=$("#apct"), b=$("#abarfill"); if(el) el.textContent="100%"; if(b) b.style.width="100%"; }
 function showError(detail){
   $("#rating").innerHTML = `<div class="card"><div class="banner danger" style="margin:0">
     <ion-icon name="alert-circle-outline"></ion-icon>
@@ -563,6 +599,14 @@ document.querySelectorAll(".field").forEach(field=>{
 });
 updateStepper();
 
+/* ---------- checklist ticking ---------- */
+$("#output").addEventListener("click", e=>{
+  const chk=e.target.closest(".chk"); if(!chk) return;
+  const on = chk.getAttribute("aria-checked")==="true";
+  chk.setAttribute("aria-checked", on?"false":"true");
+  chk.closest(".citem").setAttribute("data-checked", on?"false":"true");
+});
+
 /* ---------- submit ---------- */
 const form=$("#q");
 form.addEventListener("submit", async e=>{
@@ -579,10 +623,13 @@ form.addEventListener("submit", async e=>{
   ratingLoading();
   try{
     const data = await runAssessment(state);
+    stopAssessing();                                  // snap to 100%
+    await new Promise(r=>setTimeout(r,420));           // let 100% land, then fade in the needle
     renderRating(data); renderOutput(state, data);
     hasRun=true; assessedComplete=true; updateStepper(); setLabel("Reassess");
     toast("Assessment complete");
   }catch(err){
+    stopAssessing();
     showError(err.detail || err.message);
     toast("Assessment failed");
   }finally{
