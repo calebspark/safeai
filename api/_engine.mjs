@@ -100,8 +100,23 @@ Use case profile:
 Write in plain, factual language. No em dashes anywhere. Return only via the tool.`;
 }
 
+// Whitelist the six known fields and cap each to a sane length, so a caller
+// cannot inflate the prompt (and the Anthropic bill) with oversized input or
+// smuggle in extra keys. Unknown keys are dropped; values are coerced to string.
+const PROFILE_FIELDS = ['industry', 'role', 'usecase', 'autonomy', 'data', 'deploy'];
+function sanitizeProfile(profile) {
+  const out = {};
+  if (profile && typeof profile === 'object') {
+    for (const k of PROFILE_FIELDS) {
+      if (profile[k] != null) out[k] = String(profile[k]).slice(0, 120);
+    }
+  }
+  return out;
+}
+
 // Runs the assessment. Returns { ok:true, data } or { ok:false, status, reason, detail }.
 export async function assess(profile) {
+  profile = sanitizeProfile(profile);
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return { ok: false, status: 500, reason: 'no_key', detail: 'ANTHROPIC_API_KEY is not configured on the server.' };
 
