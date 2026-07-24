@@ -171,7 +171,7 @@
     @media (min-width:720px){ .drivers{ grid-template-columns:repeat(3,1fr); } }
     @media (min-width:1024px){ .drivers{ grid-template-columns:repeat(5,1fr); } }
     .dtile{ background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); }
-    .dtile .k{ color:var(--ink-2); font-size:calc(var(--fs-base)*.86); }
+    .dtile .k{ color:var(--ink); font-weight:700; font-size:calc(var(--fs-base)*1.02); letter-spacing:-.01em; }
     .dtile .dlevel{ margin-top:6px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*1.05); }
     .dtile .v{ margin-top:6px; color:var(--ink-3); font-size:calc(var(--fs-base)*.82); line-height:1.45; }
 
@@ -436,9 +436,8 @@ function renderRating(d){
       <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Risk rating</h2></div></div>
       <div class="gauge-block">${gaugeSVG(pct)}</div>
       <div class="gauge-legend">
-        <span class="tierpill" style="background:${t.soft};color:${t.color};border:1px solid ${t.line}">Tier ${t.n} of 4</span>
         <span class="big" style="color:${t.color}">${escapeHtml(t.name)}</span>
-        <span class="score">Risk index ${pct} / 100</span>
+        <span class="score">Risk index ${pct} / 100 · Tier ${t.n} of 4</span>
       </div>
       <div class="drivers">
         ${(d.drivers||[]).map(dr=>{ const sv=SEV[dr.level]||{soft:'var(--surface-2)',line:'var(--line)',ink:'var(--ink-2)'}; return `<div class="dtile" style="background:${sv.soft};border-color:${sv.line}"><div class="k">${escapeHtml(dr.label)}</div><div class="dlevel" style="color:${sv.ink}">${escapeHtml(dr.level)}</div><div class="v">${escapeHtml(dr.note||'')}</div></div>`;}).join("")}
