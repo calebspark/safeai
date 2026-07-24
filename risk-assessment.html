@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeAI · AI Risk Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
+  <style>
+    :root {
+      --accent:     #E97132;
+      --accent-2:   #f08a52;
+      --accent-ink: #16100b;
+      --bg:         #0c0c0e;
+      --surface-1:  #161618;
+      --surface-2:  #202023;
+      --surface-3:  #2a2a2e;
+      --ink:        #f4f4f5;
+      --ink-2:      #a1a1aa;
+      --ink-3:      #71717a;
+      --line:       rgba(255,255,255,.07);
+      --line-2:     rgba(255,255,255,.12);
+
+      --info:       #6ea8fe;  --info-soft: rgba(110,168,254,.12);  --info-line: rgba(110,168,254,.30);
+      --success:    #3ecf8e;  --success-soft: rgba(62,207,142,.12); --success-line: rgba(62,207,142,.30);
+      --warn:       #e6b455;  --warn-soft: rgba(230,180,85,.13);   --warn-line: rgba(230,180,85,.32);
+      --danger:     #e5695f;  --danger-soft: rgba(229,105,95,.13); --danger-line: rgba(229,105,95,.32);
+
+      --t1: #3ecf8e; --t1-soft: rgba(62,207,142,.12); --t1-line: rgba(62,207,142,.34);
+      --t2: #e6b455; --t2-soft: rgba(230,180,85,.13); --t2-line: rgba(230,180,85,.34);
+      --t3: #ef8a4b; --t3-soft: rgba(239,138,75,.14); --t3-line: rgba(239,138,75,.36);
+      --t4: #e5695f; --t4-soft: rgba(229,105,95,.14); --t4-line: rgba(229,105,95,.38);
+
+      --raise:
+        inset 0 1px 0 rgba(255,255,255,.09),
+        inset 0 -1px 0 rgba(0,0,0,.45),
+        0 14px 30px -18px rgba(0,0,0,.55);
+      --shadow-pop: 0 22px 48px -20px rgba(0,0,0,.72);
+
+      --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
+      --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:28px; --s7:40px; --s8:56px;
+      --gap: 16px;
+      --fs-base: 17px;
+    }
+    @media (min-width:1024px){ :root{ --fs-base:13px; } }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family:"DM Sans", system-ui, sans-serif;
+      font-size:var(--fs-base); line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    .trim{ text-box: trim-both cap alphabetic; }
+    h1,h2,h3,h4{ font-family:"Plus Jakarta Sans","DM Sans",sans-serif; margin:0; letter-spacing:-.02em; line-height:1.2; }
+    p{ margin:0; }
+    .wrap{ max-width:1120px; margin:0 auto; padding:0 var(--s5); }
+    ion-icon{ display:inline-block; }
+    .with-icon{ display:inline-flex; align-items:center; gap:.5em; }
+
+    /* ---------- top bar ---------- */
+    .topbar{ position:sticky; top:0; z-index:40; background:rgba(12,12,14,.82); backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
+    .topbar .wrap{ display:flex; align-items:center; justify-content:space-between; height:60px; }
+    .brand{ display:flex; align-items:center; gap:var(--s3); font-weight:600; }
+    .brand .dot{ width:26px; height:26px; border-radius:8px; background:linear-gradient(140deg,#9b3b92,#b84e6f 40%,var(--accent)); box-shadow:var(--raise); }
+    .brand small{ color:var(--ink-3); font-weight:500; }
+    .tag{ font-size:calc(var(--fs-base)*.82); color:var(--ink-2); background:var(--surface-1); border:1px solid var(--line); padding:5px 12px; border-radius:var(--r-pill); }
+
+    /* ---------- hero ---------- */
+    .hero{ padding:var(--s8) 0 var(--s6); }
+    .eyebrow{ display:inline-flex; align-items:center; gap:6px; font-family:"Plus Jakarta Sans"; font-size:calc(var(--fs-base)*.86); font-weight:600; color:var(--accent); margin-bottom:var(--s3); }
+    .hero h1{ font-size:calc(var(--fs-base)*2.7); font-weight:700; max-width:760px; }
+    .hero p{ color:var(--ink-2); font-size:calc(var(--fs-base)*1.12); line-height:1.75; max-width:640px; margin-top:var(--s4); }
+
+    /* ---------- stepper (MindForge 2.2.2 as a live progression bar) ---------- */
+    .stepper{ position:relative; margin:var(--s7) 0 0; padding:0; display:grid; grid-template-columns:repeat(5,1fr); }
+    .strack, .sfill{ position:absolute; top:15px; height:2px; border-radius:2px; }
+    .strack{ left:10%; right:10%; background:var(--surface-3); }
+    .sfill{ left:10%; width:0; background:var(--accent); transition:width .45s cubic-bezier(.2,.8,.2,1); }
+    .step{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding:0 4px; }
+    .node{ position:relative; z-index:1; width:32px; height:32px; border-radius:50%; background:var(--surface-2); border:1px solid var(--line-2); display:grid; place-items:center; color:var(--ink-3); font-weight:600; font-size:calc(var(--fs-base)*.85); box-shadow:var(--raise); transition:background .3s, color .3s, border-color .3s, box-shadow .3s; }
+    .node ion-icon{ font-size:18px; display:none; }
+    .node .nnum{ display:inline; }
+    .step.done .node{ background:var(--accent); color:var(--accent-ink); border-color:transparent; }
+    .step.done .node ion-icon{ display:inline-block; }
+    .step.done .node .nnum{ display:none; }
+    .step.cur .node{ border-color:var(--accent); color:var(--ink); box-shadow:var(--raise), 0 0 0 4px rgba(233,113,50,.16); }
+    .stxt{ font-size:calc(var(--fs-base)*.86); color:var(--ink-2); font-weight:500; max-width:120px; transition:color .3s; }
+    .step.done .stxt, .step.cur .stxt{ color:var(--ink); }
+    .stxt .next{ display:block; font-size:calc(var(--fs-base)*.74); color:var(--ink-3); font-weight:500; margin-top:2px; }
+    @media (max-width:640px){ .stxt{ font-size:calc(var(--fs-base)*.74); } }
+
+    /* ---------- layout ---------- */
+    .stage{ padding:var(--s6) 0 var(--s8); }
+    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s6); box-shadow:0 14px 34px -22px rgba(0,0,0,.55); }
+    .card + .card, #rating > .card, #output > .card{ margin-top:var(--gap); }
+    .card h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
+    .card .sub{ color:var(--ink-2); margin-top:6px; font-size:calc(var(--fs-base)*.95); }
+    .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s6); }
+    .stitle .n{ display:grid; place-items:center; width:30px; height:30px; flex:none; border-radius:9px; background:var(--surface-2); color:var(--accent); box-shadow:var(--raise); }
+    .stitle .n ion-icon{ font-size:18px; }
+
+    /* ---------- pill fields ---------- */
+    .fgrid{ display:grid; gap:var(--s6); grid-template-columns:1fr; }
+    @media (min-width:900px){ .fgrid{ grid-template-columns:1fr 1fr; } }
+    .field{ display:flex; flex-direction:column; }
+    .field > label{ order:0; font-weight:600; font-size:calc(var(--fs-base)*1.02); margin-bottom:5px; }
+    .field.miss > label{ color:var(--warn); }
+    .field .hint{ order:1; color:var(--ink-3); font-size:calc(var(--fs-base)*.84); margin:0 0 var(--s3); line-height:1.5; }
+    .field.miss .hint{ color:var(--warn); }
+    .field .pills{ order:2; }
+    .pills{ display:flex; flex-wrap:wrap; gap:8px; }
+    .pill{ font:inherit; font-weight:500; cursor:pointer; color:var(--ink-2); background:var(--surface-2);
+      border:1px solid var(--line); border-radius:var(--r-pill); padding:9px 15px;
+      display:inline-flex; align-items:center; gap:6px; box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+      transition:background .15s, color .15s, border-color .15s, transform .1s; }
+    .pill:hover{ background:var(--surface-3); color:var(--ink); }
+    .pill:active{ transform:translateY(1px); }
+    .pill:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .pill .pk{ width:0; overflow:hidden; display:inline-flex; align-items:center; opacity:0; transition:width .15s, opacity .15s; }
+    .pill .pk ion-icon{ font-size:15px; color:var(--accent-ink); }
+    .pill[aria-checked="true"]{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px -10px rgba(233,113,50,.6); }
+    .pill[aria-checked="true"]:hover{ background:var(--accent-2); color:var(--accent-ink); }
+    .pill[aria-checked="true"] .pk{ width:15px; opacity:1; }
+    .field.miss .pill{ border-color:var(--warn-line); }
+
+    /* ---------- buttons ---------- */
+    .actions{ display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s7); align-items:center; }
+    .btn{ font:inherit; font-weight:600; cursor:pointer; color:var(--ink); background:var(--surface-2); border:0; border-radius:var(--r-sm);
+      padding:13px 26px; box-shadow:var(--raise); transition:transform .12s, background .15s; display:inline-flex; align-items:center; gap:.55em; }
+    .btn ion-icon{ font-size:1.15em; }
+    .btn:hover{ background:var(--surface-3); }
+    .btn:active{ transform:translateY(1px) scale(.99); }
+    .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .btn:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
+    .btn-accent{ color:#fff; background:linear-gradient(115deg,#9b3b92 0%,#b84e6f 28%,var(--accent) 72%); }
+    .btn-accent:hover{ background:linear-gradient(115deg,#ad479f 0%,#cc5a7c 28%,var(--accent-2) 72%); }
+    .btn-ghost{ background:transparent; box-shadow:none; color:var(--ink-2); }
+    .btn-ghost:hover{ background:var(--surface-1); color:var(--ink); }
+    .spin{ display:none; width:1em; height:1em; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:sp .7s linear infinite; }
+    @keyframes sp{ to{ transform:rotate(360deg); } }
+    .btn.is-loading{ position:relative; }
+    .btn.is-loading .lbl{ visibility:hidden; }
+    .btn.is-loading .spin{ display:block; position:absolute; left:50%; top:50%; margin:-.5em 0 0 -.5em; }
+    .formhint{ color:var(--ink-3); font-size:calc(var(--fs-base)*.88); }
+
+    /* ---------- rating card (full width, comes after profile) ---------- */
+    .tierpill{ display:inline-flex; align-items:center; gap:8px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*.86); padding:8px 16px; border-radius:var(--r-pill); }
+    .gauge-block{ display:flex; justify-content:center; padding:var(--s3) 0 0; }
+    .gauge-block svg{ width:100%; max-width:340px; height:auto; }
+    .gauge-block .gneedle{ transition:transform .7s cubic-bezier(.2,.9,.2,1); transform-origin:100px 100px; }
+    .gauge-legend{ display:flex; flex-direction:column; align-items:center; gap:var(--s2); margin-top:calc(var(--s5) * -1); }
+    .gauge-legend .big{ font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*2); line-height:1; }
+    .gauge-legend .score{ color:var(--ink-2); font-size:calc(var(--fs-base)*.95); }
+    .drivers{ margin-top:var(--s6); display:grid; gap:var(--s3); grid-template-columns:repeat(2,1fr); }
+    @media (min-width:720px){ .drivers{ grid-template-columns:repeat(3,1fr); } }
+    @media (min-width:1024px){ .drivers{ grid-template-columns:repeat(5,1fr); } }
+    .dtile{ background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s4); }
+    .dtile .k{ color:var(--ink-2); font-size:calc(var(--fs-base)*.86); }
+    .dtile .chip{ margin-top:var(--s2); display:inline-block; font-size:calc(var(--fs-base)*.82); font-weight:600; padding:3px 10px; border-radius:var(--r-pill); background:var(--surface-3); color:var(--ink-2); }
+    .dtile .v{ margin-top:8px; color:var(--ink-3); font-size:calc(var(--fs-base)*.82); line-height:1.45; }
+    .chip.hi{ background:var(--danger-soft); color:var(--danger); }
+    .chip.md{ background:var(--warn-soft); color:var(--warn); }
+    .chip.lo{ background:var(--success-soft); color:var(--success); }
+
+    /* ---------- assessment output ---------- */
+    .banner{ display:flex; gap:var(--s3); align-items:flex-start; padding:var(--s4) var(--s5); border-radius:var(--r-md); font-size:calc(var(--fs-base)*.95); line-height:1.6; }
+    .banner ion-icon{ font-size:20px; flex:none; margin-top:1px; }
+    .banner.info{ background:var(--info-soft); border:1px solid var(--info-line); color:var(--ink); } .banner.info ion-icon{ color:var(--info); }
+    .banner.warn{ background:var(--warn-soft); border:1px solid var(--warn-line); color:var(--ink); } .banner.warn ion-icon{ color:var(--warn); }
+    .banner.danger{ background:var(--danger-soft); border:1px solid var(--danger-line); color:var(--ink); } .banner.danger ion-icon{ color:var(--danger); }
+    .banner b{ color:var(--ink); }
+
+    .aihdr{ display:flex; align-items:center; gap:var(--s2); margin:var(--s6) 0 var(--s3); }
+    .aihdr .badge{ font-size:calc(var(--fs-base)*.76); font-weight:600; padding:3px 9px; border-radius:var(--r-pill); background:var(--info-soft); color:var(--info); }
+    .narrative{ color:var(--ink); line-height:1.75; }
+    .narrative p{ margin-top:var(--s3); }
+
+    .tbl-scroll{ overflow-x:auto; border-radius:var(--r-md); border:1px solid var(--line); }
+    table.risk{ border-collapse:collapse; width:100%; min-width:680px; font-size:calc(var(--fs-base)*.9); }
+    table.risk th, table.risk td{ text-align:left; padding:12px 14px; vertical-align:top; border-bottom:1px solid var(--line); }
+    table.risk td:last-child, table.risk th:last-child{ white-space:nowrap; }
+    table.risk thead th{ background:var(--surface-2); color:var(--ink-2); font-weight:600; font-size:calc(var(--fs-base)*.82); }
+    table.risk tbody tr:last-child td{ border-bottom:0; }
+    table.risk td b{ display:block; margin-bottom:3px; }
+    table.risk td small{ color:var(--ink-2); }
+    .lvl{ font-weight:600; white-space:nowrap; }
+    .lvl.t1{ color:var(--t1);} .lvl.t2{ color:var(--t2);} .lvl.t3{ color:var(--t3);} .lvl.t4{ color:var(--t4);}
+
+    .acc{ border:1px solid var(--line); border-radius:var(--r-md); overflow:hidden; }
+    .acc + .acc{ margin-top:var(--s3); }
+    .acc > summary{ list-style:none; cursor:pointer; padding:15px 18px; display:flex; align-items:center; gap:var(--s3); background:var(--surface-1); user-select:none; }
+    .acc > summary::-webkit-details-marker{ display:none; }
+    .acc > summary:hover{ background:var(--surface-2); }
+    .acc .cico{ font-size:20px; flex:none; color:var(--accent); }
+    .acc .ctitle{ font-weight:600; flex:1; }
+    .acc .ccount{ font-size:calc(var(--fs-base)*.8); color:var(--ink-2); background:var(--surface-2); padding:3px 10px; border-radius:var(--r-pill); }
+    .acc .chev{ font-size:16px; color:var(--ink-3); transition:transform .2s; }
+    .acc[open] .chev{ transform:rotate(180deg); }
+    .acc .body{ padding:6px 18px 16px; }
+    .acc ul{ margin:0; padding:0; list-style:none; }
+    .acc li{ display:flex; gap:var(--s3); padding:10px 0; border-top:1px solid var(--line); line-height:1.55; }
+    .acc li:first-child{ border-top:0; }
+    .acc li .mk{ width:20px; height:20px; flex:none; margin-top:1px; border-radius:6px; background:var(--surface-3); display:grid; place-items:center; color:var(--ink-3); }
+    .acc li .mk ion-icon{ font-size:13px; }
+    .acc li.req .mk{ background:var(--accent); color:var(--accent-ink); }
+    .acc li span{ color:var(--ink-2); }
+    .acc li.req span b{ color:var(--ink); }
+
+    .empty{ text-align:center; color:var(--ink-3); padding:var(--s7) var(--s4); }
+    .empty ion-icon{ font-size:34px; margin-bottom:var(--s3); color:var(--ink-3); }
+    .disclaim{ margin-top:var(--s6); color:var(--ink-3); font-size:calc(var(--fs-base)*.84); line-height:1.6; }
+    footer{ border-top:1px solid var(--line); padding:var(--s6) 0; color:var(--ink-3); font-size:calc(var(--fs-base)*.86); }
+    footer .wrap{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:var(--s3); }
+
+    .toast{ position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0; background:var(--surface-2); color:var(--ink); border:1px solid var(--line-2); box-shadow:var(--shadow-pop);
+      padding:11px 18px; border-radius:var(--r-pill); font-size:calc(var(--fs-base)*.9); font-weight:500; display:flex; align-items:center; gap:8px; pointer-events:none; transition:transform .25s, opacity .25s; z-index:60; }
+    .toast.show{ opacity:1; transform:translate(-50%,0); }
+    .toast ion-icon{ font-size:16px; color:var(--success); }
+
+    @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand"><span class="dot"></span>SafeAI <small>· CPI</small></div>
+      <span class="tag">AI Risk Assessment &amp; Mapping · prototype</span>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow"><ion-icon name="shield-checkmark-outline"></ion-icon>Risk assessment portal</div>
+      <h1 class="trim">Know your AI risk before you deploy it.</h1>
+
+      <div class="stepper" id="stepper" aria-label="Risk management flow">
+        <div class="strack"></div>
+        <div class="sfill" id="sfill"></div>
+        <div class="step"><span class="node"><span class="nnum">1</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">Risk appetite</span></div>
+        <div class="step"><span class="node"><span class="nnum">2</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">Risk identification</span></div>
+        <div class="step"><span class="node"><span class="nnum">3</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">Risk assessment</span></div>
+        <div class="step muted"><span class="node"><span class="nnum">4</span></span><span class="stxt">Risk treatment<span class="next">next</span></span></div>
+        <div class="step muted"><span class="node"><span class="nnum">5</span></span><span class="stxt">Monitoring &amp; reporting<span class="next">next</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="stage">
+    <div class="wrap">
+      <!-- ===== PROFILE (full width) ===== -->
+      <div class="card">
+        <div class="stitle"><span class="n"><ion-icon name="clipboard-outline"></ion-icon></span><div><h2>Profile your AI use case</h2></div></div>
+
+        <form id="q" novalidate>
+          <div class="fgrid">
+            <div class="field" data-key="industry">
+              <label>Industry</label>
+              <div class="pills" role="radiogroup" aria-label="Industry">
+                <button type="button" class="pill" data-val="1|Education">Education<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="1|Retail">Retail<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="1|Manufacturing">Manufacturing<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Tech/Telco">Tech / Telco<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3|Finance">Finance<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3|Healthcare">Healthcare<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3|Public Sector/Gov">Public Sector / Gov<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              </div>
+              <div class="hint">Sets the regulatory baseline. Healthcare and Finance carry stricter compliance.</div>
+            </div>
+
+            <div class="field" data-key="role">
+              <label>Role / responsibility</label>
+              <div class="pills" role="radiogroup" aria-label="Role">
+                <button type="button" class="pill" data-val="End User">End user<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Business Sponsor">Business sponsor<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Legal/Compliance">Legal / compliance<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="IT Ops">IT operations<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="ML Engineer">ML engineer<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Data Scientist">Data scientist<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              </div>
+              <div class="hint">Tailors the language and ownership of the recommendations.</div>
+            </div>
+
+            <div class="field" data-key="usecase">
+              <label>AI system / use case type</label>
+              <div class="pills" role="radiogroup" aria-label="Use case">
+                <button type="button" class="pill" data-val="1|RPA (robotic process automation)">RPA<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Predictive Analytics">Predictive analytics<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Computer Vision">Computer vision<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Generative AI (text/image)">Generative AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Conversational Agent">Conversational agent<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3|Automated Decision Making">Automated decision making<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3|Agentic AI (tool-using)">Agentic AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              </div>
+              <div class="hint">Dictates the likely attack vectors. GenAI needs prompt-injection controls.</div>
+            </div>
+
+            <div class="field" data-key="autonomy">
+              <label>Autonomy level</label>
+              <div class="pills" role="radiogroup" aria-label="Autonomy">
+                <button type="button" class="pill" data-val="1|Human-in-the-Loop">Human-in-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Human-over-the-Loop">Human-over-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3|Fully Autonomous">Fully autonomous<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              </div>
+              <div class="hint">Higher autonomy sharply increases the risk multiplier.</div>
+            </div>
+
+            <div class="field" data-key="data">
+              <label>Data source &amp; sensitivity</label>
+              <div class="pills" role="radiogroup" aria-label="Data sensitivity">
+                <button type="button" class="pill" data-val="1|Public/Open Source">Public / open source<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Internal Confidential">Internal confidential<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3|PII (personal data)">PII (personal data)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="4|PHI (health / medical)">PHI (health / medical)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              </div>
+              <div class="hint">The main driver of data protection and privacy requirements.</div>
+            </div>
+
+            <div class="field" data-key="deploy">
+              <label>Deployment model</label>
+              <div class="pills" role="radiogroup" aria-label="Deployment">
+                <button type="button" class="pill" data-val="1|Cloud PaaS/IaaS (self-hosted)">Cloud PaaS / IaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="1|On-Premises">On-premises<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|3rd-Party SaaS">3rd-party SaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="2|Edge Device">Edge device<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              </div>
+              <div class="hint">Sets the infrastructure and IT architecture expectations.</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-accent" id="run">
+              <span class="spin" aria-hidden="true"></span>
+              <span class="lbl with-icon"><ion-icon name="sparkles-outline"></ion-icon><span>Assess risk</span></span>
+            </button>
+            <button type="button" class="btn btn-ghost" id="reset">Reset</button>
+            <span id="formhint" class="formhint"></span>
+          </div>
+        </form>
+      </div>
+
+      <!-- ===== RATING (after profile) ===== -->
+      <div id="rating"></div>
+      <!-- ===== ASSESSMENT DETAIL ===== -->
+      <div id="output" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>SafeAI · AI risk assessment prototype</span>
+      <span>Maps to MindForge AI RMF · CSA Guidelines on Securing AI Systems</span>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"><ion-icon name="checkmark-circle"></ion-icon><span></span></div>
+
+<script>
+/* ============================================================
+   SafeAI risk engine — the assessment is performed by Claude
+   (POST /api/assess). This file collects the pill inputs,
+   renders the model's structured result, and handles loading
+   and error states. No local scoring.
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const KEYS = ["industry","role","usecase","autonomy","data","deploy"];
+const state = { industry:"", role:"", usecase:"", autonomy:"", data:"", deploy:"" };
+
+function label(v){ if(!v) return ""; const p=String(v).split("|"); return p.length>1?p.slice(1).join("|"):p[0]; }
+
+const TIERS = {
+  1:{n:1,name:"Low risk",     color:"var(--t1)",soft:"var(--t1-soft)",line:"var(--t1-line)",banner:"info"},
+  2:{n:2,name:"Moderate risk",color:"var(--t2)",soft:"var(--t2-soft)",line:"var(--t2-line)",banner:"warn"},
+  3:{n:3,name:"High risk",    color:"var(--t3)",soft:"var(--t3-soft)",line:"var(--t3-line)",banner:"warn"},
+  4:{n:4,name:"Severe risk",  color:"var(--t4)",soft:"var(--t4-soft)",line:"var(--t4-line)",banner:"danger"},
+};
+const LVLC  = {Low:"t1",Medium:"t2",High:"t3",Severe:"t4"};
+const CHIPC = {Low:"lo",Medium:"md",High:"hi"};
+const CAT_ICON = {
+  "Cybersecurity":"shield-checkmark-outline",
+  "Data protection & privacy":"lock-closed-outline",
+  "IT architecture & infrastructure":"server-outline",
+  "User access control":"people-outline",
+  "AI governance":"git-network-outline",
+};
+
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function toast(msg){ const t=$("#toast"); t.querySelector("span").textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1900); }
+function tierOf(d){ return TIERS[d.tier] || TIERS[Math.min(4,Math.max(1,Math.round((d.riskIndex||0)/25)+1))]; }
+function setLabel(txt){ const l=$("#run .lbl span:last-child"); if(l) l.textContent=txt; }
+
+/* ---------- needle gauge ---------- */
+function gaugeSVG(value){
+  const R=80, W=15, v=Math.max(0,Math.min(100,value));
+  const pt=(val,r)=>{ const a=(180-(val/100)*180)*Math.PI/180; return [100+r*Math.cos(a), 100-r*Math.sin(a)]; };
+  const arc=(v1,v2,c)=>{ const [x1,y1]=pt(v1,R),[x2,y2]=pt(v2,R); return `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${R} ${R} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="${c}" stroke-width="${W}" stroke-linecap="butt"/>`; };
+  const [nx,ny]=pt(v,R-20);
+  return `<svg viewBox="0 0 200 118" role="img" aria-label="Risk gauge, ${v} of 100">
+    ${arc(1,24,'var(--t1)')}${arc(26,49,'var(--t2)')}${arc(51,77,'var(--t3)')}${arc(79,99,'var(--t4)')}
+    <line class="gneedle" x1="100" y1="100" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="100" cy="100" r="7" fill="var(--surface-3)" stroke="var(--ink)" stroke-width="2"/>
+    <text x="20" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">Low</text>
+    <text x="180" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">Severe</text>
+  </svg>`;
+}
+
+/* ---------- rating card ---------- */
+function renderRating(d){
+  const t=tierOf(d), pct=Math.max(0,Math.min(100,d.riskIndex|0));
+  $("#rating").innerHTML = `
+    <div class="card">
+      <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Risk rating</h2></div></div>
+      <div class="gauge-block">${gaugeSVG(pct)}</div>
+      <div class="gauge-legend">
+        <span class="tierpill" style="background:${t.soft};color:${t.color};border:1px solid ${t.line}">Tier ${t.n} of 4</span>
+        <span class="big" style="color:${t.color}">${escapeHtml(t.name)}</span>
+        <span class="score">Risk index ${pct} / 100</span>
+      </div>
+      <div class="drivers">
+        ${(d.drivers||[]).map(dr=>`<div class="dtile"><div class="k">${escapeHtml(dr.label)}</div><span class="chip ${CHIPC[dr.level]||''}">${escapeHtml(dr.level)}</span><div class="v">${escapeHtml(dr.note||'')}</div></div>`).join("")}
+      </div>
+    </div>`;
+}
+
+/* ---------- live stepper (updates as the questionnaire is filled) ---------- */
+let assessedComplete=false;
+function updateStepper(){
+  const a=KEYS.filter(k=>state[k]).length;
+  const steps=[...document.querySelectorAll('#stepper .step')];
+  const fill=document.getElementById('sfill'); if(!fill) return;
+  let frontier, done=[false,false,false,false,false], cur=-1;
+  if(assessedComplete){ frontier=50; done=[true,true,true,false,false]; }
+  else { done[0]=a>=1; done[1]=a>=6; frontier = a>=6?30:(10+(a/6)*20); cur = a>=6?2:(a>=1?1:0); }
+  fill.style.width=(frontier-10)+'%';
+  steps.forEach((el,i)=>{ el.classList.toggle('done',!!done[i]); el.classList.toggle('cur', i===cur && !done[i]); });
+}
+
+/* ---------- assessment detail ---------- */
+function renderOutput(vals, d){
+  const t=tierOf(d);
+  const req = (d.controls||[]).reduce((n,g)=>n+(g.items||[]).filter(i=>i.priority==="Required").length,0);
+  const paras = String(d.rationale||"").split(/\n{2,}/).filter(Boolean);
+
+  $("#output").innerHTML = `
+    <div class="card">
+      <div class="stitle"><span class="n"><ion-icon name="document-text-outline"></ion-icon></span><div><h2>Risk assessment</h2><div class="sub">${escapeHtml(label(vals.role))} · ${escapeHtml(label(vals.industry))} · ${escapeHtml(label(vals.usecase))}</div></div></div>
+
+      <div class="banner ${t.banner}">
+        <ion-icon name="${t.n>=3?'warning-outline':'information-circle-outline'}"></ion-icon>
+        <div><b>Tier ${t.n} — ${escapeHtml(t.name)}.</b> Assessed by Claude against the MindForge AI RMF and CSA Securing AI guidelines.</div>
+      </div>
+
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">Analyst assessment</h2><span class="badge">AI-generated</span></div>
+      <div class="narrative">${paras.map(p=>`<p>${escapeHtml(p)}</p>`).join("")||"<p>"+escapeHtml(d.rationale||"")+"</p>"}</div>
+
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">Identified risk scenarios</h2></div>
+      <div class="tbl-scroll">
+        <table class="risk">
+          <thead><tr><th>Risk scenario</th><th>Impact</th><th>Likelihood</th><th>Proposed mitigation</th><th>Risk level</th></tr></thead>
+          <tbody>
+            ${(d.scenarios||[]).map(s=>`<tr>
+              <td><b>${escapeHtml(s.scenario)}</b></td>
+              <td><b>${escapeHtml(s.impactType)}</b><small>${escapeHtml(s.impactNote)}</small></td>
+              <td><b>${escapeHtml(s.likelihood)}</b><small>${escapeHtml(s.likelihoodNote)}</small></td>
+              <td>${escapeHtml(s.mitigation)}</td>
+              <td><span class="lvl ${LVLC[s.initialLevel]||''}">Initial: ${escapeHtml(s.initialLevel)}</span><br><span class="lvl ${LVLC[s.residualLevel]||''}">Residual: ${escapeHtml(s.residualLevel)}</span></td>
+            </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">Recommended controls</h2><span class="badge" style="background:var(--surface-2);color:var(--ink-2)">${req} required at this tier</span></div>
+      ${(d.controls||[]).map((g,gi)=>`
+        <details class="acc" ${gi===0?"open":""}>
+          <summary>
+            <ion-icon class="cico" name="${CAT_ICON[g.category]||'ellipse-outline'}"></ion-icon>
+            <span class="ctitle">${escapeHtml(g.category)}</span>
+            <span class="ccount">${(g.items||[]).filter(i=>i.priority==="Required").length}/${(g.items||[]).length}</span>
+            <ion-icon class="chev" name="chevron-down-outline"></ion-icon>
+          </summary>
+          <div class="body"><ul>
+            ${(g.items||[]).map(i=>{ const rq=i.priority==="Required"; return `<li class="${rq?"req":""}">
+              <span class="mk"><ion-icon name="${rq?'checkmark':'ellipse-outline'}"></ion-icon></span>
+              <span>${rq?"<b>Required. </b>":"<b style='color:var(--ink-3)'>Recommended. </b>"}${escapeHtml(i.text)}</span>
+            </li>`;}).join("")}
+          </ul></div>
+        </details>`).join("")}
+
+      <div class="actions" style="margin-top:var(--s6)">
+        <button type="button" class="btn" id="copyBtn"><span class="lbl with-icon"><ion-icon name="copy-outline"></ion-icon><span>Copy summary</span></span></button>
+        <button type="button" class="btn btn-ghost" onclick="window.print()"><ion-icon name="print-outline"></ion-icon>Print / PDF</button>
+      </div>
+
+      <p class="disclaim">This assessment was generated by Claude from your inputs, aligned to the MindForge AI Risk Management framework and the CSA Guidelines on Securing AI Systems. It is decision support, not a substitute for a formal risk assessment signed off by your compliance function.</p>
+    </div>`;
+
+  $("#copyBtn").addEventListener("click", ()=>copySummary(vals,d,t));
+  $("#rating").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function ratingLoading(){
+  $("#rating").innerHTML = `<div class="card"><div class="empty" style="padding:var(--s6)"><div class="spin" style="display:block;margin:0 auto var(--s3);width:24px;height:24px;border-width:3px"></div>Claude is assessing your use case. This runs a live analysis, it takes a few seconds.</div></div>`;
+  $("#output").innerHTML = "";
+}
+function showError(detail){
+  $("#rating").innerHTML = `<div class="card"><div class="banner danger" style="margin:0">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <div><b>Assessment failed.</b> ${escapeHtml(detail||"Could not reach the assessment engine.")}<br>Check that the server is running with an API key, then <button type="button" class="btn btn-ghost" id="retry" style="padding:6px 14px;margin-top:8px">Retry</button></div>
+  </div></div>`;
+  $("#output").innerHTML = "";
+  const r=$("#retry"); if(r) r.addEventListener("click",()=>$("#q").requestSubmit());
+}
+
+function copySummary(vals,d,t){
+  const lines=[];
+  lines.push("SafeAI — AI Risk Assessment");
+  lines.push("Profile: "+KEYS.map(k=>label(vals[k])).join(" · "));
+  lines.push("");
+  lines.push("OVERALL: Tier "+t.n+" of 4 — "+t.name+" (risk index "+(d.riskIndex|0)+"/100)");
+  lines.push("");
+  lines.push(String(d.rationale||"").trim());
+  lines.push("");
+  lines.push("Risk scenarios:");
+  (d.scenarios||[]).forEach(s=>lines.push("  - "+s.scenario+" ["+s.impactType+"] -> "+s.mitigation+" (Initial "+s.initialLevel+" / Residual "+s.residualLevel+")"));
+  lines.push("");
+  lines.push("Required controls at this tier:");
+  (d.controls||[]).forEach(g=>{ const rq=(g.items||[]).filter(i=>i.priority==="Required"); if(rq.length){ lines.push("  "+g.category+":"); rq.forEach(i=>lines.push("    [x] "+i.text)); }});
+  const txt=lines.join("\n");
+  const btn=$("#copyBtn"), sp=btn.querySelector(".lbl span:last-child");
+  navigator.clipboard.writeText(txt).then(()=>{ const old=sp.textContent; sp.textContent="Copied!"; toast("Summary copied"); setTimeout(()=>sp.textContent=old,1200); });
+}
+
+/* ---------- the actual assessment call ---------- */
+async function runAssessment(vals){
+  const profile = Object.fromEntries(KEYS.map(k=>[k,label(vals[k])]));
+  const r = await fetch("/api/assess",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile})});
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok){ const e=new Error(j.detail||j.error||("HTTP "+r.status)); e.detail=j.detail||j.error; throw e; }
+  return j;
+}
+
+/* ---------- pill selection ---------- */
+let hasRun=false;
+document.querySelectorAll(".field").forEach(field=>{
+  const key=field.dataset.key;
+  field.querySelectorAll(".pill").forEach(pill=>{
+    pill.setAttribute("role","radio"); pill.setAttribute("aria-checked","false");
+    pill.addEventListener("click",()=>{
+      field.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked","false"));
+      pill.setAttribute("aria-checked","true");
+      state[key]=pill.dataset.val;
+      field.classList.remove("miss");
+      assessedComplete=false;
+      updateStepper();
+      if(hasRun){ setLabel("Reassess"); $("#formhint").textContent="Inputs changed. Reassess to update."; $("#formhint").style.color="var(--ink-3)"; }
+    });
+  });
+});
+updateStepper();
+
+/* ---------- submit ---------- */
+const form=$("#q");
+form.addEventListener("submit", async e=>{
+  e.preventDefault();
+  let missing=0, firstMiss=null;
+  document.querySelectorAll(".field").forEach(field=>{
+    if(!state[field.dataset.key]){ missing++; field.classList.add("miss"); if(!firstMiss) firstMiss=field; }
+    else field.classList.remove("miss");
+  });
+  if(missing){ $("#formhint").textContent=`${missing} field${missing>1?"s":""} still to answer.`; $("#formhint").style.color="var(--warn)"; if(firstMiss) firstMiss.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+  $("#formhint").textContent="";
+
+  const btn=$("#run"); btn.classList.add("is-loading"); btn.disabled=true;
+  ratingLoading();
+  try{
+    const data = await runAssessment(state);
+    renderRating(data); renderOutput(state, data);
+    hasRun=true; assessedComplete=true; updateStepper(); setLabel("Reassess");
+    toast("Assessment complete");
+  }catch(err){
+    showError(err.detail || err.message);
+    toast("Assessment failed");
+  }finally{
+    btn.classList.remove("is-loading"); btn.disabled=false;
+  }
+});
+
+$("#reset").addEventListener("click",()=>{
+  KEYS.forEach(k=>state[k]="");
+  document.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked","false"));
+  document.querySelectorAll(".field").forEach(f=>f.classList.remove("miss"));
+  $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#formhint").textContent=""; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
+});
+</script>
+</body>
+</html>
