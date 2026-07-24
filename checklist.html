@@ -405,23 +405,85 @@ $("#resetBtn").addEventListener("click", ()=>{
   checked = {}; save(); renderList(); updateScore(); toast("Checklist reset");
 });
 
-$("#copyBtn").addEventListener("click", ()=>{
+/* Build a formatted summary: rich HTML (for docs, email, Notion) plus a
+   clean plain-text fallback. Continuous 1..N numbering, bold titles, section
+   headings, and spacing so it reads as a professional report when pasted. */
+function buildSummary(){
   const n = count(), b = band(n);
-  const lines = [];
-  lines.push("SafeAI — AI Safety Checklist");
-  lines.push("Score: "+n+" / "+TOTAL+" — "+b.tag);
-  lines.push("");
+
+  // rich HTML — inline styles so paste targets keep the formatting; light
+  // palette because it lands on a white document, not the app's dark canvas.
+  const H = [];
+  H.push('<div style="font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;line-height:1.5;font-size:13px">');
+  H.push('<div style="font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0 0 2px">AI Safety Checklist</div>');
+  H.push('<div style="font-size:12px;color:#777;margin:0 0 16px">SafeAI &middot; safeai.sg</div>');
+  H.push('<div style="font-size:15px;font-weight:700;margin:0 0 4px">Score: '+n+' of '+TOTAL+', '+escapeHtml(b.tag)+'</div>');
+  H.push('<div style="font-size:13px;color:#444;margin:0 0 20px;max-width:640px">'+escapeHtml(b.verdict)+' '+escapeHtml(b.note)+'</div>');
+
+  // plain text fallback
+  const T = [];
+  T.push('AI SAFETY CHECKLIST');
+  T.push('SafeAI · safeai.sg');
+  T.push('');
+  T.push('Score: '+n+' of '+TOTAL+', '+b.tag);
+  T.push(b.verdict+' '+b.note);
+
+  let idx = 0;
   GROUPS.forEach(g=>{
-    lines.push(g.title+":");
-    g.items.forEach(i=>lines.push("  ["+(checked[i.id]?"x":" ")+"] "+i.t));
-    lines.push("");
+    const done = g.items.filter(i=>checked[i.id]).length;
+
+    H.push('<div style="font-size:16px;font-weight:700;margin:22px 0 10px;padding-bottom:5px;border-bottom:1px solid #e3e3e3">'
+      + escapeHtml(g.title)
+      + ' <span style="font-weight:500;font-size:12px;color:#999">'+done+' of '+g.items.length+'</span></div>');
+
+    T.push('');
+    T.push(g.title.toUpperCase()+'  ('+done+' of '+g.items.length+')');
+    T.push('');
+
+    g.items.forEach(i=>{
+      idx++;
+      const on = !!checked[i.id];
+      const mark = on
+        ? '<span style="color:#1a7f37;font-weight:700">&#10003;</span>'
+        : '<span style="color:#c0c0c0">&#9675;</span>';
+      H.push('<div style="margin:0 0 12px">'
+        + '<div style="font-size:13px">'+mark+' <b>'+idx+'. '+escapeHtml(i.t)+'</b></div>'
+        + '<div style="font-size:12px;color:#666;margin:3px 0 0 20px">'+escapeHtml(i.d)+'</div>'
+        + '</div>');
+
+      T.push('  ['+(on?'x':' ')+'] '+idx+'. '+i.t);
+      T.push('        '+i.d);
+      T.push('');
+    });
   });
-  const outstanding = GROUPS.flatMap(g=>g.items).filter(i=>!checked[i.id]);
-  if(outstanding.length){ lines.push("Still to do ("+outstanding.length+"):"); outstanding.forEach(i=>lines.push("  - "+i.t)); }
-  const txt = lines.join("\n").trim();
+
+  H.push('<div style="font-size:11px;color:#999;margin-top:22px;padding-top:10px;border-top:1px solid #e3e3e3">General guidance, not a formal risk assessment. For a use-case risk tier and mapped controls, use the SafeAI AI Risk Assessment at safeai.sg/risk-assessment.html</div>');
+  H.push('</div>');
+
+  T.push('General guidance, not a formal risk assessment.');
+  T.push('For a use-case risk tier: safeai.sg/risk-assessment.html');
+
+  return { html: H.join(''), text: T.join('\n').replace(/\n{3,}/g,'\n\n').trim() };
+}
+
+$("#copyBtn").addEventListener("click", async ()=>{
+  const { html, text } = buildSummary();
   const sp = $("#copyBtn").querySelector(".lbl span:last-child");
-  navigator.clipboard.writeText(txt).then(()=>{ const old=sp.textContent; sp.textContent="Copied!"; toast("Summary copied"); setTimeout(()=>sp.textContent=old,1200); })
-    .catch(()=>toast("Could not copy"));
+  const ok = ()=>{ const old=sp.textContent; sp.textContent="Copied!"; toast("Summary copied"); setTimeout(()=>sp.textContent=old,1200); };
+  try{
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      await navigator.clipboard.write([ new ClipboardItem({
+        "text/html":  new Blob([html], {type:"text/html"}),
+        "text/plain": new Blob([text], {type:"text/plain"}),
+      }) ]);
+      ok();
+    } else {
+      await navigator.clipboard.writeText(text); ok();
+    }
+  }catch(e){
+    try{ await navigator.clipboard.writeText(text); ok(); }
+    catch(e2){ toast("Could not copy"); }
+  }
 });
 
 renderList();
