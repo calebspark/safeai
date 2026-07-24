@@ -81,6 +81,13 @@
     .eyebrow{ display:inline-flex; align-items:center; gap:6px; font-family:"Plus Jakarta Sans"; font-size:calc(var(--fs-base)*.86); font-weight:600; color:var(--accent); margin-bottom:var(--s3); }
     .hero h1{ font-size:calc(var(--fs-base)*2.7); font-weight:700; max-width:760px; }
     .hero p{ color:var(--ink-2); font-size:calc(var(--fs-base)*1.12); line-height:1.75; max-width:640px; margin-top:var(--s4); }
+    .companion{ display:inline-flex; align-items:center; gap:10px; margin-top:var(--s5); padding:11px 16px 11px 14px; border-radius:var(--r-pill);
+      background:var(--surface-1); border:1px solid var(--line); box-shadow:var(--raise); text-decoration:none; color:var(--ink-2); font-size:calc(var(--fs-base)*.92); transition:background .15s, color .15s; }
+    .companion:hover{ background:var(--surface-2); color:var(--ink); }
+    .companion:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .companion ion-icon{ font-size:1.1em; color:var(--accent); flex:none; }
+    .companion b{ color:var(--ink); font-weight:600; }
+    .companion .arr{ color:var(--ink-3); }
 
     /* ---------- stepper (MindForge 2.2.2 as a live progression bar) ---------- */
     .stepper{ position:relative; margin:var(--s7) 0 0; padding:0; display:grid; grid-template-columns:repeat(5,1fr); }
@@ -276,6 +283,12 @@
         <div class="step muted"><span class="node"><span class="nnum">4</span></span><span class="stxt">Risk treatment<span class="next">next</span></span></div>
         <div class="step muted"><span class="node"><span class="nnum">5</span></span><span class="stxt">Monitoring &amp; reporting<span class="next">next</span></span></div>
       </div>
+
+      <a href="/checklist.html" class="companion">
+        <ion-icon name="checkbox-outline"></ion-icon>
+        <span>Prefer a plain-language starting point? <b>Try the AI Safety Checklist</b></span>
+        <ion-icon class="arr" name="arrow-forward-outline"></ion-icon>
+      </a>
     </div>
   </section>
 

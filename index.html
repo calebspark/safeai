@@ -286,7 +286,8 @@
     .pillar-outcome { font-size: var(--t-body); color: var(--ink-2); line-height:1.65; }
 
     /* ── DOWNLOAD ── */
-    .download-grid { display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items:stretch; }
+    .download-grid { display:grid; grid-template-columns: repeat(3,1fr); gap: var(--gap); align-items:stretch; }
+    @media (max-width:900px){ .download-grid { grid-template-columns: 1fr; } }
     .download-card {
       background: var(--surface-1); border-radius: var(--r-lg); padding: 36px;
       box-shadow: var(--raise), var(--shadow);
@@ -649,6 +650,18 @@
         <a href="/risk-assessment.html" class="btn btn-accent">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           Know my AI Risk
+        </a>
+      </div>
+      <div class="download-card">
+        <span class="download-icon">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L20 5"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/><path d="M8 7h5M8 11h3"/></svg>
+        </span>
+        <div class="download-label">Self-scored checklist</div>
+        <h3 class="trim">AI Safety Checklist</h3>
+        <p>Twenty-two plain-language steps to run AI safely, from reading the terms of service to keeping a kill switch. Tick what you already do, see where you stand, and start with the gaps that matter most. No technical knowledge needed.</p>
+        <a href="/checklist.html" class="btn btn-accent">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Open the checklist
         </a>
       </div>
     </div>

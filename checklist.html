@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeAI · AI Safety Checklist</title>
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
+  <style>
+    :root {
+      --accent:     #E97132;
+      --accent-2:   #f08a52;
+      --accent-ink: #16100b;
+      --bg:         #0c0c0e;
+      --surface-1:  #161618;
+      --surface-2:  #202023;
+      --surface-3:  #2a2a2e;
+      --ink:        #f4f4f5;
+      --ink-2:      #a1a1aa;
+      --ink-3:      #71717a;
+      --line:       rgba(255,255,255,.07);
+      --line-2:     rgba(255,255,255,.12);
+
+      --info:       #6ea8fe;  --info-soft: rgba(110,168,254,.12);  --info-line: rgba(110,168,254,.30);
+      --success:    #3ecf8e;  --success-soft: rgba(62,207,142,.12); --success-line: rgba(62,207,142,.30);
+      --warn:       #e6b455;  --warn-soft: rgba(230,180,85,.13);   --warn-line: rgba(230,180,85,.32);
+      --danger:     #e5695f;  --danger-soft: rgba(229,105,95,.13); --danger-line: rgba(229,105,95,.32);
+
+      --raise:
+        inset 0 1px 0 rgba(255,255,255,.09),
+        inset 0 -1px 0 rgba(0,0,0,.45),
+        0 14px 30px -18px rgba(0,0,0,.55);
+      --shadow-pop: 0 22px 48px -20px rgba(0,0,0,.72);
+
+      --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
+      --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:28px; --s7:40px; --s8:56px;
+      --gap: 16px;
+      --fs-base: 17px;
+    }
+    @media (min-width:1024px){ :root{ --fs-base:13px; } }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family:"DM Sans", system-ui, sans-serif;
+      font-size:var(--fs-base); line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    .trim{ text-box: trim-both cap alphabetic; }
+    h1,h2,h3,h4{ font-family:"Plus Jakarta Sans","DM Sans",sans-serif; margin:0; letter-spacing:-.02em; line-height:1.2; }
+    p{ margin:0; }
+    a{ color:inherit; }
+    .wrap{ max-width:1120px; margin:0 auto; padding:0 var(--s5); }
+    ion-icon{ display:inline-block; }
+    .with-icon{ display:inline-flex; align-items:center; gap:.5em; }
+
+    /* ---------- top bar (matches landing nav) ---------- */
+    nav{ position:sticky; top:0; z-index:100; background:rgba(12,12,14,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
+    .nav-brand{ display:flex; align-items:center; text-decoration:none; }
+    .nav-logo{ height:46px; width:auto; display:block; }
+    .nav-links{ display:flex; align-items:center; gap:8px; }
+    .nav-link{ font:600 var(--fs-base)/1 "Plus Jakarta Sans","DM Sans",sans-serif; text-box:trim-both cap alphabetic; color:var(--ink-2); text-decoration:none; padding:12px 24px; border-radius:var(--r-sm); background:transparent; cursor:pointer; transition:background .18s ease, color .18s ease; }
+    .nav-link:hover{ background:var(--surface-1); color:var(--ink); }
+    .nav-link:active{ background:var(--surface-2); }
+    .nav-link:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .nav-right{ display:flex; align-items:center; gap:24px; }
+    .spark-logo-nav{ height:30px; width:auto; display:block; opacity:.9; }
+    @media (max-width:640px){ nav{ padding:0 20px; height:72px; } .nav-logo{ height:38px; } .nav-links{ display:none; } }
+
+    /* ---------- hero ---------- */
+    .hero{ padding:64px 0 var(--s6); }
+    @media (min-width:1024px){ .hero{ padding-top:104px; } }
+    .eyebrow{ display:inline-flex; align-items:center; gap:6px; font-family:"Plus Jakarta Sans"; font-size:calc(var(--fs-base)*.86); font-weight:600; color:var(--accent); margin-bottom:var(--s3); }
+    .hero h1{ font-size:calc(var(--fs-base)*2.7); font-weight:700; max-width:760px; }
+    .hero p{ color:var(--ink-2); font-size:calc(var(--fs-base)*1.12); line-height:1.75; max-width:640px; margin-top:var(--s4); }
+
+    /* companion link to the risk tool */
+    .companion{ display:inline-flex; align-items:center; gap:10px; margin-top:var(--s5); padding:11px 16px 11px 14px; border-radius:var(--r-pill);
+      background:var(--surface-1); border:1px solid var(--line); box-shadow:var(--raise); text-decoration:none; color:var(--ink-2); font-size:calc(var(--fs-base)*.92); transition:background .15s, color .15s; }
+    .companion:hover{ background:var(--surface-2); color:var(--ink); }
+    .companion ion-icon{ font-size:1.1em; color:var(--accent); flex:none; }
+    .companion b{ color:var(--ink); font-weight:600; }
+    .companion .arr{ color:var(--ink-3); }
+
+    /* ---------- layout ---------- */
+    .stage{ padding:var(--s6) 0 var(--s8); }
+    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s6); box-shadow:0 14px 34px -22px rgba(0,0,0,.55); }
+    .card + .card{ margin-top:var(--gap); }
+    .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s3); }
+    .stitle .n{ display:grid; place-items:center; width:30px; height:30px; flex:none; border-radius:9px; background:var(--surface-2); color:var(--accent); box-shadow:var(--raise); }
+    .stitle .n ion-icon{ font-size:18px; }
+    .stitle h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
+
+    /* ---------- score card (live, sticky-ish summary) ---------- */
+    .score-top{ display:flex; align-items:center; gap:var(--s6); flex-wrap:wrap; }
+    .score-ring{ position:relative; width:120px; height:120px; flex:none; }
+    .score-ring svg{ width:100%; height:100%; transform:rotate(-90deg); }
+    .score-ring .track{ fill:none; stroke:var(--surface-3); stroke-width:11; }
+    .score-ring .prog{ fill:none; stroke:var(--accent); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset .5s cubic-bezier(.2,.8,.2,1), stroke .3s; }
+    .score-ring .ctr{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; }
+    .score-ring .ctr .num{ font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*1.7); line-height:1; }
+    .score-ring .ctr .den{ font-size:calc(var(--fs-base)*.78); color:var(--ink-3); }
+    .score-meta{ flex:1; min-width:240px; }
+    .score-band{ display:inline-flex; align-items:center; gap:7px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*.86); padding:7px 14px; border-radius:var(--r-pill); }
+    .score-band ion-icon{ font-size:1.05em; }
+    .score-verdict{ font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*1.5); margin-top:var(--s3); line-height:1.25; }
+    .score-note{ color:var(--ink-2); font-size:calc(var(--fs-base)*.95); line-height:1.65; margin-top:var(--s2); max-width:520px; }
+    .score-actions{ display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s5); }
+
+    /* ---------- buttons ---------- */
+    .btn{ font:inherit; font-weight:600; cursor:pointer; color:var(--ink); background:var(--surface-2); border:0; border-radius:var(--r-sm);
+      padding:11px 22px; box-shadow:var(--raise); transition:transform .12s, background .15s; display:inline-flex; align-items:center; gap:.55em; text-decoration:none; }
+    .btn ion-icon{ font-size:1.15em; }
+    .btn:hover{ background:var(--surface-3); }
+    .btn:active{ transform:translateY(1px) scale(.99); }
+    .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .btn-accent{ color:#fff; background:linear-gradient(115deg,#9b3b92 0%,#b84e6f 28%,var(--accent) 72%); }
+    .btn-accent:hover{ background:linear-gradient(115deg,#ad479f 0%,#cc5a7c 28%,var(--accent-2) 72%); }
+    .btn-ghost{ background:transparent; box-shadow:none; color:var(--ink-2); }
+    .btn-ghost:hover{ background:var(--surface-1); color:var(--ink); }
+
+    /* ---------- checklist groups ---------- */
+    .grp-head{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s2); }
+    .grp-head .gnum{ font-family:"Plus Jakarta Sans"; font-weight:700; color:var(--ink-3); font-size:calc(var(--fs-base)*.9); }
+    .grp-head h3{ font-size:calc(var(--fs-base)*1.12); font-weight:700; }
+    .grp-head .gcount{ margin-left:auto; font-size:calc(var(--fs-base)*.8); color:var(--ink-2); background:var(--surface-2); padding:3px 11px; border-radius:var(--r-pill); }
+    .grp-sub{ color:var(--ink-3); font-size:calc(var(--fs-base)*.88); margin-bottom:var(--s4); line-height:1.55; }
+
+    .citem{ display:flex; align-items:flex-start; gap:var(--s4); padding:15px 0; border-top:1px solid var(--line); line-height:1.55; }
+    .citem:first-child{ border-top:0; }
+    .chk{ width:22px; height:22px; flex:none; margin-top:1px; padding:0; border-radius:6px; border:1.5px solid var(--line-2); background:var(--surface-2); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
+    .chk ion-icon{ font-size:15px; color:#fff; opacity:0; transition:opacity .12s; }
+    .chk:hover{ border-color:var(--ink-3); }
+    .chk:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .chk[aria-checked="true"]{ background:var(--success); border-color:var(--success); }
+    .chk[aria-checked="true"] ion-icon{ opacity:1; }
+    .ctext{ flex:1; }
+    .ctext .ct{ color:var(--ink); font-weight:600; font-size:calc(var(--fs-base)*1.02); display:block; }
+    .ctext .cd{ color:var(--ink-2); font-size:calc(var(--fs-base)*.92); margin-top:3px; }
+    .citem[data-checked="true"] .ct{ color:var(--ink-2); text-decoration:line-through; text-decoration-color:var(--ink-3); }
+    .citem[data-checked="true"] .cd{ color:var(--ink-3); }
+
+    /* ---------- resources ---------- */
+    .res-grid{ display:grid; gap:var(--s3); grid-template-columns:1fr; margin-top:var(--s2); }
+    @media (min-width:720px){ .res-grid{ grid-template-columns:1fr 1fr; } }
+    .res{ display:flex; align-items:flex-start; gap:var(--s3); padding:15px 16px; border-radius:var(--r-md); background:var(--surface-2); border:1px solid var(--line); text-decoration:none; transition:background .15s, transform .1s; }
+    .res:hover{ background:var(--surface-3); }
+    .res:active{ transform:translateY(1px); }
+    .res:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .res ion-icon{ font-size:20px; color:var(--accent); flex:none; margin-top:2px; }
+    .res > span{ display:flex; flex-direction:column; min-width:0; }
+    .res .rt{ display:block; color:var(--ink); font-weight:600; }
+    .res .rd{ display:block; color:var(--ink-3); font-size:calc(var(--fs-base)*.84); margin-top:3px; line-height:1.45; }
+    .res .rurl{ color:var(--ink-2); font-size:calc(var(--fs-base)*.82); margin-top:7px; display:inline-flex; align-items:center; gap:5px; }
+
+    .disclaim{ margin-top:var(--s6); color:var(--ink-3); font-size:calc(var(--fs-base)*.84); line-height:1.6; }
+    footer{ border-top:1px solid var(--line); padding:var(--s6) 0; color:var(--ink-3); font-size:calc(var(--fs-base)*.86); }
+    footer .wrap{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:var(--s3); }
+    footer a{ color:var(--ink-2); text-decoration:none; }
+    footer a:hover{ color:var(--ink); }
+
+    .toast{ position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0; background:var(--surface-2); color:var(--ink); border:1px solid var(--line-2); box-shadow:var(--shadow-pop);
+      padding:11px 18px; border-radius:var(--r-pill); font-size:calc(var(--fs-base)*.9); font-weight:500; display:flex; align-items:center; gap:8px; pointer-events:none; transition:transform .25s, opacity .25s; z-index:60; }
+    .toast.show{ opacity:1; transform:translate(-50%,0); }
+    .toast ion-icon{ font-size:16px; color:var(--success); }
+
+    @media print{ nav,.companion,.score-actions,.toast,footer{ display:none!important; } }
+    @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/index.html" class="nav-brand">
+      <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
+    </a>
+    <div class="nav-right">
+      <div class="nav-links">
+        <a href="/index.html#mission" class="nav-link">Mission</a>
+        <a href="/index.html#downloads" class="nav-link">Resources</a>
+        <a href="/index.html#council" class="nav-link">Who We Are</a>
+        <a href="/index.html#contact" class="nav-link">Contact Us</a>
+      </div>
+      <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-nav" />
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow"><ion-icon name="checkbox-outline"></ion-icon>AI safety checklist</div>
+      <h1 class="trim">Twenty-two practical steps to run AI safely.</h1>
+      <p>No technical knowledge needed. Tick what you already do, count the gaps, and start with the three that matter most. Built for founders and teams deploying AI without a dedicated security function.</p>
+      <a href="/risk-assessment.html" class="companion">
+        <ion-icon name="speedometer-outline"></ion-icon>
+        <span>Want a risk tier for a specific use case? <b>Try the AI Risk Assessment</b></span>
+        <ion-icon class="arr" name="arrow-forward-outline"></ion-icon>
+      </a>
+    </div>
+  </section>
+
+  <main class="stage">
+    <div class="wrap">
+
+      <!-- ===== LIVE SCORE ===== -->
+      <div class="card" id="scoreCard">
+        <div class="score-top">
+          <div class="score-ring">
+            <svg viewBox="0 0 120 120">
+              <circle class="track" cx="60" cy="60" r="52"></circle>
+              <circle class="prog" id="ring" cx="60" cy="60" r="52"></circle>
+            </svg>
+            <div class="ctr"><span class="num" id="scoreNum">0</span><span class="den">of 22</span></div>
+          </div>
+          <div class="score-meta">
+            <span class="score-band" id="band"><ion-icon name="alert-circle-outline"></ion-icon><span id="bandText">High exposure</span></span>
+            <div class="score-verdict" id="verdict">Start now.</div>
+            <div class="score-note" id="note">Tick each step you already have in place. Your progress saves automatically on this device.</div>
+            <div class="score-actions">
+              <button type="button" class="btn" id="copyBtn"><span class="lbl with-icon"><ion-icon name="copy-outline"></ion-icon><span>Copy summary</span></span></button>
+              <button type="button" class="btn btn-ghost" onclick="window.print()"><ion-icon name="print-outline"></ion-icon>Print / PDF</button>
+              <button type="button" class="btn btn-ghost" id="resetBtn"><ion-icon name="refresh-outline"></ion-icon>Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CHECKLIST ===== -->
+      <div class="card" id="listCard"></div>
+
+      <!-- ===== SINGAPORE RESOURCES ===== -->
+      <div class="card">
+        <div class="stitle"><span class="n"><ion-icon name="library-outline"></ion-icon></span><div><h2>Singapore has your back</h2></div></div>
+        <p class="grp-sub">Free, official resources for AI adoption, data protection, and security in Singapore.</p>
+        <div class="res-grid" id="resGrid"></div>
+      </div>
+
+      <p class="disclaim">This checklist is general guidance to help teams adopt AI responsibly. It is not legal, regulatory, or financial advice, and it is not a formal risk assessment. For a use-case-specific risk tier and mapped controls, use the <a href="/risk-assessment.html" style="color:var(--accent)">AI Risk Assessment</a>. Verify regulatory obligations, such as PDPA duties, with your compliance function.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>SafeAI · AI safety checklist</span>
+      <span><a href="/risk-assessment.html">AI Risk Assessment</a> · <a href="/index.html#downloads">Resources</a></span>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast"><ion-icon name="checkmark-circle"></ion-icon><span></span></div>
+
+<script>
+/* ============================================================
+   SafeAI — AI Safety Checklist
+   Self-scored, plain-language companion to the risk assessment.
+   Ticks persist to localStorage on this device.
+   ============================================================ */
+const $ = s => document.querySelector(s);
+
+const GROUPS = [
+  {
+    icon:"clipboard-outline", title:"Before you deploy",
+    sub:"Set the ground rules before any real data or customer touches the tool.",
+    items:[
+      { id:"tos",     t:"Read the terms of service", d:"Check whether the provider trains on your inputs. If it does, keep confidential data out of the tool." },
+      { id:"data",    t:"Know where your data goes", d:"Which country stores it, who can access it, whether you can delete it. If the vendor cannot answer, do not use it." },
+      { id:"fake",    t:"Test with synthetic data first", d:"Run the tool on made-up records and check the outputs for errors and fabrication before you connect anything real." },
+      { id:"never",   t:"Write down what it must never do", d:"If the AI should never quote prices, make legal claims, or promise timelines, put that in writing and tell the team." },
+      { id:"ip",      t:"Check who owns the output", d:"Confirm in the terms whether you own the content, code, or designs the AI generates. Sometimes you do not." },
+      { id:"free",    t:"Understand the pricing model", d:"If a tool is free, find out how the vendor makes money. Free often means your data is the product." },
+      { id:"human",   t:"Assign a human reviewer", d:"Every AI output that reaches a customer passes a person first. No exceptions." },
+      { id:"pilot",   t:"Pilot with one team", d:"Roll out to a single team before the whole company, so problems surface with low blast radius." },
+    ]
+  },
+  {
+    icon:"eye-outline", title:"After you deploy",
+    sub:"Keep watching. AI drifts, and so do the risks around it.",
+    items:[
+      { id:"review",  t:"Review outputs on a schedule", d:"Set a recurring check for errors, drift, and patterns that do not match expectations." },
+      { id:"log",     t:"Keep an error log", d:"When the AI gets something wrong, record what was asked, what it returned, and what was wrong." },
+      { id:"disclose",t:"Disclose AI use to customers", d:"If AI shapes any part of the customer experience, tell them. Transparency builds trust." },
+      { id:"kill",    t:"Keep a kill switch", d:"Know how to turn any AI tool off in minutes, not hours." },
+      { id:"quarter", t:"Reassess every quarter", d:"Models and tools change constantly. What was safe three months ago may behave differently now." },
+      { id:"train",   t:"Train the team", d:"A few minutes on what the AI is and is not for prevents most mistakes. Show everyone the kill switch." },
+    ]
+  },
+  {
+    icon:"lock-closed-outline", title:"Protect your data and your people",
+    sub:"The controls that keep a mistake from becoming a breach.",
+    items:[
+      { id:"pdpa",    t:"Handle personal data under the PDPA", d:"If the AI touches names, contact details, or financial data, follow Singapore's PDPA. The penalties are real." },
+      { id:"sep",     t:"Separate experiments from production", d:"Do not run AI experiments on machines that hold finance or customer systems. If the tool is compromised, so is everything on that machine." },
+      { id:"source",  t:"Install only from trusted sources", d:"Official stores and known vendors. Not forum links, shortened URLs, or messages from strangers." },
+      { id:"agents",  t:"Know what your AI agents can do", d:"Agents fetch code and connect to systems on their own. Check their permissions and scope them tightly." },
+    ]
+  },
+  {
+    icon:"trending-up-outline", title:"As you grow, so does your risk",
+    sub:"What is safe at your current size may not hold as you scale.",
+    items:[
+      { id:"volume",  t:"Reassess as customer volume grows", d:"What is compliant at 100 customers may not hold at 10,000. Revisit as you scale." },
+      { id:"surface", t:"Watch the growing attack surface", d:"Every agent or integration you add is another door. Make sure each one is locked." },
+      { id:"reg",     t:"Stay ahead of the regulators", d:"CSA and the PDPC keep publishing new AI guidance. Track it before it becomes an obligation." },
+      { id:"insure",  t:"Get insurance that covers AI", d:"Many cyber policies exclude unauthorised software. As you scale, secure coverage that explicitly includes AI tool breaches." },
+    ]
+  },
+];
+
+const RESOURCES = [
+  { t:"IMDA GenAI Starter Kit", d:"Free AI sandbox for Singapore businesses.", url:"imda.gov.sg", href:"https://www.imda.gov.sg" },
+  { t:"PDPC Data Protection Guidelines", d:"How to handle customer data when using AI.", url:"pdpc.gov.sg", href:"https://www.pdpc.gov.sg" },
+  { t:"CSA AI Security Guidelines", d:"Guidelines on securing AI systems, with agentic guidance.", url:"csa.gov.sg", href:"https://www.csa.gov.sg" },
+  { t:"IMDA Agentic AI Governance", d:"Framework for governing AI agents.", url:"imda.gov.sg", href:"https://www.imda.gov.sg" },
+  { t:"Enterprise SG GenAI support", d:"Pre-approved AI tools with government grant support.", url:"enterprisesg.gov.sg", href:"https://www.enterprisesg.gov.sg" },
+  { t:"AI Verify Foundation", d:"Open-source toolkit to test models for safety and fairness.", url:"aiverifyfoundation.sg", href:"https://aiverifyfoundation.sg" },
+];
+
+const TOTAL = GROUPS.reduce((n,g)=>n+g.items.length,0);
+const STORE = "safeai_checklist_v1";
+let checked = load();
+
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE)) || {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(checked)); }catch(e){} }
+
+function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function toast(msg){ const t=$("#toast"); t.querySelector("span").textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1900); }
+function count(){ return Object.keys(checked).filter(k=>checked[k]).length; }
+
+/* ---------- render checklist ---------- */
+function renderList(){
+  $("#listCard").innerHTML = GROUPS.map((g,gi)=>{
+    const done = g.items.filter(i=>checked[i.id]).length;
+    return `
+      <div ${gi>0?'style="margin-top:var(--s7)"':''}>
+        <div class="grp-head">
+          <span class="n" style="display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:9px;background:var(--surface-2);color:var(--accent);box-shadow:var(--raise)"><ion-icon name="${g.icon}" style="font-size:18px"></ion-icon></span>
+          <h3>${escapeHtml(g.title)}</h3>
+          <span class="gcount" data-gi="${gi}">${done}/${g.items.length}</span>
+        </div>
+        <p class="grp-sub">${escapeHtml(g.sub)}</p>
+        <ul style="margin:0;padding:0;list-style:none">
+          ${g.items.map(i=>{ const on=!!checked[i.id]; return `
+            <li class="citem" data-checked="${on}">
+              <button type="button" class="chk" role="checkbox" aria-checked="${on}" data-id="${i.id}" aria-label="Mark done: ${escapeHtml(i.t)}"><ion-icon name="checkmark"></ion-icon></button>
+              <span class="ctext"><span class="ct">${escapeHtml(i.t)}</span><span class="cd">${escapeHtml(i.d)}</span></span>
+            </li>`; }).join("")}
+        </ul>
+      </div>`;
+  }).join("");
+}
+
+function renderResources(){
+  $("#resGrid").innerHTML = RESOURCES.map(r=>`
+    <a class="res" href="${r.href}" target="_blank" rel="noopener noreferrer">
+      <ion-icon name="open-outline"></ion-icon>
+      <span><span class="rt">${escapeHtml(r.t)}</span><span class="rd">${escapeHtml(r.d)}</span><span class="rurl"><ion-icon name="globe-outline" style="font-size:.95em;color:var(--ink-3)"></ion-icon>${escapeHtml(r.url)}</span></span>
+    </a>`).join("");
+}
+
+/* ---------- score band ---------- */
+const CIRC = 2 * Math.PI * 52;
+function band(n){
+  if(n>=17) return { key:"strong", color:"var(--success)", soft:"var(--success-soft)", line:"var(--success-line)", icon:"shield-checkmark-outline", tag:"Strong position", verdict:"You are in good shape.", note:"Most safeguards are in place. Keep reviewing every quarter, and revisit as you add tools or scale up." };
+  if(n>=9)  return { key:"progress", color:"var(--warn)", soft:"var(--warn-soft)", line:"var(--warn-line)", icon:"construct-outline", tag:"Making progress", verdict:"Close the gaps.", note:"A solid start. Work through the unchecked items, prioritising anything that touches customer data or lets AI act on its own." };
+  return { key:"high", color:"var(--danger)", soft:"var(--danger-soft)", line:"var(--danger-line)", icon:"alert-circle-outline", tag:"High exposure", verdict:"Start now.", note:"Several basics are missing. Pick the three that matter most for your business and close them this week. Do not try to fix everything at once." };
+}
+
+function updateScore(){
+  const n = count();
+  const b = band(n);
+  $("#scoreNum").textContent = n;
+  const ring = $("#ring");
+  ring.style.strokeDasharray = CIRC.toFixed(1);
+  ring.style.strokeDashoffset = (CIRC * (1 - n/TOTAL)).toFixed(1);
+  ring.style.stroke = b.color;
+  const badge = $("#band");
+  badge.style.background = b.soft; badge.style.color = b.color; badge.style.border = "1px solid "+b.line;
+  badge.querySelector("ion-icon").setAttribute("name", b.icon);
+  $("#bandText").textContent = b.tag;
+  $("#verdict").textContent = b.verdict;
+  $("#verdict").style.color = b.color;
+  $("#note").textContent = b.note;
+  // per-group counts
+  GROUPS.forEach((g,gi)=>{ const el=document.querySelector('.gcount[data-gi="'+gi+'"]'); if(el){ const done=g.items.filter(i=>checked[i.id]).length; el.textContent=done+"/"+g.items.length; } });
+}
+
+/* ---------- interactions ---------- */
+$("#listCard").addEventListener("click", e=>{
+  const chk = e.target.closest(".chk"); if(!chk) return;
+  const id = chk.dataset.id;
+  const on = chk.getAttribute("aria-checked")==="true";
+  const now = !on;
+  checked[id] = now;
+  chk.setAttribute("aria-checked", String(now));
+  chk.closest(".citem").setAttribute("data-checked", String(now));
+  save(); updateScore();
+});
+
+$("#resetBtn").addEventListener("click", ()=>{
+  checked = {}; save(); renderList(); updateScore(); toast("Checklist reset");
+});
+
+$("#copyBtn").addEventListener("click", ()=>{
+  const n = count(), b = band(n);
+  const lines = [];
+  lines.push("SafeAI — AI Safety Checklist");
+  lines.push("Score: "+n+" / "+TOTAL+" — "+b.tag);
+  lines.push("");
+  GROUPS.forEach(g=>{
+    lines.push(g.title+":");
+    g.items.forEach(i=>lines.push("  ["+(checked[i.id]?"x":" ")+"] "+i.t));
+    lines.push("");
+  });
+  const outstanding = GROUPS.flatMap(g=>g.items).filter(i=>!checked[i.id]);
+  if(outstanding.length){ lines.push("Still to do ("+outstanding.length+"):"); outstanding.forEach(i=>lines.push("  - "+i.t)); }
+  const txt = lines.join("\n").trim();
+  const sp = $("#copyBtn").querySelector(".lbl span:last-child");
+  navigator.clipboard.writeText(txt).then(()=>{ const old=sp.textContent; sp.textContent="Copied!"; toast("Summary copied"); setTimeout(()=>sp.textContent=old,1200); })
+    .catch(()=>toast("Could not copy"));
+});
+
+renderList();
+renderResources();
+updateScore();
+</script>
+</body>
+</html>
