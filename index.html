@@ -286,11 +286,13 @@
     .pillar-outcome { font-size: var(--t-body); color: var(--ink-2); line-height:1.65; }
 
     /* ── DOWNLOAD ── */
+    .download-grid { display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items:stretch; }
     .download-card {
       background: var(--surface-1); border-radius: var(--r-lg); padding: 36px;
       box-shadow: var(--raise), var(--shadow);
       display:flex; flex-direction:column; gap: var(--s4); align-items:flex-start;
     }
+    .download-card .btn { margin-top: auto; }
     .download-icon {
       width:48px; height:48px; border-radius: var(--r-md);
       background: var(--surface-2); display:flex; align-items:center; justify-content:center;
@@ -355,7 +357,7 @@
     /* ── CONTACT ── */
     .contact-box { max-width: 780px; margin:0 auto; text-align:center; }
     .contact-box > p { font-size: var(--t-lead); color: var(--ink-2); line-height:1.7; margin: var(--s4) auto var(--s7); max-width:620px; }
-    .contact-cards { display:flex; justify-content:center; gap: var(--gap); flex-wrap:wrap; margin-bottom: var(--s7); }
+    .contact-cards { display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); max-width: 720px; margin: 0 auto var(--s7); align-items:stretch; }
     .contact-person {
       position: relative;
       display:flex; align-items:center; gap:16px; text-align:left;
@@ -437,6 +439,7 @@
       .hero-sub { line-height: 1.7; margin-bottom: var(--s6); }
       .hero-cta { gap: var(--s3); }
       .hero-cta .btn { width:100%; --btn-py: 14px; }
+      .download-grid { grid-template-columns: 1fr; }
 
       h2 { margin-bottom: var(--s4); }
       .lead { line-height: 1.7; }
@@ -450,7 +453,7 @@
       .footer-logo { width:200px; }
       .solution-head img { height:80px; width:80px; }
       .council-grid { grid-template-columns: 1fr; }
-      .contact-cards { flex-direction:column; }
+      .contact-cards { grid-template-columns: 1fr; }
       .contact-person { width:100%; }
       .contact-btns { flex-direction:column; }
       .contact-btns .btn { width:100%; }
@@ -487,7 +490,7 @@
     <p class="hero-sub">SafeAI.sg bridges national AI governance policy and practitioner-level implementation, so every organisation can deploy AI with confidence at the right level of rigour, at any scale.</p>
     <div class="hero-cta">
       <a href="#contact" class="btn btn-accent" data-tip="Contact Us">Keep me informed</a>
-      <a href="#mission" class="btn" data-tip="Scrolls below">Explore the mission</a>
+      <a href="/risk-assessment.html" class="btn" data-tip="Assess your AI risk">Know my AI Risk</a>
     </div>
   </div>
 </section>
@@ -622,18 +625,32 @@
   <div class="section-inner">
     <div class="eyebrow">Resources</div>
     <h2 class="trim">Framework Documents</h2>
-    <p class="lead lead-gap">Access the foundational documents behind SafeAI.sg. The charter deck gives a structured overview of the mission, the five pillars, and the council.</p>
-    <div class="download-card">
-      <span class="download-icon">
-        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
-      </span>
-      <div class="download-label">Charter deck, PDF</div>
-      <h3 class="trim">SafeAI.sg Charter Summary</h3>
-      <p>A structured visual overview of the SafeAI.sg Advisory Council Charter, covering the mission, five delivery pillars, council structure, and operating principles. Built for senior stakeholder briefings.</p>
-      <a href="SafeAI_SG_Charter_Deck_v7_1.pdf" download="SafeAI_Charter_Summary_v7.1.pdf" class="btn btn-accent">
-        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M12 15l-4-4M12 15l4-4M5 21h14"/></svg>
-        Download charter summary
-      </a>
+    <p class="lead lead-gap">Access the foundational documents behind SafeAI.sg, and check where your own AI use case sits with the interactive risk assessment.</p>
+    <div class="download-grid">
+      <div class="download-card">
+        <span class="download-icon">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+        </span>
+        <div class="download-label">Charter deck, PDF</div>
+        <h3 class="trim">SafeAI.sg Charter Summary</h3>
+        <p>A structured visual overview of the SafeAI.sg Advisory Council Charter, covering the mission, five delivery pillars, council structure, and operating principles. Built for senior stakeholder briefings.</p>
+        <a href="SafeAI_SG_Charter_Deck_v7_1.pdf" download="SafeAI_Charter_Summary_v7.1.pdf" class="btn btn-accent">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M12 15l-4-4M12 15l4-4M5 21h14"/></svg>
+          Download charter summary
+        </a>
+      </div>
+      <div class="download-card">
+        <span class="download-icon">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <div class="download-label">Interactive tool</div>
+        <h3 class="trim">AI Risk Assessment</h3>
+        <p>Answer six quick questions about your AI use case and get an instant risk tier, the key risk scenarios, and a mapped checklist of the controls you should have in place. Aligned to the MindForge AI RMF and CSA Securing AI guidelines.</p>
+        <a href="/risk-assessment.html" class="btn btn-accent">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Know my AI Risk
+        </a>
+      </div>
     </div>
   </div>
 </section>
