@@ -122,6 +122,7 @@
     .btn:hover{ background:var(--surface-3); }
     .btn:active{ transform:translateY(1px) scale(.99); }
     .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .btn:disabled{ opacity:.55; cursor:default; pointer-events:none; }
     .btn-accent{ color:#fff; background:linear-gradient(115deg,#9b3b92 0%,#b84e6f 28%,var(--accent) 72%); }
     .btn-accent:hover{ background:linear-gradient(115deg,#ad479f 0%,#cc5a7c 28%,var(--accent-2) 72%); }
     .btn-ghost{ background:transparent; box-shadow:none; color:var(--ink-2); }
@@ -224,7 +225,7 @@
             <div class="score-note" id="note">Tick each step you already have in place. Your progress saves automatically on this device.</div>
             <div class="score-actions">
               <button type="button" class="btn" id="copyBtn"><span class="lbl with-icon"><ion-icon name="copy-outline"></ion-icon><span>Copy summary</span></span></button>
-              <button type="button" class="btn btn-ghost" onclick="window.print()"><ion-icon name="print-outline"></ion-icon>Print / PDF</button>
+              <button type="button" class="btn" id="pdfBtn"><span class="lbl with-icon"><ion-icon name="download-outline"></ion-icon><span>Download PDF</span></span></button>
               <button type="button" class="btn btn-ghost" id="resetBtn"><ion-icon name="refresh-outline"></ion-icon>Reset</button>
             </div>
           </div>
@@ -483,6 +484,117 @@ $("#copyBtn").addEventListener("click", async ()=>{
   }catch(e){
     try{ await navigator.clipboard.writeText(text); ok(); }
     catch(e2){ toast("Could not copy"); }
+  }
+});
+
+/* ---------- PDF download ----------
+   Builds a clean light-canvas document with jsPDF (lazy-loaded from CDN on
+   first click). One accent, neutral ink/grey system, hairline rules, no
+   decoration; ticked items get an accent-filled box with a white check. */
+let _jspdfP = null;
+function ensureJsPDF(){
+  if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
+  if(_jspdfP) return _jspdfP;
+  _jspdfP = new Promise((res, rej)=>{
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js";
+    s.onload = res;
+    s.onerror = ()=>{ _jspdfP = null; rej(new Error("jspdf_load")); };
+    document.head.appendChild(s);
+  });
+  return _jspdfP;
+}
+
+function buildPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:"pt", format:"a4" });
+  const W = 595.28, H = 841.89, M = 56, CW = W - M*2, FOOT = H - 40;
+  const ACCENT=[233,113,50], INK=[26,26,26], GREY=[102,102,102], FAINT=[153,153,153], RULE=[227,227,227];
+  const n = count(), b = band(n);
+  const BAND = b.key==="strong" ? [26,127,55] : b.key==="progress" ? [161,116,26] : [178,58,50];
+  let y = M;
+
+  const need = (h)=>{ if(y + h > FOOT - 16){ doc.addPage(); y = M; } };
+  const rule = ()=>{ doc.setDrawColor(...RULE); doc.setLineWidth(.75); doc.line(M, y, W - M, y); };
+
+  // header
+  doc.setFont("helvetica","bold"); doc.setFontSize(21); doc.setTextColor(...INK);
+  doc.text("AI Safety Checklist", M, y + 16); y += 26;
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(...FAINT);
+  const dt = new Date().toLocaleDateString("en-SG", { day:"numeric", month:"long", year:"numeric" });
+  doc.text("SafeAI  ·  safeai.sg  ·  " + dt, M, y + 4); y += 18; rule(); y += 22;
+
+  // score
+  doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(...INK);
+  doc.text("Score: " + n + " of " + TOTAL, M, y);
+  const sw = doc.getTextWidth("Score: " + n + " of " + TOTAL);
+  doc.setTextColor(...BAND); doc.text("  ·  " + b.tag, M + sw, y); y += 15;
+  doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(...GREY);
+  const noteLines = doc.splitTextToSize(b.verdict + " " + b.note, CW);
+  doc.text(noteLines, M, y); y += noteLines.length * 12 + 14;
+
+  // groups
+  let idx = 0;
+  GROUPS.forEach(g=>{
+    const done = g.items.filter(i=>checked[i.id]).length;
+    need(56);
+    y += 10;
+    doc.setFont("helvetica","bold"); doc.setFontSize(11.5); doc.setTextColor(...INK);
+    doc.text(g.title, M, y);
+    doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(...FAINT);
+    doc.text(done + " of " + g.items.length, W - M, y, { align:"right" }); y += 8; rule(); y += 16;
+
+    g.items.forEach(i=>{
+      idx++;
+      const on = !!checked[i.id];
+      const dLines = doc.splitTextToSize(i.d, CW - 24);
+      need(16 + dLines.length * 11 + 10);
+      // checkbox, 10pt
+      const bx = M, by = y - 8.5, bs = 10;
+      if(on){
+        doc.setFillColor(...ACCENT);
+        doc.roundedRect(bx, by, bs, bs, 2, 2, "F");
+        doc.setDrawColor(255,255,255); doc.setLineWidth(1.1);
+        doc.line(bx+2.4, by+5.2, bx+4.1, by+7);
+        doc.line(bx+4.1, by+7,   bx+7.6, by+3);
+      } else {
+        doc.setDrawColor(176,176,176); doc.setLineWidth(.9);
+        doc.roundedRect(bx, by, bs, bs, 2, 2, "S");
+      }
+      doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...INK);
+      doc.text(idx + ". " + i.t, M + 24, y); y += 12;
+      doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(...GREY);
+      doc.text(dLines, M + 24, y); y += dLines.length * 11 + 10;
+    });
+    y += 4;
+  });
+
+  // footer on every page
+  const pages = doc.getNumberOfPages();
+  for(let p = 1; p <= pages; p++){
+    doc.setPage(p);
+    doc.setDrawColor(...RULE); doc.setLineWidth(.75); doc.line(M, FOOT, W - M, FOOT);
+    doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(...FAINT);
+    doc.text("SafeAI · General guidance, not a formal risk assessment. Use-case risk tiers: safeai.sg/risk-assessment.html", M, FOOT + 12);
+    doc.text("Page " + p + " of " + pages, W - M, FOOT + 12, { align:"right" });
+  }
+
+  doc.save("SafeAI-AI-Safety-Checklist.pdf");
+}
+
+$("#pdfBtn").addEventListener("click", async ()=>{
+  const btn = $("#pdfBtn"), sp = btn.querySelector(".lbl span:last-child");
+  const old = sp.textContent;
+  btn.disabled = true; sp.textContent = "Preparing…";
+  try{
+    await ensureJsPDF();
+    buildPDF();
+    toast("PDF downloaded");
+  }catch(e){
+    toast("Could not build the PDF, opening print instead");
+    setTimeout(()=>window.print(), 600);
+  }finally{
+    btn.disabled = false; sp.textContent = old;
   }
 });
 
