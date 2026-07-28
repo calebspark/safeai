@@ -74,6 +74,25 @@ export const SSIC_SYNONYMS = {
   embassy: 'V', 'international organisation': 'V', un: 'V',
 };
 
+// Display order. SSIC_SECTIONS stays canonical A to V because that is the
+// official sequence and the thing we can defend. This is presentation only:
+// the sections most likely to be picked by an organisation running an AI risk
+// assessment in Singapore surface first, the rest follow in SSIC order.
+//
+// Ranked by who actually does AI governance work here: MAS-regulated finance,
+// the tech sector, healthcare, government, professional services and education,
+// then the two largest sectors by GDP and by establishment count.
+export const SSIC_COMMON = ['L', 'K', 'R', 'P', 'N', 'Q', 'C', 'G'];
+
+export function orderedSections() {
+  const byCode = new Map(SSIC_SECTIONS.map(s => [s.code, s]));
+  const common = SSIC_COMMON.map(c => ({ ...byCode.get(c), common: true }));
+  const rest = SSIC_SECTIONS
+    .filter(s => !SSIC_COMMON.includes(s.code))
+    .map(s => ({ ...s, common: false }));
+  return [...common, ...rest];
+}
+
 export function industryValue(section) {
   return `${section.code} - ${section.title}`;
 }

@@ -285,6 +285,11 @@
     .combo-opt .code{ flex:none; width:1.3em; color:var(--ink-3); font-variant-numeric:tabular-nums; font-weight:600; }
     .combo-opt.free{ color:var(--accent); font-weight:600; }
     .combo-empty{ padding:9px 11px; color:var(--ink-3); }
+    /* Sentence case, quiet. A grouping label, not a shout. */
+    .combo-sep{ padding:10px 11px 5px; color:var(--ink-3); font-size:calc(var(--fs-base)*.8);
+      font-weight:600; letter-spacing:.02em; pointer-events:none; }
+    .combo-sep + .combo-opt{ margin-top:0; }
+    .combo-opt + .combo-sep{ margin-top:var(--s2); border-top:1px solid var(--line); }
 
     /* ---------- two-level group picker (role, use case) ---------- */
     .field .picker{ order:2; }
@@ -458,7 +463,7 @@
    Option data and the agentic scoring live in ./assets/ so they
    can be unit tested headlessly with `node --test`.
    ============================================================ */
-import { SSIC_SECTIONS, SSIC_SYNONYMS, industryValue } from './assets/ssic.mjs';
+import { SSIC_SYNONYMS, SSIC_COMMON, orderedSections, industryValue } from './assets/ssic.mjs';
 import { fuzzyMatch, CONFIDENT } from './assets/match.mjs';
 
 const $ = s => document.querySelector(s);
@@ -467,13 +472,15 @@ const state = { industry:"", role:"", usecase:"", autonomy:"", data:"", deploy:"
 
 function label(v){ if(!v) return ""; const p=String(v).split("|"); return p.length>1?p.slice(1).join("|"):p[0]; }
 
-const INDUSTRY_ENTRIES = SSIC_SECTIONS.map(s=>({ value:industryValue(s), label:s.title, code:s.code }));
+/* Presentation order, not SSIC order: the sections most likely to be picked
+   come first. The canonical A to V list still lives in assets/ssic.mjs. */
+const INDUSTRY_ENTRIES = orderedSections().map(s=>({ value:industryValue(s), label:s.title, code:s.code, common:s.common }));
 
 /* ---------- searchable combo field ----------
    Resolution order for typed text: exact option, then fuzzy match against the
    option list plus a synonym table (free, instant), then POST /api/classify as
    a fallback. A classify outage never blocks the assessment. */
-function comboField(key, entries, { noun, synonyms={}, showCode=false }){
+function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=false }){
   const root  = document.querySelector(`.combo[data-combo="${key}"]`);
   const input = root.querySelector(".combo-input");
   const list  = root.querySelector(".combo-list");
@@ -516,9 +523,18 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false }){
       ? entries.map(e=>({e,r:rank(e,norm)})).filter(x=>x.r>=0)
           .sort((a,b)=>a.r-b.r).map(x=>x.e)
       : entries;
-    const rows = matches.map(e=>
-      `<li class="combo-opt" role="option" aria-selected="false" data-value="${escapeHtml(e.value)}">${showCode?`<span class="code">${escapeHtml(e.code)}</span>`:""}<span>${escapeHtml(e.label)}</span></li>`
-    ).join("");
+    /* Separators only on the unfiltered list. Once someone is typing, rank
+       order already answers "which of these did you mean", and headings in a
+       filtered result just add noise. */
+    let lastCommon=null;
+    const rows = matches.map(e=>{
+      let sep="";
+      if(!norm && groups && e.common!==lastCommon){
+        sep = `<li class="combo-sep" role="presentation">${e.common?"Commonly selected":"All other sections"}</li>`;
+        lastCommon=e.common;
+      }
+      return sep + `<li class="combo-opt" role="option" aria-selected="false" data-value="${escapeHtml(e.value)}">${showCode?`<span class="code">${escapeHtml(e.code)}</span>`:""}<span>${escapeHtml(e.label)}</span></li>`;
+    }).join("");
     const free = (norm && !matches.length)
       ? `<li class="combo-opt free" role="option" aria-selected="false" data-free="1">Not listed. Use "${escapeHtml(q.trim())}"</li>`
       : "";
@@ -892,11 +908,36 @@ async function runAssessment(vals){
 /* ---------- pill selection ---------- */
 let hasRun=false;
 
-/* Every field-change path funnels through here so the stepper and the
-   reassess prompt stay consistent across pills, combos and pickers. */
+/* Live countdown. Once the user has been told how many fields are outstanding,
+   that number has to keep up as they answer, and clear itself at zero. */
+let countdownActive=false;
+function missingCount(){ return KEYS.filter(k=>!state[k]).length; }
+function showCountdown(){
+  countdownActive=true;
+  refreshCountdown();
+}
+function refreshCountdown(){
+  if(!countdownActive) return;
+  const n=missingCount(), hint=$("#formhint");
+  if(n===0){
+    countdownActive=false;
+    hint.textContent="All set. Assess when ready.";
+    hint.style.color="var(--success)";
+    return;
+  }
+  hint.textContent=`${n} field${n>1?"s":""} still to answer.`;
+  hint.style.color="var(--warn)";
+}
+
+/* Every field-change path funnels through here so the stepper, the countdown
+   and the reassess prompt stay consistent across pills, combos and pickers. */
 function onFieldChanged(){
   assessedComplete=false;
   updateStepper();
+  document.querySelectorAll(".field[data-key]").forEach(f=>{
+    if(KEYS.includes(f.dataset.key) && state[f.dataset.key]) f.classList.remove("miss");
+  });
+  if(countdownActive){ refreshCountdown(); return; }
   if(hasRun){ setLabel("Reassess"); $("#formhint").textContent="Inputs changed. Reassess to update."; $("#formhint").style.color="var(--ink-3)"; }
 }
 
@@ -919,7 +960,7 @@ document.querySelectorAll(".field[data-key]").forEach(field=>{
 
 /* Controls that own their own DOM state and so need clearing on reset. */
 const FIELD_CONTROLS = [
-  comboField("industry", INDUSTRY_ENTRIES, { noun:"industry", synonyms:SSIC_SYNONYMS, showCode:true }),
+  comboField("industry", INDUSTRY_ENTRIES, { noun:"industry", synonyms:SSIC_SYNONYMS, showCode:true, groups:true }),
 ];
 updateStepper();
 
@@ -940,7 +981,8 @@ form.addEventListener("submit", async e=>{
     if(!state[field.dataset.key]){ missing++; field.classList.add("miss"); if(!firstMiss) firstMiss=field; }
     else field.classList.remove("miss");
   });
-  if(missing){ $("#formhint").textContent=`${missing} field${missing>1?"s":""} still to answer.`; $("#formhint").style.color="var(--warn)"; if(firstMiss) firstMiss.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+  if(missing){ showCountdown(); if(firstMiss) firstMiss.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+  countdownActive=false;
   $("#formhint").textContent="";
 
   const btn=$("#run"); btn.classList.add("is-loading"); btn.disabled=true;
@@ -966,7 +1008,8 @@ $("#reset").addEventListener("click",()=>{
   document.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked","false"));
   document.querySelectorAll(".field").forEach(f=>f.classList.remove("miss"));
   FIELD_CONTROLS.forEach(c=>c.reset());
-  $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#formhint").textContent=""; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
+  countdownActive=false;
+  $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#formhint").textContent=""; $("#formhint").style.color="var(--ink-3)"; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
 });
 </script>
 </body>
