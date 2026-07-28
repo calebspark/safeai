@@ -110,7 +110,9 @@
     /* ---------- layout ---------- */
     .stage{ padding:var(--s6) 0 var(--s8); }
     .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s6); box-shadow:0 14px 34px -22px rgba(0,0,0,.55); }
-    .card + .card, #rating > .card, #output > .card{ margin-top:var(--gap); }
+    /* Each result section is its own container, so the sibling rule cannot
+       reach across them. Every card after the first keeps the same rhythm. */
+    .card + .card, #rating > .card, #output > .card, #maturity > .card, #agentic > .card{ margin-top:var(--gap); }
     .card h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
     .card .sub{ color:var(--ink-2); margin-top:6px; font-size:calc(var(--fs-base)*.95); }
     .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s6); }
@@ -136,10 +138,14 @@
     .pill:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
     .pill .pk{ width:0; overflow:hidden; display:inline-flex; align-items:center; opacity:0; transition:width .15s, opacity .15s; }
     .pill .pk ion-icon{ font-size:15px; color:var(--accent-ink); }
-    .pill[aria-checked="true"]{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600;
+    /* Pressed covers both the single-choice pills (aria-checked) and the
+       multi-select adoption gate (aria-pressed). Without the second selector
+       the adoption pills stayed grey with white text when selected. */
+    .pill[aria-checked="true"], .pill[aria-pressed="true"]{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600;
       box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px -10px rgba(233,113,50,.6); }
-    .pill[aria-checked="true"]:hover{ background:var(--accent-2); color:var(--accent-ink); }
-    .pill[aria-checked="true"] .pk{ width:15px; opacity:1; }
+    .pill[aria-checked="true"]:hover, .pill[aria-pressed="true"]:hover{ background:var(--accent-2); color:var(--accent-ink); }
+    .pill[aria-checked="true"] .pk, .pill[aria-pressed="true"] .pk{ width:15px; opacity:1; }
+    .pill[aria-checked="true"] .pk ion-icon, .pill[aria-pressed="true"] .pk ion-icon{ color:var(--accent-ink); }
     .field.miss .pill{ border-color:var(--warn-line); }
 
     /* ---------- buttons ---------- */
@@ -302,12 +308,24 @@
     .picker-back:active{ transform:translateY(1px); }
     .picker-back:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
     .pill.group{ font-weight:600; color:var(--ink); }
-    .pill.other{ color:var(--accent); }
+    /* "Not listed" is an escape hatch, not an option. It reads as a quiet text
+       link: no fill, no stroke, no padding, so it never competes with the
+       real choices sitting next to it. */
+    .pill.other{ color:var(--accent); background:none; border:0; padding:0; box-shadow:none;
+      text-decoration:underline; text-underline-offset:3px; }
+    .pill.other:hover{ background:none; color:var(--accent-2); }
+    .pill.other .pk{ display:none; }
+    .pill.other:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
     /* Small tier: 8px vertical, 16px horizontal, the house 2:1 ratio. */
     .btn-sm{ padding:8px 16px; border-radius:var(--r-sm); font-size:calc(var(--fs-base)*.9); }
     .picker .pills{ align-items:center; }
     .picker-free{ flex:1 1 240px; min-width:0; }
     .adopt-field{ margin-bottom:var(--s6); padding-bottom:var(--s5); border-bottom:1px solid var(--line); }
+    /* What each option actually means, shown only for what is selected. */
+    .adopt-desc{ order:3; margin-top:var(--s3); display:grid; gap:var(--s2); }
+    .adopt-desc[hidden]{ display:none; }
+    .adopt-desc div{ color:var(--ink-2); font-size:calc(var(--fs-base)*.9); line-height:1.55; }
+    .adopt-desc b{ color:var(--ink); font-weight:600; }
 
     /* ---------- maturity matrix ----------
        Rows inside the one card, not nested cards. No double padding. */
@@ -328,8 +346,11 @@
     .fq .fdesc{ color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
     .fq .anchors{ margin-top:var(--s3); color:var(--ink-3); font-size:calc(var(--fs-base)*.84); line-height:1.6; }
     .fq .anchors b{ color:var(--ink-2); }
+    /* Fixed circles. The tick is suppressed here because widening the pill to
+       fit it stretched the circle into a capsule on selection. */
     .scale{ display:flex; flex-wrap:wrap; gap:8px; }
-    .scale .pill{ min-width:44px; justify-content:center; }
+    .scale .pill{ width:44px; height:44px; padding:0; gap:0; border-radius:50%; justify-content:center; }
+    .scale .pill .pk{ display:none; }
     .badge-both{ font-weight:500; font-size:calc(var(--fs-base)*.78); color:var(--info);
       background:var(--info-soft); border:1px solid var(--info-line); border-radius:var(--r-pill);
       padding:2px 9px; margin-left:8px; vertical-align:1px; }
@@ -401,12 +422,13 @@
               <button type="button" class="pill" data-adopt="Gen AI" aria-pressed="false">Gen AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
               <button type="button" class="pill" data-adopt="None" aria-pressed="false">None of these<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
             </div>
+            <div class="adopt-desc" id="adopt-desc" hidden></div>
           </div>
 
           <div class="fgrid">
             <div class="field" data-key="industry">
               <label for="industry-input">Industry</label>
-              <div class="hint">Singapore Standard Industrial Classification 2025. Sets the regulatory baseline. Financial, health and public sector carry stricter compliance.</div>
+              <div class="hint">Sets the regulatory baseline. Financial, health and public sector carry stricter compliance.</div>
               <div class="combo" data-combo="industry">
                 <input id="industry-input" class="combo-input" type="text" autocomplete="off" spellcheck="false"
                        role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="industry-list"
@@ -550,18 +572,21 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
 
   function commit(value, msg){
     state[key]=value;
-    input.value=value;
+    /* Show the plain sector name. The stored value keeps its SSIC letter
+       because the API matches on it, but the letter means nothing to the
+       person filling the form. */
+    const picked = entries.find(e=>e.value===value);
+    input.value = picked ? picked.label : value;
     field.classList.remove("miss");
     close();
     setNote(msg||"", msg?"ok":null);
     onFieldChanged();
   }
 
-  /* Rank so an exact code beats a prefix beats a substring. Without this,
-     typing "l" buries section L under every label containing the letter. */
+  /* Rank so a prefix beats a substring. The SSIC letter is not ranked on:
+     it is no longer shown, so matching "l" to Financial would look random. */
   function rank(e, norm){
     const lab=e.label.toLowerCase();
-    if((e.code||"").toLowerCase()===norm) return 0;
     if(lab.startsWith(norm)) return 1;
     if(lab.includes(norm)) return 2;
     return -1;
@@ -629,9 +654,11 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
     }catch{ /* offline or blocked, fall through */ }
     busy=false;
 
+    /* An entry we could not check is not an entry we accept. Silently taking
+       it as typed was showing a tick next to gibberish. */
     if(!res){
-      state[key]=raw; field.classList.remove("miss");
-      setNote("Could not verify that entry, so we will use it as typed.", "ok");
+      state[key]="";
+      setNote("Could not check that entry just now. Pick one from the list, or try again in a moment.", "bad");
       onFieldChanged(); return;
     }
     if(res.valid){
@@ -712,7 +739,13 @@ function groupPicker(key, groups, { noun }){
   function commit(value, msg){
     state[key]=value;
     field.classList.remove("miss");
-    pills.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked", String(p.dataset.item===value)));
+    /* Free text resolves while the group row is showing, and a group pill is
+       marked by which items it holds, not by data-item. Re-render there so the
+       resolved answer still reads as selected. */
+    if(pills.querySelector("[data-item]"))
+      pills.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked", String(p.dataset.item===value)));
+    else
+      showGroups();
     setNote(msg||"", msg?"ok":null);
     onFieldChanged();
   }
@@ -723,7 +756,8 @@ function groupPicker(key, groups, { noun }){
     const p = e.target.closest(".pill");
     if(!p) return;
     if(p.dataset.group) return showItems(p.dataset.group);
-    if(p.dataset.item)  return commit(p.dataset.item);
+    /* Second click on the chosen item clears it back to neutral. */
+    if(p.dataset.item)  return commit(state[key]===p.dataset.item ? "" : p.dataset.item);
     if(p.dataset.other) return showFreeInput();
   });
   root.addEventListener("keydown", e=>{
@@ -754,9 +788,8 @@ function groupPicker(key, groups, { noun }){
     busy=false;
 
     if(!res){
-      showGroups();
-      state[key]=raw; field.classList.remove("miss");
-      setNote("Could not verify that entry, so we will use it as typed.", "ok");
+      state[key]="";
+      setNote("Could not check that entry just now. Pick one from the list, or try again in a moment.", "bad");
       onFieldChanged(); return;
     }
     if(res.valid){
@@ -1162,10 +1195,13 @@ document.querySelectorAll(".field[data-key]").forEach(field=>{
   if(!KEYS.includes(key)) return;
   field.querySelectorAll(".pill").forEach(pill=>{
     pill.setAttribute("role","radio"); pill.setAttribute("aria-checked","false");
+    /* Clicking the selected pill again clears it, so a mis-tap is undoable
+       without a Reset. Same rule everywhere a pill can be pressed. */
     pill.addEventListener("click",()=>{
+      const wasOn = pill.getAttribute("aria-checked")==="true";
       field.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked","false"));
-      pill.setAttribute("aria-checked","true");
-      state[key]=pill.dataset.val;
+      if(!wasOn) pill.setAttribute("aria-checked","true");
+      state[key]= wasOn ? "" : pill.dataset.val;
       field.classList.remove("miss");
       onFieldChanged();
     });
@@ -1174,7 +1210,7 @@ document.querySelectorAll(".field[data-key]").forEach(field=>{
 
 /* Controls that own their own DOM state and so need clearing on reset. */
 const FIELD_CONTROLS = [
-  comboField("industry", INDUSTRY_ENTRIES, { noun:"industry", synonyms:SSIC_SYNONYMS, showCode:true, groups:true }),
+  comboField("industry", INDUSTRY_ENTRIES, { noun:"industry", synonyms:SSIC_SYNONYMS, showCode:false, groups:true }),
   groupPicker("role", ROLE_GROUPS, { noun:"role" }),
   groupPicker("usecase", USECASE_GROUPS, { noun:"AI use case" }),
 ];
@@ -1207,7 +1243,26 @@ document.getElementById("adoption-pills").addEventListener("click", e=>{
   $("#adopt-hint").textContent = state.adoption.includes("Agentic AI")
     ? "Agentic AI adds a short second survey after your results."
     : "Select all that apply. This routes you to the right follow-up and does not affect your risk score.";
+  renderAdoptDesc();
 });
+
+/* Plain-language meaning of each option, shown only once it is selected, so
+   nobody has to guess whether their bots count as RPA or Gen AI. */
+const ADOPT_DESC = {
+  "Agentic AI":"Software agents that plan their own steps and act, calling tools, systems or other agents to finish a task instead of only answering.",
+  "RPA":"Robotic process automation. Bots that repeat fixed, rule-based steps across existing software. Predictable, and no learning involved.",
+  "Gen AI":"Models that produce new content from a prompt, such as text, images, code, audio or summaries.",
+  "None":"No AI or automation in production yet. You still get the base risk rating for the use case you are planning.",
+};
+
+function renderAdoptDesc(){
+  const box=$("#adopt-desc");
+  const picked=state.adoption||[];
+  box.hidden = !picked.length;
+  box.innerHTML = picked.map(v=>
+    `<div><b>${escapeHtml(v==="None"?"None of these":v)}.</b> ${escapeHtml(ADOPT_DESC[v]||"")}</div>`
+  ).join("");
+}
 
 /* ---------- AI Adoption Maturity Matrix ---------- */
 const TRACKS=[
@@ -1293,9 +1348,14 @@ $("#agentic").addEventListener("click", async e=>{
   const f=e.target.closest("[data-factor]");
   if(f){
     const block=f.closest("[data-factor-block]");
+    const wasOn=f.getAttribute("aria-checked")==="true";
     block.querySelectorAll(".pill").forEach(x=>x.setAttribute("aria-checked","false"));
-    f.setAttribute("aria-checked","true");
-    state.agenticFactors[f.dataset.factor]=Number(f.dataset.score);
+    if(wasOn){
+      delete state.agenticFactors[f.dataset.factor];
+    }else{
+      f.setAttribute("aria-checked","true");
+      state.agenticFactors[f.dataset.factor]=Number(f.dataset.score);
+    }
     updatePredeployReady();
     return;
   }
