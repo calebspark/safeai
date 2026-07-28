@@ -307,6 +307,41 @@
     .btn-sm{ padding:8px 16px; border-radius:var(--r-sm); font-size:calc(var(--fs-base)*.9); }
     .picker .pills{ align-items:center; }
     .picker-free{ flex:1 1 240px; min-width:0; }
+    .adopt-field{ margin-bottom:var(--s6); padding-bottom:var(--s5); border-bottom:1px solid var(--line); }
+
+    /* ---------- maturity matrix ----------
+       Rows inside the one card, not nested cards. No double padding. */
+    .track{ display:flex; align-items:flex-start; gap:var(--s4); padding:var(--s4) 0; border-top:1px solid var(--line); }
+    .track:first-of-type{ border-top:0; padding-top:0; }
+    .track .tico{ flex:none; width:34px; height:34px; border-radius:var(--r-sm);
+      display:grid; place-items:center; background:var(--surface-2); color:var(--ink-2); font-size:18px; }
+    .track .tbody{ flex:1; min-width:0; }
+    .track h3{ margin:0 0 3px; font-size:calc(var(--fs-base)*1.05); }
+    .track p{ margin:0; color:var(--ink-2); line-height:1.55; }
+    .track .tact{ flex:none; align-self:center; }
+    .track.on .tico{ background:var(--accent); color:var(--accent-ink); }
+
+    /* ---------- agentic matrix ---------- */
+    .fq{ padding:var(--s4) 0; border-top:1px solid var(--line); }
+    .fq:first-of-type{ border-top:0; }
+    .fq > label{ display:block; font-weight:600; font-size:calc(var(--fs-base)*1.02); margin-bottom:4px; }
+    .fq .fdesc{ color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
+    .fq .anchors{ margin-top:var(--s3); color:var(--ink-3); font-size:calc(var(--fs-base)*.84); line-height:1.6; }
+    .fq .anchors b{ color:var(--ink-2); }
+    .scale{ display:flex; flex-wrap:wrap; gap:8px; }
+    .scale .pill{ min-width:44px; justify-content:center; }
+    .badge-both{ font-weight:500; font-size:calc(var(--fs-base)*.78); color:var(--info);
+      background:var(--info-soft); border:1px solid var(--info-line); border-radius:var(--r-pill);
+      padding:2px 9px; margin-left:8px; vertical-align:1px; }
+    .gap-list{ margin:0; padding:0; list-style:none; }
+    .gap-list li{ padding:var(--s3) 0; border-top:1px solid var(--line); line-height:1.6; color:var(--ink-2); }
+    .gap-list li:first-child{ border-top:0; }
+    .gap-list b{ color:var(--ink); }
+    table.risk input[type="text"], table.risk select{ width:100%; font:inherit; font-size:calc(var(--fs-base)*.92);
+      color:var(--ink); background:var(--surface-2); border:1px solid var(--line);
+      border-radius:var(--r-sm); padding:7px 9px; }
+    table.risk input[type="text"]:focus-visible, table.risk select:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+    table.risk input[type="text"]::placeholder{ color:var(--ink-3); }
 
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
   </style>
@@ -357,6 +392,17 @@
         <div class="stitle"><span class="n"><ion-icon name="clipboard-outline"></ion-icon></span><div><h2>Profile your AI use case</h2></div></div>
 
         <form id="q" novalidate>
+          <div class="field adopt-field">
+            <label>Which of these does your organisation use?</label>
+            <div class="hint" id="adopt-hint">Select all that apply. This routes you to the right follow-up and does not affect your risk score.</div>
+            <div class="pills" role="group" aria-label="AI adoption" id="adoption-pills">
+              <button type="button" class="pill" data-adopt="Agentic AI" aria-pressed="false">Agentic AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              <button type="button" class="pill" data-adopt="RPA" aria-pressed="false">RPA<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              <button type="button" class="pill" data-adopt="Gen AI" aria-pressed="false">Gen AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              <button type="button" class="pill" data-adopt="None" aria-pressed="false">None of these<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+            </div>
+          </div>
+
           <div class="fgrid">
             <div class="field" data-key="industry">
               <label for="industry-input">Industry</label>
@@ -438,6 +484,8 @@
       <div id="rating"></div>
       <!-- ===== ASSESSMENT DETAIL ===== -->
       <div id="output" aria-live="polite"></div>
+      <div id="maturity"></div>
+      <div id="agentic"></div>
     </div>
   </main>
 
@@ -463,6 +511,10 @@
 import { SSIC_SYNONYMS, SSIC_COMMON, orderedSections, industryValue } from './assets/ssic.mjs';
 import { ROLE_GROUPS, USECASE_GROUPS, flatten } from './assets/options.mjs';
 import { fuzzyMatch, CONFIDENT } from './assets/match.mjs';
+import {
+  IMPACT_FACTORS, LIKELIHOOD_FACTORS, SHARED_FACTOR_ID,
+  scorePredeployment, governanceGap, AUTONOMY_CEILING_COPY,
+} from './assets/agentic.mjs';
 
 const $ = s => document.querySelector(s);
 const KEYS = ["industry","role","usecase","autonomy","data","deploy"];
@@ -749,19 +801,62 @@ function toast(msg){ const t=$("#toast"); t.querySelector("span").textContent=ms
 function tierOf(d){ return TIERS[d.tier] || TIERS[Math.min(4,Math.max(1,Math.round((d.riskIndex||0)/25)+1))]; }
 function setLabel(txt){ const l=$("#run .lbl span:last-child"); if(l) l.textContent=txt; }
 
-/* ---------- needle gauge ---------- */
-function gaugeSVG(value){
+/* Strip the SSIC code for prose. The stored value keeps it. */
+function displayName(v){ return label(v).replace(/^[A-V]\s-\s/, ""); }
+
+/* ---------- needle gauge ----------
+   Bands are a parameter so the three-tier agentic gauge reuses this. */
+const GAUGE_BANDS_4=[[1,24,'var(--t1)'],[26,49,'var(--t2)'],[51,77,'var(--t3)'],[79,99,'var(--t4)']];
+const GAUGE_BANDS_3=[[1,32,'var(--t1)'],[34,66,'var(--t2)'],[68,99,'var(--t4)']];
+
+function gaugeSVG(value, opts={}){
+  const { bands=GAUGE_BANDS_4, lo="Low", hi="Severe", aria="Risk gauge" } = opts;
   const R=80, W=15, v=Math.max(0,Math.min(100,value));
   const pt=(val,r)=>{ const a=(180-(val/100)*180)*Math.PI/180; return [100+r*Math.cos(a), 100-r*Math.sin(a)]; };
   const arc=(v1,v2,c)=>{ const [x1,y1]=pt(v1,R),[x2,y2]=pt(v2,R); return `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${R} ${R} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="${c}" stroke-width="${W}" stroke-linecap="butt"/>`; };
   const [nx,ny]=pt(v,R-20);
-  return `<svg viewBox="0 0 200 118" role="img" aria-label="Risk gauge, ${v} of 100">
-    ${arc(1,24,'var(--t1)')}${arc(26,49,'var(--t2)')}${arc(51,77,'var(--t3)')}${arc(79,99,'var(--t4)')}
+  return `<svg viewBox="0 0 200 118" role="img" aria-label="${escapeHtml(aria)}, ${v} of 100">
+    ${bands.map(b=>arc(b[0],b[1],b[2])).join("")}
     <line class="gneedle" x1="100" y1="100" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
     <circle cx="100" cy="100" r="7" fill="var(--surface-3)" stroke="var(--ink)" stroke-width="2"/>
-    <text x="20" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">Low</text>
-    <text x="180" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">Severe</text>
+    <text x="20" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">${escapeHtml(lo)}</text>
+    <text x="180" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">${escapeHtml(hi)}</text>
   </svg>`;
+}
+
+/* ---------- what the tier labels mean ----------
+   The scoring accordion explains how the number was derived. This one
+   explains what to do about it. */
+const TIER_MEANING=[
+  { tier:"Low",      sev:"Low",    band:"0 to 25",   text:"Routine, reversible, no sensitive data. Standard IT hygiene suffices." },
+  { tier:"Moderate", sev:"Medium", band:"26 to 50",  text:"Real but bounded. Needs a named owner and a documented review before go-live." },
+  { tier:"High",     sev:"High",   band:"51 to 78",  text:"Consequential to people, money or safety. Needs compliance sign-off, documented human oversight and pre-deployment testing." },
+  { tier:"Severe",   sev:"Severe", band:"79 to 100", text:"Potential for serious or irreversible harm. Executive approval required, and some cases should not deploy at all." },
+];
+
+function tierMeaningHTML(current){
+  const rows=TIER_MEANING.map(t=>`<tr${t.tier===current?' style="background:var(--surface-2)"':''}>
+      <td><b class="sev-${t.sev}">${t.tier}</b></td>
+      <td>${t.band}</td>
+      <td>${escapeHtml(t.text)}</td>
+    </tr>`).join("");
+  return `
+    <details class="acc" style="margin-top:var(--s3)">
+      <summary>
+        <ion-icon class="cico" name="help-circle-outline"></ion-icon>
+        <span class="ctitle">What Low, Moderate, High and Severe mean</span>
+        <ion-icon class="chev" name="chevron-down-outline"></ion-icon>
+      </summary>
+      <div class="body">
+        <p style="color:var(--ink-2);margin:0 0 var(--s3)">The band tells you where the number landed. This tells you what it asks of you.</p>
+        <div class="tbl-scroll">
+          <table class="risk">
+            <thead><tr><th>Tier</th><th>Band</th><th>What it means</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    </details>`;
 }
 
 /* ---------- rating card ---------- */
@@ -798,7 +893,7 @@ function renderRating(d){
   const t=tierOf(d), pct=Math.max(0,Math.min(100,d.riskIndex|0));
   $("#rating").innerHTML = `
     <div class="card">
-      <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Risk rating</h2></div></div>
+      <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Overall AI Use Case Risk Rating</h2></div></div>
       <div class="gauge-block">${gaugeSVG(pct)}</div>
       <div class="gauge-legend">
         <span class="big" style="color:${t.color}">${escapeHtml(t.name)}</span>
@@ -808,6 +903,7 @@ function renderRating(d){
         ${(d.drivers||[]).map(dr=>{ const sv=SEV[dr.level]||{soft:'var(--surface-2)',line:'var(--line)',ink:'var(--ink-2)'}; return `<div class="dtile" style="background:${sv.soft};border-color:${sv.line}"><div class="k">${escapeHtml(dr.label)}</div><div class="dlevel" style="color:${sv.ink}">${escapeHtml(dr.level)}</div><div class="v">${escapeHtml(dr.note||'')}</div></div>`;}).join("")}
       </div>
       ${scoringHTML(d)}
+      ${tierMeaningHTML(t.name.replace(/ risk$/,""))}
     </div>`;
 }
 
@@ -832,7 +928,7 @@ function renderOutput(vals, d){
 
   $("#output").innerHTML = `
     <div class="card">
-      <div class="stitle"><span class="n"><ion-icon name="document-text-outline"></ion-icon></span><div><h2>Risk assessment</h2><div class="sub">${escapeHtml(label(vals.role))} · ${escapeHtml(label(vals.industry))} · ${escapeHtml(label(vals.usecase))}</div></div></div>
+      <div class="stitle"><span class="n"><ion-icon name="document-text-outline"></ion-icon></span><div><h2>Risk assessment</h2><div class="sub">${escapeHtml(label(vals.role))} · ${escapeHtml(displayName(vals.industry))} · ${escapeHtml(label(vals.usecase))}</div></div></div>
 
       <div class="banner ${t.banner}">
         <ion-icon name="${t.n>=3?'warning-outline':'information-circle-outline'}"></ion-icon>
@@ -891,7 +987,7 @@ function renderOutput(vals, d){
 let _apTimer=null;
 function ratingLoading(){
   $("#rating").innerHTML = `<div class="card">
-    <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Risk rating</h2></div></div>
+    <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Overall AI Use Case Risk Rating</h2></div></div>
     <div class="assessing">
       <div class="atext">Assessing your risk...</div>
       <div class="apct" id="apct">0%</div>
@@ -1092,13 +1188,295 @@ $("#output").addEventListener("click", e=>{
   chk.closest(".citem").setAttribute("data-checked", on?"false":"true");
 });
 
+/* ---------- adoption gate ----------
+   Routing only. Never sent to /api/assess, which picks the six KEYS. */
+state.adoption=[];
+document.getElementById("adoption-pills").addEventListener("click", e=>{
+  const p=e.target.closest(".pill"); if(!p) return;
+  const val=p.dataset.adopt;
+  if(val==="None"){
+    state.adoption = p.getAttribute("aria-pressed")==="true" ? [] : ["None"];
+  }else{
+    const on = p.getAttribute("aria-pressed")==="true";
+    state.adoption = on
+      ? state.adoption.filter(v=>v!==val)
+      : [...state.adoption.filter(v=>v!=="None"), val];
+  }
+  document.querySelectorAll("#adoption-pills .pill")
+    .forEach(x=>x.setAttribute("aria-pressed", String(state.adoption.includes(x.dataset.adopt))));
+  $("#adopt-hint").textContent = state.adoption.includes("Agentic AI")
+    ? "Agentic AI adds a short second survey after your results."
+    : "Select all that apply. This routes you to the right follow-up and does not affect your risk score.";
+});
+
+/* ---------- AI Adoption Maturity Matrix ---------- */
+const TRACKS=[
+  { id:"Agentic AI", icon:"git-network-outline", live:true,
+    blurb:"Assessed against the IMDA Model AI Governance Framework for Agentic AI." },
+  { id:"RPA", icon:"repeat-outline", live:false,
+    blurb:"Robotic process automation track. Work in progress." },
+  { id:"Gen AI", icon:"sparkles-outline", live:false,
+    blurb:"Generative AI track. Work in progress." },
+];
+
+function renderMaturity(){
+  const picked=(state.adoption||[]).filter(v=>v!=="None");
+  const rows=TRACKS.map(t=>{
+    const on=picked.includes(t.id);
+    return `<div class="track ${on?"on":""}">
+      <span class="tico"><ion-icon name="${t.icon}"></ion-icon></span>
+      <div class="tbody">
+        <h3>${escapeHtml(t.id)}${on?' <span class="ccount">You selected this</span>':""}</h3>
+        <p>${escapeHtml(t.blurb)}</p>
+      </div>
+      <div class="tact">${t.live
+        ? `<button type="button" class="btn btn-sm" data-track="${escapeHtml(t.id)}">Start assessment</button>`
+        : `<span class="ccount">Work in progress</span>`}</div>
+    </div>`;
+  }).join("");
+
+  $("#maturity").innerHTML=`
+    <div class="card">
+      <div class="stitle" style="margin-bottom:var(--s4)">
+        <span class="n"><ion-icon name="layers-outline"></ion-icon></span>
+        <div><h2>AI Adoption Maturity Matrix</h2>
+        <div class="sub">A deeper assessment for each technology you adopt</div></div>
+      </div>
+      ${rows}
+    </div>`;
+}
+
+$("#maturity").addEventListener("click", e=>{
+  const b=e.target.closest("[data-track]");
+  if(b && b.dataset.track==="Agentic AI") renderAgenticIntro();
+});
+
+/* ---------- Agentic AI Risk Assessment Matrix ----------
+   Source: IMDA MGF for Agentic AI. Ten factors from pp.15-17 before
+   deployment, Dayos action tiering from p.18 after. Scores in the browser,
+   so this section survives an API outage. */
+state.agenticFactors={};
+state.agenticActions=[];
+
+function agenticCard(inner){
+  return `<div class="card">
+    <div class="stitle" style="margin-bottom:var(--s4)">
+      <span class="n"><ion-icon name="git-network-outline"></ion-icon></span>
+      <div><h2>Agentic AI Risk Assessment Matrix</h2>
+      <div class="sub">IMDA Model AI Governance Framework for Agentic AI</div></div>
+    </div>
+    ${inner}
+  </div>`;
+}
+
+function renderAgenticIntro(){
+  /* Start over means start over. Both branches reset. */
+  state.agenticFactors={}; state.agenticActions=[];
+  $("#agentic").innerHTML=agenticCard(`
+    <p style="color:var(--ink-2);margin:0 0 var(--s4);line-height:1.6">These two paths use different parts of the framework. Before deployment we assess whether the use case is suitable at all. After deployment we tier each action and check how much autonomy it has actually been given.</p>
+    <label style="display:block;margin-bottom:var(--s3);font-weight:600">Have you already deployed any AI agents?</label>
+    <div class="pills" role="radiogroup" aria-label="Deployment status">
+      <button type="button" class="pill" role="radio" aria-checked="false" data-deployed="no">No, still assessing<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+      <button type="button" class="pill" role="radio" aria-checked="false" data-deployed="yes">Yes, agents are live<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+    </div>`);
+  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+$("#agentic").addEventListener("click", async e=>{
+  const dep=e.target.closest("[data-deployed]");
+  if(dep) return dep.dataset.deployed==="no" ? renderPredeployForm() : renderDeployedForm();
+  /* "Edit the list" returns to the form with the rows intact. It is a
+     separate id from "Add action type" because the result view has no table
+     to append to, which would make the click do nothing. */
+  if(e.target.closest("#edit-actions")) return renderDeployedForm();
+
+  const f=e.target.closest("[data-factor]");
+  if(f){
+    const block=f.closest("[data-factor-block]");
+    block.querySelectorAll(".pill").forEach(x=>x.setAttribute("aria-checked","false"));
+    f.setAttribute("aria-checked","true");
+    state.agenticFactors[f.dataset.factor]=Number(f.dataset.score);
+    updatePredeployReady();
+    return;
+  }
+  if(e.target.closest("#agentic-run")) return renderPredeployResult(scorePredeployment(state.agenticFactors));
+  if(e.target.closest("#agentic-restart")) return renderAgenticIntro();
+
+  if(e.target.closest("#add-action")){
+    state.agenticActions.push({label:"",severity:1,reversibility:1,oversight:1,granted:3});
+    return redrawActions();
+  }
+  const del=e.target.closest("[data-del]");
+  if(del){
+    state.agenticActions.splice(Number(del.dataset.del),1);
+    if(!state.agenticActions.length) state.agenticActions.push({label:"",severity:1,reversibility:1,oversight:1,granted:3});
+    return redrawActions();
+  }
+  if(e.target.closest("#score-actions")){
+    const named=state.agenticActions.filter(r=>(r.label||"").trim());
+    if(!named.length){ toast("Name at least one action type."); return; }
+    return renderDeployedResult(governanceGap(named));
+  }
+});
+
+$("#agentic").addEventListener("input", e=>{
+  const el=e.target.closest("[data-row]"); if(!el) return;
+  const row=state.agenticActions[Number(el.dataset.row)];
+  row[el.dataset.key] = el.dataset.key==="label" ? el.value : Number(el.value);
+});
+
+/* --- pre-deployment: the ten factors --- */
+const LIKELIHOOD_ONLY = LIKELIHOOD_FACTORS.filter(f=>f.id!==SHARED_FACTOR_ID);
+const PREDEPLOY_TOTAL = IMPACT_FACTORS.length + LIKELIHOOD_ONLY.length;
+
+function factorBlock(f){
+  const opts=[1,2,3,4,5].map(n=>
+    `<button type="button" class="pill" role="radio" aria-checked="false" data-factor="${escapeHtml(f.id)}" data-score="${n}">${n}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`
+  ).join("");
+  return `<div class="fq" data-factor-block="${escapeHtml(f.id)}">
+    <label>${escapeHtml(f.label)}${f.id===SHARED_FACTOR_ID?'<span class="badge-both">Counts in both axes</span>':""}</label>
+    <p class="fdesc">${escapeHtml(f.description)}</p>
+    <div class="scale" role="radiogroup" aria-label="${escapeHtml(f.label)}">${opts}</div>
+    <div class="anchors"><b>1</b> ${escapeHtml(f.anchors[1])}<br><b>3</b> ${escapeHtml(f.anchors[3])}<br><b>5</b> ${escapeHtml(f.anchors[5])}</div>
+  </div>`;
+}
+
+function updatePredeployReady(){
+  const done=Object.keys(state.agenticFactors).length;
+  const btn=$("#agentic-run"); if(!btn) return;
+  btn.disabled = done<PREDEPLOY_TOTAL;
+  const left=PREDEPLOY_TOTAL-done;
+  const hint=$("#agentic-hint");
+  hint.textContent = left>0 ? `${left} question${left>1?"s":""} left.` : "Ready to score.";
+  hint.style.color = left>0 ? "var(--ink-3)" : "var(--success)";
+}
+
+function renderPredeployForm(){
+  $("#agentic").innerHTML=agenticCard(`
+    <p style="color:var(--ink-2);margin:0 0 var(--s4);line-height:1.6">Rate each factor from 1 to 5. Access to external systems appears in both IMDA tables, so it is asked once and counted in both.</p>
+    <h3 style="margin:0 0 var(--s2)">Factors affecting impact</h3>
+    ${IMPACT_FACTORS.map(factorBlock).join("")}
+    <h3 style="margin:var(--s6) 0 var(--s2)">Factors affecting likelihood</h3>
+    ${LIKELIHOOD_ONLY.map(factorBlock).join("")}
+    <div class="actions">
+      <button type="button" class="btn btn-accent" id="agentic-run" disabled>Score this agent</button>
+      <button type="button" class="btn btn-ghost" id="agentic-restart">Back</button>
+      <span class="formhint" id="agentic-hint"></span>
+    </div>`);
+  updatePredeployReady();
+  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+const AGENTIC_PROFILE={1:"Low severity, fully reversible",2:"Moderate severity, partially reversible",3:"High severity, limited reversibility"};
+
+function renderPredeployResult(s){
+  $("#agentic").innerHTML=agenticCard(`
+    <div class="gauge-block">${gaugeSVG(s.needle,{bands:GAUGE_BANDS_3,lo:"Tier 1",hi:"Tier 3",aria:"Agentic risk gauge"})}</div>
+    <div class="gauge-legend">
+      <span class="big" style="color:${s.tier===1?"var(--t1)":s.tier===2?"var(--t2)":"var(--t4)"}">Tier ${s.tier}</span>
+      <span class="score">${escapeHtml(AGENTIC_PROFILE[s.tier])}</span>
+    </div>
+    <div class="tbl-scroll" style="margin-top:var(--s4)">
+      <table class="risk">
+        <thead><tr><th>Axis</th><th>Rating</th></tr></thead>
+        <tbody>
+          <tr><td><b>Impact</b></td><td>${s.impact} of 5</td></tr>
+          <tr><td><b>Likelihood</b></td><td>${s.likelihood} of 5</td></tr>
+          <tr><td><b>Likelihood times impact</b></td><td>${s.raw} of 25</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 style="margin:var(--s6) 0 var(--s2)">Autonomy ceiling</h3>
+    <p style="color:var(--ink-2);margin:0;line-height:1.6">${escapeHtml(AUTONOMY_CEILING_COPY[s.tier])}</p>
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
+    </div>
+    <p class="disclaim">Scored locally from the factor tables in the IMDA Model AI Governance Framework for Agentic AI, pages 15 to 17. Decision support, not a substitute for a formal risk assessment.</p>`);
+  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* --- deployed: Dayos action tiering --- */
+const GRANTED_LABEL={3:"Acts autonomously",2:"Human signs off",1:"Agent does not act"};
+
+function actionRow(i,row){
+  const sel=(name,val)=>`<select data-row="${i}" data-key="${name}" aria-label="${name}">`+
+    [1,2,3,4,5].map(n=>`<option value="${n}"${Number(val)===n?" selected":""}>${n}</option>`).join("")+"</select>";
+  return `<tr>
+    <td><input type="text" data-row="${i}" data-key="label" value="${escapeHtml(row.label||"")}" placeholder="e.g. Password reset" aria-label="Action type"></td>
+    <td>${sel("severity",row.severity)}</td>
+    <td>${sel("reversibility",row.reversibility)}</td>
+    <td>${sel("oversight",row.oversight)}</td>
+    <td><select data-row="${i}" data-key="granted" aria-label="Autonomy granted">
+      ${[3,2,1].map(n=>`<option value="${n}"${Number(row.granted)===n?" selected":""}>${GRANTED_LABEL[n]}</option>`).join("")}
+    </select></td>
+    <td><button type="button" class="btn btn-ghost btn-sm" data-del="${i}" aria-label="Remove ${escapeHtml(row.label||"row")}"><ion-icon name="close-outline"></ion-icon></button></td>
+  </tr>`;
+}
+
+function redrawActions(){
+  const body=$("#action-rows"); if(!body) return;
+  body.innerHTML=state.agenticActions.map((r,i)=>actionRow(i,r)).join("");
+}
+
+function renderDeployedForm(){
+  if(!state.agenticActions.length) state.agenticActions=[{label:"",severity:1,reversibility:1,oversight:1,granted:3}];
+  $("#agentic").innerHTML=agenticCard(`
+    <p style="color:var(--ink-2);margin:0 0 var(--s4);line-height:1.6">List the action types your agents perform. Each is scored the way Dayos scored its IT ticket types, then compared against the autonomy you have actually granted it. Rate 1 to 5, where 5 is the worst case.</p>
+    <div class="tbl-scroll">
+      <table class="risk">
+        <thead><tr>
+          <th style="min-width:190px">Action type</th><th>Severity</th><th>Irreversibility</th>
+          <th>Oversight difficulty</th><th style="min-width:150px">Autonomy granted</th><th></th>
+        </tr></thead>
+        <tbody id="action-rows">${state.agenticActions.map((r,i)=>actionRow(i,r)).join("")}</tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-accent" id="score-actions">Check governance gap</button>
+      <button type="button" class="btn" id="add-action"><ion-icon name="add-outline"></ion-icon>Add action type</button>
+      <button type="button" class="btn btn-ghost" id="agentic-restart">Back</button>
+    </div>`);
+  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function renderDeployedResult(res){
+  const total=res.rows.length;
+  const pct=t=>Math.round((res.distribution[t]/total)*100);
+  const gaps=res.gaps.map(r=>`<li><b>${escapeHtml(r.label)}</b> is Tier ${r.tier} but runs as "${escapeHtml(GRANTED_LABEL[r.granted])}". ${escapeHtml(AUTONOMY_CEILING_COPY[r.tier])}</li>`).join("");
+
+  $("#agentic").innerHTML=agenticCard(`
+    <div class="gauge-block">${gaugeSVG(res.needle,{bands:GAUGE_BANDS_3,lo:"Governed",hi:"Over-permitted",aria:"Governance gap gauge"})}</div>
+    <div class="gauge-legend">
+      <span class="big" style="color:${res.needle===0?"var(--t1)":res.needle>=50?"var(--t4)":"var(--t2)"}">${res.gaps.length} of ${total}</span>
+      <span class="score">action ${total===1?"type":"types"} above the permitted autonomy ceiling</span>
+    </div>
+    <div class="tbl-scroll" style="margin-top:var(--s4)">
+      <table class="risk">
+        <thead><tr><th>Tier</th><th>Actions</th><th>Share</th></tr></thead>
+        <tbody>${[1,2,3].map(t=>`<tr><td><b>Tier ${t}</b></td><td>${res.distribution[t]}</td><td>${pct(t)}%</td></tr>`).join("")}</tbody>
+      </table>
+    </div>
+    ${res.gaps.length
+      ? `<h3 style="margin:var(--s6) 0 var(--s2)">What to correct</h3><ul class="gap-list">${gaps}</ul>`
+      : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every action type sits at or below its permitted ceiling. Re-check when you add new agent capabilities.</div></div>`}
+    <div class="actions">
+      <button type="button" class="btn" id="edit-actions">Edit the list</button>
+      <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
+    </div>
+    <p class="disclaim">Action tiering adapted from the Dayos case study in the IMDA Model AI Governance Framework for Agentic AI, page 18. Autonomy granted is an addition by SafeAI.</p>`);
+  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
 /* ---------- submit ---------- */
 const form=$("#q");
 form.addEventListener("submit", async e=>{
   e.preventDefault();
+  /* Only the six scored fields are required. The adoption gate carries the
+     .field class for styling but has no data-key and is optional. */
   let missing=0, firstMiss=null;
-  document.querySelectorAll(".field").forEach(field=>{
-    if(!state[field.dataset.key]){ missing++; field.classList.add("miss"); if(!firstMiss) firstMiss=field; }
+  KEYS.forEach(k=>{
+    const field=document.querySelector(`.field[data-key="${k}"]`); if(!field) return;
+    if(!state[k]){ missing++; field.classList.add("miss"); if(!firstMiss) firstMiss=field; }
     else field.classList.remove("miss");
   });
   if(missing){ showCountdown(); if(firstMiss) firstMiss.scrollIntoView({behavior:"smooth",block:"center"}); return; }
@@ -1111,7 +1489,7 @@ form.addEventListener("submit", async e=>{
     const data = await runAssessment(state);
     stopAssessing();                                  // snap to 100%
     await new Promise(r=>setTimeout(r,420));           // let 100% land, then fade in the needle
-    renderRating(data); renderOutput(state, data);
+    renderRating(data); renderOutput(state, data); renderMaturity();
     hasRun=true; assessedComplete=true; updateStepper(); setLabel("Reassess");
     toast("Assessment complete");
   }catch(err){
@@ -1129,7 +1507,9 @@ $("#reset").addEventListener("click",()=>{
   document.querySelectorAll(".field").forEach(f=>f.classList.remove("miss"));
   FIELD_CONTROLS.forEach(c=>c.reset());
   countdownActive=false;
-  $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#formhint").textContent=""; $("#formhint").style.color="var(--ink-3)"; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
+  state.agenticFactors={}; state.agenticActions=[];
+  $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML=""; $("#agentic").innerHTML="";
+  $("#formhint").textContent=""; $("#formhint").style.color="var(--ink-3)"; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
 });
 </script>
 </body>
