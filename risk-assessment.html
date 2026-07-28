@@ -339,6 +339,33 @@
     .track .tact{ flex:none; align-self:center; }
     .track.on .tico{ background:var(--accent); color:var(--accent-ink); }
 
+    /* ---------- technology comparison ----------
+       Sits inside the maturity card, so it is a table on the card surface, not
+       a second card. The selected column is marked by weight and the accent,
+       never by giving each column its own colour. */
+    .cmp-h{ margin:var(--s6) 0 var(--s1); font-size:calc(var(--fs-base)*1.05); }
+    .cmp-lead{ color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
+    table.risk.cmp{ min-width:760px; }
+    table.risk.cmp td, table.risk.cmp th{ white-space:normal; vertical-align:top; }
+    table.risk.cmp thead th{ font-size:calc(var(--fs-base)*.9); font-weight:600; color:var(--ink); }
+    table.risk.cmp thead th.on{ color:var(--accent); }
+    table.risk.cmp tbody th{ text-align:left; padding:12px 14px; border-bottom:1px solid var(--line);
+      font-weight:600; color:var(--ink); background:var(--surface-2); white-space:nowrap; }
+    table.risk.cmp tbody tr:last-child th{ border-bottom:0; }
+    table.risk.cmp td{ color:var(--ink-2); line-height:1.55; }
+    .cmp-cards{ display:none; }
+    @media (max-width:720px){
+      .cmp-table{ display:none; }
+      .cmp-cards{ display:grid; gap:var(--s5); }
+      .cmp-block{ border-top:1px solid var(--line); padding-top:var(--s4); }
+      .cmp-block:first-child{ border-top:0; padding-top:0; }
+      .cmp-block h4{ font-size:calc(var(--fs-base)*1.05); margin:0 0 var(--s3); }
+      .cmp-block h4.on{ color:var(--accent); }
+      .cmp-line + .cmp-line{ margin-top:var(--s3); }
+      .cmp-line .ck{ display:block; color:var(--ink-3); font-size:calc(var(--fs-base)*.82); }
+      .cmp-line .cv{ display:block; color:var(--ink-2); line-height:1.55; }
+    }
+
     /* ---------- agentic matrix ---------- */
     .fq{ padding:var(--s4) 0; border-top:1px solid var(--line); }
     .fq:first-of-type{ border-top:0; }
@@ -1274,6 +1301,65 @@ const TRACKS=[
     blurb:"Generative AI track. Work in progress." },
 ];
 
+/* ---------- how the three technologies differ ----------
+   Sits under the tracks so someone who is unsure which one they run can place
+   themselves before starting a track assessment. Columns follow the track
+   order, and the column the user selected is marked, not recoloured. */
+const TECH_COLS = ["RPA","Gen AI","Agentic AI"];
+const TECH_ROWS = [
+  { k:"Characteristics", v:[
+    "A rule-based software bot. It repeats the same deterministic steps every run.",
+    "Creates new text, images, code, audio or video from a natural language prompt. The output is not deterministic.",
+    "Performs tasks on its own to reach a goal you set, and you direct it in natural language.",
+  ]},
+  { k:"Capabilities", v:[
+    "Task and workflow automation through scripting.",
+    "Generates content and ideas, summarises, searches and translates using foundation models.",
+    "Complex workflow automation that includes making decisions, using tools and generating content.",
+  ]},
+  { k:"Use cases", v:[
+    "Invoice processing, data entry, web scraping.",
+    "Intelligent search, transcription and summaries, first drafts.",
+    "Processing claims and handling exceptions, goal-driven research.",
+  ]},
+  { k:"Triggers", v:[
+    "A person, an event, a schedule, or another agent.",
+    "Prompted by a person or by a machine.",
+    "Prompted by a person or a machine, then runs with little intervention until the goal is met.",
+  ]},
+  { k:"How it adapts", v:[
+    "Static. It needs reprogramming to handle new conditions.",
+    "Tuned by changing model parameters or the prompts.",
+    "Can learn and adapt as it runs, through feedback loops.",
+  ]},
+];
+
+function techCompareHTML(picked){
+  const head = TECH_COLS.map(c=>
+    `<th scope="col"${picked.includes(c)?' class="on"':""}>${escapeHtml(c)}</th>`).join("");
+  const body = TECH_ROWS.map(r=>
+    `<tr><th scope="row">${escapeHtml(r.k)}</th>${r.v.map(cell=>`<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
+  ).join("");
+  /* A three-column table is unreadable on a phone even inside a scroller, so
+     the same data stacks one block per technology below 720px. */
+  const blocks = TECH_COLS.map((c,i)=>`
+    <div class="cmp-block">
+      <h4${picked.includes(c)?' class="on"':""}>${escapeHtml(c)}${picked.includes(c)?" · you selected this":""}</h4>
+      ${TECH_ROWS.map(r=>`<div class="cmp-line"><span class="ck">${escapeHtml(r.k)}</span><span class="cv">${escapeHtml(r.v[i])}</span></div>`).join("")}
+    </div>`).join("");
+
+  return `
+    <h3 class="cmp-h">Key differences between RPA, Gen AI and Agentic AI</h3>
+    <p class="cmp-lead">Most organisations run more than one of these. Risk changes with how much the software decides on its own.</p>
+    <div class="tbl-scroll cmp-table">
+      <table class="risk cmp">
+        <thead><tr><th scope="col"></th>${head}</tr></thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
+    <div class="cmp-cards">${blocks}</div>`;
+}
+
 function renderMaturity(){
   const picked=(state.adoption||[]).filter(v=>v!=="None");
   const rows=TRACKS.map(t=>{
@@ -1298,6 +1384,7 @@ function renderMaturity(){
         <div class="sub">A deeper assessment for each technology you adopt</div></div>
       </div>
       ${rows}
+      ${techCompareHTML(picked)}
     </div>`;
 }
 
