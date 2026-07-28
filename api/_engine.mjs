@@ -127,7 +127,7 @@ Scoring mechanism (prescribed, follow it exactly):
    - Data sensitivity: Low = public or synthetic data; Medium = internal or commercial data; High = PII, PHI, financial records, or confidential IP.
    - Use-case impact: Low = drafting or summarising with human output review; Medium = customer-facing answers or operational decisions with oversight; High = consequential decisions about people, money, safety, or eligibility.
    - Autonomy: Low = human writes or approves every output; Medium = human-in-the-loop on a sample or on exceptions; High = automated actions or decisions without per-case review.
-   - Regulated industry: High = Healthcare, Finance, Public Sector; Medium = other regulated or licence-based sectors; Low = otherwise.
+   - Regulated industry: rate from the SSIC 2025 section given in the profile. High = L (Financial and Insurance), R (Health and Social Services), P (Public Administration and Defence). Medium = D (Electricity and Gas), E (Water and Waste), H (Transportation and Storage), Q (Education), and K (Telecommunications and Computing) where telecoms licensing applies. Low = otherwise. If the industry is free text rather than a section, judge it against the same idea.
    - Deployment exposure: Low = on-prem or private cloud, internal users only; Medium = managed cloud or internal tools with vendor access; High = third-party SaaS, public endpoints, or edge devices.
    - Role: rate how much the stated role amplifies blast radius (a decision-maker deploying org-wide is High; an individual contributor experimenting is Low).
 2. The risk index is arithmetic, not judgement: riskIndex = sum over drivers of weight x points, where points are Low 0, Medium 0.5, High 1, and weights are Data sensitivity 25, Use-case impact 25, Autonomy 20, Regulated industry 15, Deployment exposure 10, Role 5.
@@ -151,12 +151,22 @@ Write in plain, factual language. No em dashes anywhere. Return only via the too
 // Whitelist the six known fields and cap each to a sane length, so a caller
 // cannot inflate the prompt (and the Anthropic bill) with oversized input or
 // smuggle in extra keys. Unknown keys are dropped; values are coerced to string.
+//
+// Industry gets a higher cap because SSIC 2025 section K's official title is
+// 121 characters. At the old flat 120 it was silently truncated mid-word, which
+// produces a subtly wrong assessment rather than a visible error. Industry
+// values come from a fixed list, so a higher cap is not an abuse vector.
 const PROFILE_FIELDS = ['industry', 'role', 'usecase', 'autonomy', 'data', 'deploy'];
-function sanitizeProfile(profile) {
+const DEFAULT_CAP = 120;
+export const FIELD_CAPS = { industry: 200 };
+
+export function sanitizeProfile(profile) {
   const out = {};
   if (profile && typeof profile === 'object') {
     for (const k of PROFILE_FIELDS) {
-      if (profile[k] != null) out[k] = String(profile[k]).slice(0, 120);
+      if (profile[k] != null) {
+        out[k] = String(profile[k]).slice(0, FIELD_CAPS[k] || DEFAULT_CAP);
+      }
     }
   }
   return out;
