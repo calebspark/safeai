@@ -250,6 +250,55 @@
     .toast.show{ opacity:1; transform:translate(-50%,0); }
     .toast ion-icon{ font-size:16px; color:var(--success); }
 
+    /* ---------- searchable combo (industry) ---------- */
+    /* .field uses CSS order: label 0, hint 1, controls 2. Keep that rhythm. */
+    .field .combo{ order:2; position:relative; }
+    .field .combo-note{ order:3; margin-top:var(--s2); font-size:calc(var(--fs-base)*.86); line-height:1.5; color:var(--ink-2); }
+    .combo-note.bad{ color:var(--danger); }
+    .combo-note.ok{ color:var(--ink-2); }
+    .combo-note ion-icon{ font-size:14px; vertical-align:-2px; margin-right:5px; }
+    .combo-note.bad ion-icon{ color:var(--danger); }
+    .combo-note.ok ion-icon{ color:var(--success); }
+    .combo-note button{ background:none; border:0; padding:0; font:inherit; font-weight:600;
+      color:var(--accent); cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+    .combo-note button:hover{ color:var(--accent-2); }
+    .combo-note button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+
+    .combo-input{ width:100%; font:inherit; font-weight:500; color:var(--ink); background:var(--surface-2);
+      border:1px solid var(--line); border-radius:var(--r-sm); padding:11px 14px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05); transition:border-color .15s, background .15s; }
+    .combo-input::placeholder{ color:var(--ink-3); }
+    .combo-input:hover{ background:var(--surface-3); }
+    .combo-input:focus-visible,.combo-input:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+    .combo-input[data-state="ok"]{ border-color:var(--success-line); }
+    .combo-input[data-state="bad"]{ border-color:var(--danger-line); }
+    .field.miss .combo-input{ border-color:var(--warn-line); }
+
+    /* Popover sits above a card, so it steps lighter and takes the deeper shadow. */
+    .combo-list{ position:absolute; z-index:40; left:0; right:0; top:calc(100% + 6px);
+      margin:0; padding:var(--s1); list-style:none; max-height:290px; overflow-y:auto;
+      background:var(--surface-2); border:1px solid var(--line-2); border-radius:var(--r-md);
+      box-shadow:var(--shadow-pop); }
+    .combo-opt{ padding:9px 11px; border-radius:var(--r-sm); cursor:pointer; line-height:1.45;
+      display:flex; gap:10px; align-items:baseline; color:var(--ink-2); }
+    .combo-opt:hover,.combo-opt[aria-selected="true"]{ background:var(--surface-3); color:var(--ink); }
+    .combo-opt .code{ flex:none; width:1.3em; color:var(--ink-3); font-variant-numeric:tabular-nums; font-weight:600; }
+    .combo-opt.free{ color:var(--accent); font-weight:600; }
+    .combo-empty{ padding:9px 11px; color:var(--ink-3); }
+
+    /* ---------- two-level group picker (role, use case) ---------- */
+    .field .picker{ order:2; }
+    .picker-crumb{ margin-bottom:var(--s2); }
+    .picker-back{ font:inherit; font-size:calc(var(--fs-base)*.86); font-weight:600; cursor:pointer;
+      color:var(--ink-2); background:var(--surface-2); border:1px solid var(--line);
+      border-radius:var(--r-pill); padding:6px 12px; display:inline-flex; align-items:center; gap:5px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.05); transition:background .15s, color .15s; }
+    .picker-back:hover{ background:var(--surface-3); color:var(--ink); }
+    .picker-back:active{ transform:translateY(1px); }
+    .picker-back:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .pill.group{ font-weight:600; color:var(--ink); }
+    .pill.other{ color:var(--accent); }
+
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
   </style>
 </head>
@@ -301,17 +350,15 @@
         <form id="q" novalidate>
           <div class="fgrid">
             <div class="field" data-key="industry">
-              <label>Industry</label>
-              <div class="pills" role="radiogroup" aria-label="Industry">
-                <button type="button" class="pill" data-val="1|Education">Education<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="1|Retail">Retail<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="1|Manufacturing">Manufacturing<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Tech/Telco">Tech / Telco<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3|Finance">Finance<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3|Healthcare">Healthcare<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3|Public Sector/Gov">Public Sector / Gov<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              <label for="industry-input">Industry</label>
+              <div class="hint">Singapore Standard Industrial Classification 2025. Sets the regulatory baseline. Financial, health and public sector carry stricter compliance.</div>
+              <div class="combo" data-combo="industry">
+                <input id="industry-input" class="combo-input" type="text" autocomplete="off" spellcheck="false"
+                       role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="industry-list"
+                       placeholder="Search or type your industry">
+                <ul id="industry-list" class="combo-list" role="listbox" aria-label="Industry" hidden></ul>
               </div>
-              <div class="hint">Sets the regulatory baseline. Healthcare and Finance carry stricter compliance.</div>
+              <div class="combo-note" data-note="industry" hidden></div>
             </div>
 
             <div class="field" data-key="role">
@@ -401,18 +448,146 @@
 
   <div class="toast" id="toast"><ion-icon name="checkmark-circle"></ion-icon><span></span></div>
 
-<script>
+<script type="module">
 /* ============================================================
    SafeAI risk engine — the assessment is performed by Claude
-   (POST /api/assess). This file collects the pill inputs,
+   (POST /api/assess). This file collects the profile inputs,
    renders the model's structured result, and handles loading
-   and error states. No local scoring.
+   and error states. No local scoring for the main assessment.
+
+   Option data and the agentic scoring live in ./assets/ so they
+   can be unit tested headlessly with `node --test`.
    ============================================================ */
+import { SSIC_SECTIONS, SSIC_SYNONYMS, industryValue } from './assets/ssic.mjs';
+import { fuzzyMatch, CONFIDENT } from './assets/match.mjs';
+
 const $ = s => document.querySelector(s);
 const KEYS = ["industry","role","usecase","autonomy","data","deploy"];
 const state = { industry:"", role:"", usecase:"", autonomy:"", data:"", deploy:"" };
 
 function label(v){ if(!v) return ""; const p=String(v).split("|"); return p.length>1?p.slice(1).join("|"):p[0]; }
+
+const INDUSTRY_ENTRIES = SSIC_SECTIONS.map(s=>({ value:industryValue(s), label:s.title, code:s.code }));
+
+/* ---------- searchable combo field ----------
+   Resolution order for typed text: exact option, then fuzzy match against the
+   option list plus a synonym table (free, instant), then POST /api/classify as
+   a fallback. A classify outage never blocks the assessment. */
+function comboField(key, entries, { noun, synonyms={}, showCode=false }){
+  const root  = document.querySelector(`.combo[data-combo="${key}"]`);
+  const input = root.querySelector(".combo-input");
+  const list  = root.querySelector(".combo-list");
+  const note  = document.querySelector(`.combo-note[data-note="${key}"]`);
+  const field = root.closest(".field");
+  let open=false, busy=false;
+
+  const close = ()=>{ open=false; list.hidden=true; input.setAttribute("aria-expanded","false"); };
+  function setNote(html, kind){
+    if(!html){ note.hidden=true; note.innerHTML=""; input.removeAttribute("data-state"); return; }
+    note.hidden=false;
+    note.className = "combo-note " + (kind||"");
+    const ico = kind==="bad" ? "alert-circle-outline" : "checkmark-circle-outline";
+    note.innerHTML = `<ion-icon name="${ico}"></ion-icon>${html}`;
+    input.setAttribute("data-state", kind==="bad" ? "bad" : "ok");
+  }
+
+  function commit(value, msg){
+    state[key]=value;
+    input.value=value;
+    field.classList.remove("miss");
+    close();
+    setNote(msg||"", msg?"ok":null);
+    onFieldChanged();
+  }
+
+  /* Rank so an exact code beats a prefix beats a substring. Without this,
+     typing "l" buries section L under every label containing the letter. */
+  function rank(e, norm){
+    const lab=e.label.toLowerCase();
+    if((e.code||"").toLowerCase()===norm) return 0;
+    if(lab.startsWith(norm)) return 1;
+    if(lab.includes(norm)) return 2;
+    return -1;
+  }
+
+  function render(q){
+    const norm=q.trim().toLowerCase();
+    const matches = norm
+      ? entries.map(e=>({e,r:rank(e,norm)})).filter(x=>x.r>=0)
+          .sort((a,b)=>a.r-b.r).map(x=>x.e)
+      : entries;
+    const rows = matches.map(e=>
+      `<li class="combo-opt" role="option" aria-selected="false" data-value="${escapeHtml(e.value)}">${showCode?`<span class="code">${escapeHtml(e.code)}</span>`:""}<span>${escapeHtml(e.label)}</span></li>`
+    ).join("");
+    const free = (norm && !matches.length)
+      ? `<li class="combo-opt free" role="option" aria-selected="false" data-free="1">Not listed. Use "${escapeHtml(q.trim())}"</li>`
+      : "";
+    list.innerHTML = rows + free || `<li class="combo-empty">No match. Keep typing to describe it.</li>`;
+    open=true; list.hidden=false; input.setAttribute("aria-expanded","true");
+  }
+
+  input.addEventListener("focus", ()=>render(input.value));
+  input.addEventListener("input", ()=>{ state[key]=""; setNote(""); render(input.value); });
+  input.addEventListener("keydown", e=>{ if(e.key==="Escape") close(); if(e.key==="Enter"){ e.preventDefault(); close(); resolveFree(); } });
+  input.addEventListener("blur", ()=>{ setTimeout(()=>{ if(open) close(); resolveFree(); }, 150); });
+  list.addEventListener("mousedown", e=>{
+    const opt=e.target.closest(".combo-opt"); if(!opt) return;
+    e.preventDefault();
+    if(opt.dataset.free) resolveFree(); else commit(opt.dataset.value);
+  });
+
+  async function resolveFree(){
+    const raw=input.value.trim();
+    if(!raw || state[key] || busy) return;
+
+    const exact = entries.find(e=>e.value===raw || e.label.toLowerCase()===raw.toLowerCase());
+    if(exact) return commit(exact.value);
+
+    /* Synonyms are keyed on section code, entries carry the full value, so
+       accept a hit on either. */
+    const m = fuzzyMatch(raw, entries.map(e=>({value:e.value,label:e.label})), synonyms);
+    if(m && m.confidence>=CONFIDENT){
+      const hit = entries.find(e=>e.value===m.value || e.code===m.value);
+      if(hit) return commit(hit.value, `Matched to <b>${escapeHtml(hit.label)}</b>.`);
+    }
+
+    busy=true;
+    setNote("Checking that entry...", "ok");
+    let res=null;
+    try{
+      const r=await fetch("/api/classify",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ field:key, text:raw, options:entries.map(e=>e.value) }),
+      });
+      if(r.ok) res=await r.json();
+    }catch{ /* offline or blocked, fall through */ }
+    busy=false;
+
+    if(!res){
+      state[key]=raw; field.classList.remove("miss");
+      setNote("Could not verify that entry, so we will use it as typed.", "ok");
+      onFieldChanged(); return;
+    }
+    if(res.valid){
+      const hit = entries.find(e=>e.value===res.mappedTo);
+      if(hit) commit(hit.value, `Read as <b>${escapeHtml(hit.label)}</b>.`);
+      else { state[key]=raw; field.classList.remove("miss"); setNote("Using your description.", "ok"); onFieldChanged(); }
+      return;
+    }
+    state[key]="";
+    const suggestion = entries.find(e=>e.value===res.mappedTo);
+    setNote(
+      escapeHtml(res.reason || `That does not look like an ${noun}.`) +
+      (suggestion?` <button type="button" data-suggest="${escapeHtml(suggestion.value)}">Use ${escapeHtml(suggestion.label)}</button>`:""),
+      "bad"
+    );
+    const btn=note.querySelector("[data-suggest]");
+    if(btn) btn.addEventListener("click", ()=>commit(btn.dataset.suggest));
+    onFieldChanged();
+  }
+
+  return { commit, reset(){ state[key]=""; input.value=""; setNote(""); close(); } };
+}
 
 const TIERS = {
   1:{n:1,name:"Low risk",     color:"var(--t1)",soft:"var(--t1-soft)",line:"var(--t1-line)",banner:"info"},
@@ -716,8 +891,20 @@ async function runAssessment(vals){
 
 /* ---------- pill selection ---------- */
 let hasRun=false;
-document.querySelectorAll(".field").forEach(field=>{
+
+/* Every field-change path funnels through here so the stepper and the
+   reassess prompt stay consistent across pills, combos and pickers. */
+function onFieldChanged(){
+  assessedComplete=false;
+  updateStepper();
+  if(hasRun){ setLabel("Reassess"); $("#formhint").textContent="Inputs changed. Reassess to update."; $("#formhint").style.color="var(--ink-3)"; }
+}
+
+/* Scoped to the six scored fields. The adoption gate has its own multi-select
+   handler and must not be wired as a single-choice radiogroup. */
+document.querySelectorAll(".field[data-key]").forEach(field=>{
   const key=field.dataset.key;
+  if(!KEYS.includes(key)) return;
   field.querySelectorAll(".pill").forEach(pill=>{
     pill.setAttribute("role","radio"); pill.setAttribute("aria-checked","false");
     pill.addEventListener("click",()=>{
@@ -725,12 +912,15 @@ document.querySelectorAll(".field").forEach(field=>{
       pill.setAttribute("aria-checked","true");
       state[key]=pill.dataset.val;
       field.classList.remove("miss");
-      assessedComplete=false;
-      updateStepper();
-      if(hasRun){ setLabel("Reassess"); $("#formhint").textContent="Inputs changed. Reassess to update."; $("#formhint").style.color="var(--ink-3)"; }
+      onFieldChanged();
     });
   });
 });
+
+/* Controls that own their own DOM state and so need clearing on reset. */
+const FIELD_CONTROLS = [
+  comboField("industry", INDUSTRY_ENTRIES, { noun:"industry", synonyms:SSIC_SYNONYMS, showCode:true }),
+];
 updateStepper();
 
 /* ---------- checklist ticking ---------- */
@@ -775,6 +965,7 @@ $("#reset").addEventListener("click",()=>{
   KEYS.forEach(k=>state[k]="");
   document.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked","false"));
   document.querySelectorAll(".field").forEach(f=>f.classList.remove("miss"));
+  FIELD_CONTROLS.forEach(c=>c.reset());
   $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#formhint").textContent=""; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
 });
 </script>
