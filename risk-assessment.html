@@ -128,6 +128,12 @@
     .field .hint{ order:1; color:var(--ink-3); font-size:calc(var(--fs-base)*.84); margin:0 0 var(--s3); line-height:1.5; }
     .field.miss .hint{ color:var(--warn); }
     .field .pills{ order:2; }
+    /* Explanation of the picked level. Sits under its pills, same voice as
+       the adoption gate description. */
+    .field .opt-desc{ order:3; margin-top:var(--s3); color:var(--ink-2);
+      font-size:calc(var(--fs-base)*.9); line-height:1.55; }
+    .field .opt-desc[hidden]{ display:none; }
+    .field .opt-desc b{ color:var(--ink); font-weight:600; }
     .pills{ display:flex; flex-wrap:wrap; gap:8px; }
     .pill{ font:inherit; font-weight:500; cursor:pointer; color:var(--ink-2); background:var(--surface-2);
       border:1px solid var(--line); border-radius:var(--r-pill); padding:9px 15px;
@@ -485,36 +491,48 @@
               <div class="combo-note" data-note="usecase" hidden></div>
             </div>
 
-            <div class="field" data-key="autonomy">
+            <!-- The six scale questions render from assets/options.mjs, so the
+                 option text and its explanation live in one reviewed place. -->
+            <div class="field" data-key="autonomy" data-scale="AUTONOMY">
               <label>Autonomy level</label>
-              <div class="pills" role="radiogroup" aria-label="Autonomy">
-                <button type="button" class="pill" data-val="Human-in-the-Loop">Human-in-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="Human-over-the-Loop">Human-over-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="Fully Autonomous">Fully autonomous<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-              </div>
-              <div class="hint">Higher autonomy sharply increases the risk multiplier.</div>
+              <div class="hint">How much the system decides and does on its own. This is the sharpest risk multiplier.</div>
+              <div class="pills" role="radiogroup" aria-label="Autonomy level"></div>
+              <div class="opt-desc" hidden></div>
             </div>
 
-            <div class="field" data-key="data">
-              <label>Data source &amp; sensitivity</label>
-              <div class="pills" role="radiogroup" aria-label="Data sensitivity">
-                <button type="button" class="pill" data-val="Public/Open Source">Public / open source<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="Internal Confidential">Internal confidential<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="PII (personal data)">PII (personal data)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="PHI (health / medical)">PHI (health / medical)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-              </div>
-              <div class="hint">The main driver of data protection and privacy requirements.</div>
+            <div class="field" data-key="dataSource" data-scale="DATA_SOURCE">
+              <label>Data source</label>
+              <div class="hint">Where the system reads from. Pick the main one.</div>
+              <div class="pills" role="radiogroup" aria-label="Data source"></div>
+              <div class="opt-desc" hidden></div>
             </div>
 
-            <div class="field" data-key="deploy">
-              <label>Deployment model</label>
-              <div class="pills" role="radiogroup" aria-label="Deployment">
-                <button type="button" class="pill" data-val="Cloud PaaS/IaaS (self-hosted)">Cloud PaaS / IaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="On-Premises">On-premises<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3rd-Party SaaS">3rd-party SaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="Edge Device">Edge device<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-              </div>
-              <div class="hint">Sets the infrastructure and IT architecture expectations.</div>
+            <div class="field" data-key="dataSensitivity" data-scale="DATA_SENSITIVITY">
+              <label>Data sensitivity</label>
+              <div class="hint">The most sensitive class of data it can reach. The main driver of data protection requirements.</div>
+              <div class="pills" role="radiogroup" aria-label="Data sensitivity"></div>
+              <div class="opt-desc" hidden></div>
+            </div>
+
+            <div class="field" data-key="capability" data-scale="CAPABILITY">
+              <label>Agent capability level</label>
+              <div class="hint">How far a single run reaches: one call, a chain, memory across days, or other agents.</div>
+              <div class="pills" role="radiogroup" aria-label="Capability level"></div>
+              <div class="opt-desc" hidden></div>
+            </div>
+
+            <div class="field" data-key="hosting" data-scale="HOSTING">
+              <label>Infrastructure hosting model</label>
+              <div class="hint">Where it runs, and therefore who else can reach the data.</div>
+              <div class="pills" role="radiogroup" aria-label="Hosting model"></div>
+              <div class="opt-desc" hidden></div>
+            </div>
+
+            <div class="field" data-key="governance" data-scale="GOVERNANCE">
+              <label>Governance and risk tier</label>
+              <div class="hint">Severity of the actions it performs, and how reversible they are.</div>
+              <div class="pills" role="radiogroup" aria-label="Governance tier"></div>
+              <div class="opt-desc" hidden></div>
             </div>
           </div>
 
@@ -558,7 +576,10 @@
    can be unit tested headlessly with `node --test`.
    ============================================================ */
 import { SSIC_SYNONYMS, SSIC_COMMON, orderedSections, industryValue } from './assets/ssic.mjs';
-import { ROLE_GROUPS, USECASE_GROUPS, flatten } from './assets/options.mjs';
+import {
+  ROLE_GROUPS, USECASE_GROUPS, flatten, OTHERS,
+  AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING, GOVERNANCE,
+} from './assets/options.mjs';
 import { fuzzyMatch, CONFIDENT } from './assets/match.mjs';
 import {
   IMPACT_FACTORS, LIKELIHOOD_FACTORS, SHARED_FACTOR_ID,
@@ -566,8 +587,9 @@ import {
 } from './assets/agentic.mjs';
 
 const $ = s => document.querySelector(s);
-const KEYS = ["industry","role","usecase","autonomy","data","deploy"];
-const state = { industry:"", role:"", usecase:"", autonomy:"", data:"", deploy:"" };
+const KEYS = ["industry","role","usecase","autonomy","dataSource","dataSensitivity","capability","hosting","governance"];
+const state = KEYS.reduce((o,k)=>(o[k]="",o),{});
+const SCALES = { AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING, GOVERNANCE };
 
 function label(v){ if(!v) return ""; const p=String(v).split("|"); return p.length>1?p.slice(1).join("|"):p[0]; }
 
@@ -741,6 +763,9 @@ function groupPicker(key, groups, { noun }){
         const holds = g.items.includes(state[key]);
         return pillHTML(g.group, { cls:"group", data:`data-group="${escapeHtml(g.group)}"`, checked:holds });
       }).join("") +
+      /* "Others" is a real answer for anything the list misses but that the
+         user does not want to describe. "Not listed" is the free-text path. */
+      pillHTML(OTHERS, { data:`data-item="${escapeHtml(OTHERS)}"`, checked: state[key]===OTHERS }) +
       pillHTML("Not listed", { cls:"other", data:'data-other="1"' });
   }
 
@@ -768,11 +793,12 @@ function groupPicker(key, groups, { noun }){
     field.classList.remove("miss");
     /* Free text resolves while the group row is showing, and a group pill is
        marked by which items it holds, not by data-item. Re-render there so the
-       resolved answer still reads as selected. */
-    if(pills.querySelector("[data-item]"))
-      pills.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked", String(p.dataset.item===value)));
-    else
+       resolved answer still reads as selected. The group row also carries the
+       "Others" item pill, so detect the row by the group pills. */
+    if(pills.querySelector("[data-group]"))
       showGroups();
+    else
+      pills.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked", String(p.dataset.item===value)));
     setNote(msg||"", msg?"ok":null);
     onFieldChanged();
   }
@@ -937,7 +963,7 @@ function scoringHTML(d){
         <ion-icon class="chev" name="chevron-down-outline"></ion-icon>
       </summary>
       <div class="body">
-        <p style="color:var(--ink-2);margin:0 0 var(--s3)">The tier follows from the index, and the index follows from the six driver ratings above. Each rating converts to points (Low 0, Medium 0.5, High 1) and is multiplied by a fixed weight. Nothing else moves the score.</p>
+        <p style="color:var(--ink-2);margin:0 0 var(--s3)">The tier follows from the index, and the index follows from the seven driver ratings above. Each rating converts to points (Low 0, Medium 0.5, High 1) and is multiplied by a fixed weight. Nothing else moves the score.</p>
         <div class="tbl-scroll">
           <table class="risk">
             <thead><tr><th>Driver</th><th>Rating</th><th>Weight &times; points</th><th>Contribution</th></tr></thead>
@@ -975,7 +1001,7 @@ function updateStepper(){
   const fill=document.getElementById('sfill'); if(!fill) return;
   let frontier, done=[false,false,false,false,false], cur=-1;
   if(assessedComplete){ frontier=50; done=[true,true,true,false,false]; }
-  else { done[0]=a>=1; done[1]=a>=6; frontier = a>=6?30:(10+(a/6)*20); cur = a>=6?2:(a>=1?1:0); }
+  else { const n=KEYS.length; done[0]=a>=1; done[1]=a>=n; frontier = a>=n?30:(10+(a/n)*20); cur = a>=n?2:(a>=1?1:0); }
   fill.style.width=(frontier-10)+'%';
   steps.forEach((el,i)=>{ el.classList.toggle('done',!!done[i]); el.classList.toggle('cur', i===cur && !done[i]); });
 }
@@ -1215,25 +1241,39 @@ function onFieldChanged(){
   if(hasRun){ setLabel("Reassess"); $("#formhint").textContent="Inputs changed. Reassess to update."; $("#formhint").style.color="var(--ink-3)"; }
 }
 
-/* Scoped to the six scored fields. The adoption gate has its own multi-select
-   handler and must not be wired as a single-choice radiogroup. */
-document.querySelectorAll(".field[data-key]").forEach(field=>{
+/* ---------- scale fields ----------
+   The six level and tier questions render from the option module. Each option
+   carries its own explanation, shown once it is picked, because "Level 3" on
+   its own tells nobody anything. Clicking the selected pill again clears it. */
+function scaleField(field){
   const key=field.dataset.key;
-  if(!KEYS.includes(key)) return;
-  field.querySelectorAll(".pill").forEach(pill=>{
-    pill.setAttribute("role","radio"); pill.setAttribute("aria-checked","false");
-    /* Clicking the selected pill again clears it, so a mis-tap is undoable
-       without a Reset. Same rule everywhere a pill can be pressed. */
-    pill.addEventListener("click",()=>{
-      const wasOn = pill.getAttribute("aria-checked")==="true";
-      field.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked","false"));
-      if(!wasOn) pill.setAttribute("aria-checked","true");
-      state[key]= wasOn ? "" : pill.dataset.val;
-      field.classList.remove("miss");
-      onFieldChanged();
-    });
+  const opts=SCALES[field.dataset.scale]||[];
+  const pills=field.querySelector(".pills");
+  const desc=field.querySelector(".opt-desc");
+
+  pills.innerHTML = opts.map(o=>
+    `<button type="button" class="pill" role="radio" aria-checked="false" data-val="${escapeHtml(o.label)}">${escapeHtml(o.label)}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`
+  ).join("");
+
+  function paint(){
+    pills.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked", String(p.dataset.val===state[key])));
+    const hit=opts.find(o=>o.label===state[key]);
+    desc.hidden=!hit;
+    desc.innerHTML = hit ? `<b>${escapeHtml(hit.label)}.</b> ${escapeHtml(hit.desc)}` : "";
+  }
+
+  pills.addEventListener("click", e=>{
+    const p=e.target.closest(".pill"); if(!p) return;
+    state[key] = state[key]===p.dataset.val ? "" : p.dataset.val;
+    field.classList.remove("miss");
+    paint();
+    onFieldChanged();
   });
-});
+
+  paint();
+  return { reset(){ state[key]=""; paint(); } };
+}
+const SCALE_FIELDS = [...document.querySelectorAll(".field[data-scale]")].map(scaleField);
 
 /* Controls that own their own DOM state and so need clearing on reset. */
 const FIELD_CONTROLS = [
@@ -1252,7 +1292,7 @@ $("#output").addEventListener("click", e=>{
 });
 
 /* ---------- adoption gate ----------
-   Routing only. Never sent to /api/assess, which picks the six KEYS. */
+   Routing only. Never sent to /api/assess, which picks the nine KEYS. */
 state.adoption=[];
 document.getElementById("adoption-pills").addEventListener("click", e=>{
   const p=e.target.closest(".pill"); if(!p) return;
@@ -1618,7 +1658,7 @@ function renderDeployedResult(res){
 const form=$("#q");
 form.addEventListener("submit", async e=>{
   e.preventDefault();
-  /* Only the six scored fields are required. The adoption gate carries the
+  /* Only the nine scored fields are required. The adoption gate carries the
      .field class for styling but has no data-key and is optional. */
   let missing=0, firstMiss=null;
   KEYS.forEach(k=>{
@@ -1653,6 +1693,7 @@ $("#reset").addEventListener("click",()=>{
   document.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked","false"));
   document.querySelectorAll(".field").forEach(f=>f.classList.remove("miss"));
   FIELD_CONTROLS.forEach(c=>c.reset());
+  SCALE_FIELDS.forEach(c=>c.reset());
   countdownActive=false;
   state.agenticFactors={}; state.agenticActions=[];
   $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML=""; $("#agentic").innerHTML="";

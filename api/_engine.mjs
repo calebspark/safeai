@@ -10,12 +10,15 @@ const MODEL = process.env.SAFEAI_MODEL || 'claude-sonnet-5';
 //   riskIndex = Σ weight(driver) × points(level), points Low=0 Medium=0.5 High=1
 // and the tier is read off fixed bands. The server recomputes both and
 // overwrites whatever the model returned, so the rubric always holds.
+// Re-weighted 2026-07-28 when data source became its own question. Total is
+// still 100, so the bands and the gauge are unchanged.
 export const DRIVER_WEIGHTS = {
-  'Data sensitivity': 25,
-  'Use-case impact': 25,
+  'Data sensitivity': 22,
+  'Use-case impact': 23,
   'Autonomy': 20,
-  'Regulated industry': 15,
+  'Regulated industry': 14,
   'Deployment exposure': 10,
+  'Data source': 6,
   'Role': 5,
 };
 const DRIVER_LABELS = Object.keys(DRIVER_WEIGHTS);
@@ -57,12 +60,12 @@ const TOOL = {
       riskIndex: { type: 'integer', minimum: 0, maximum: 100, description: 'Overall risk index, consistent with the tier (Low ~0-25, Moderate ~26-50, High ~51-78, Severe ~79-100).' },
       rationale: { type: 'string', description: 'At most 2 tight sentences on why this use case lands at this tier. State the driving factors directly. No preamble, no restating the profile, no filler, no headings, no bullets, no em dashes.' },
       drivers: {
-        type: 'array', minItems: 6, maxItems: 6,
-        description: 'Exactly one entry per driver, using the six canonical labels. These ratings ARE the score: the server computes the risk index and tier from them.',
+        type: 'array', minItems: 7, maxItems: 7,
+        description: 'Exactly one entry per driver, using the seven canonical labels. These ratings ARE the score: the server computes the risk index and tier from them.',
         items: {
           type: 'object', additionalProperties: false, required: ['label', 'level', 'note'],
           properties: {
-            label: { type: 'string', enum: ['Data sensitivity', 'Use-case impact', 'Autonomy', 'Regulated industry', 'Deployment exposure', 'Role'] },
+            label: { type: 'string', enum: ['Data sensitivity', 'Use-case impact', 'Autonomy', 'Regulated industry', 'Deployment exposure', 'Data source', 'Role'] },
             level: { type: 'string', enum: ['Low', 'Medium', 'High'] },
             note: { type: 'string', description: 'A few words on why.' },
           },
@@ -123,14 +126,15 @@ Anchor your judgement in these frameworks:
 - A four-tier model: Tier 1 Low (e.g. internal summarising of public docs, no PII), Tier 2 Moderate (e.g. general FAQ chatbot, internal code generation), Tier 3 High (e.g. automated CV screening, lending decisions, confidential IP access), Tier 4 Severe/Unacceptable (e.g. autonomous medical diagnosis, critical infrastructure control).
 
 Scoring mechanism (prescribed, follow it exactly):
-1. Rate each of the six drivers Low, Medium, or High, using exactly these labels: Data sensitivity, Use-case impact, Autonomy, Regulated industry, Deployment exposure, Role.
-   - Data sensitivity: Low = public or synthetic data; Medium = internal or commercial data; High = PII, PHI, financial records, or confidential IP.
-   - Use-case impact: Low = drafting or summarising with human output review; Medium = customer-facing answers or operational decisions with oversight; High = consequential decisions about people, money, safety, or eligibility.
-   - Autonomy: Low = human writes or approves every output; Medium = human-in-the-loop on a sample or on exceptions; High = automated actions or decisions without per-case review.
+1. Rate each of the seven drivers Low, Medium, or High, using exactly these labels: Data sensitivity, Use-case impact, Autonomy, Regulated industry, Deployment exposure, Data source, Role.
+   - Data sensitivity: read it off the stated tier. Low = Public / low sensitivity; Medium = Internal / medium sensitivity; High = Confidential / high sensitivity, or Restricted / regulated (PII, PHI, HIPAA, GDPR).
+   - Use-case impact: Low = drafting or summarising with human output review; Medium = customer-facing answers or operational decisions with oversight; High = consequential decisions about people, money, safety, or eligibility. Raise it a level when the stated governance tier is Tier 3, since that tier is reserved for critical system modifications.
+   - Autonomy: read it off the stated autonomy level and capability level together. Low = autonomy Level 0 or 1, or capability Level 1. Medium = autonomy Level 2, or capability Level 2 or 3. High = autonomy Level 3, 4 or 5, or capability Level 4 or 5, because the agent then acts or coordinates other agents without per-case review.
    - Regulated industry: rate from the SSIC 2025 section given in the profile. High = L (Financial and Insurance), R (Health and Social Services), P (Public Administration and Defence). Medium = D (Electricity and Gas), E (Water and Waste), H (Transportation and Storage), Q (Education), and K (Telecommunications and Computing) where telecoms licensing applies. Low = otherwise. If the industry is free text rather than a section, judge it against the same idea.
-   - Deployment exposure: Low = on-prem or private cloud, internal users only; Medium = managed cloud or internal tools with vendor access; High = third-party SaaS, public endpoints, or edge devices.
+   - Deployment exposure: rate from the hosting model. Low = self-hosted on private infrastructure, internal users only; Medium = hybrid, or a managed platform with vendor access; High = third-party SaaS, serverless platforms holding regulated data, public endpoints, or edge devices.
+   - Data source: Low = a single curated store the organisation controls, such as internal documents or its own database; Medium = several sources, or SaaS and line-of-business systems reached through APIs; High = agent state and memory that persists across sessions, or any source the organisation does not control, because both widen what an attacker can reach or poison.
    - Role: rate how much the stated role amplifies blast radius (a decision-maker deploying org-wide is High; an individual contributor experimenting is Low).
-2. The risk index is arithmetic, not judgement: riskIndex = sum over drivers of weight x points, where points are Low 0, Medium 0.5, High 1, and weights are Data sensitivity 25, Use-case impact 25, Autonomy 20, Regulated industry 15, Deployment exposure 10, Role 5.
+2. The risk index is arithmetic, not judgement: riskIndex = sum over drivers of weight x points, where points are Low 0, Medium 0.5, High 1, and weights are Data sensitivity 22, Use-case impact 23, Autonomy 20, Regulated industry 14, Deployment exposure 10, Data source 6, Role 5.
 3. The tier is read off the index: 0-25 Tier 1 Low, 26-50 Tier 2 Moderate, 51-78 Tier 3 High, 79-100 Tier 4 Severe. Do not pick a tier first and back-fill; the drivers determine everything. The server recomputes the index and tier from your driver ratings and overrides any mismatch, so your ratings are the assessment.
 
 Write the rationale as a reverse explanation of that chain: name the driver ratings that dominate the score and what in the profile made them so (e.g. which drivers are High and why). Do NOT state a numeric index or tier in the rationale; the server computes those from your ratings and displays them alongside. Choose scenarios that genuinely fit this use case (e.g. GenAI and conversational agents face prompt injection; predictive and vision models face data poisoning and bias; autonomous or agentic systems face unsafe-action risk; any sensitive data faces exfiltration; public endpoints face denial of service). For controls, mark an item Required when it is expected at this computed tier and Recommended when it is good practice but not mandatory at this tier, so a Low-risk case has few Required items and a Severe case has many.
@@ -142,13 +146,16 @@ Use case profile:
 - Role / responsibility: ${p('role')}
 - AI system / use case type: ${p('usecase')}
 - Autonomy level: ${p('autonomy')}
-- Data source & sensitivity: ${p('data')}
-- Deployment model: ${p('deploy')}
+- Data source: ${p('dataSource')}
+- Data sensitivity: ${p('dataSensitivity')}
+- Agent capability level: ${p('capability')}
+- Infrastructure hosting model: ${p('hosting')}
+- Governance and risk tier of the actions it performs: ${p('governance')}
 
 Write in plain, factual language. No em dashes anywhere. Return only via the tool.`;
 }
 
-// Whitelist the six known fields and cap each to a sane length, so a caller
+// Whitelist the nine known fields and cap each to a sane length, so a caller
 // cannot inflate the prompt (and the Anthropic bill) with oversized input or
 // smuggle in extra keys. Unknown keys are dropped; values are coerced to string.
 //
@@ -156,7 +163,14 @@ Write in plain, factual language. No em dashes anywhere. Return only via the too
 // 121 characters. At the old flat 120 it was silently truncated mid-word, which
 // produces a subtly wrong assessment rather than a visible error. Industry
 // values come from a fixed list, so a higher cap is not an abuse vector.
-const PROFILE_FIELDS = ['industry', 'role', 'usecase', 'autonomy', 'data', 'deploy'];
+// `data` and `deploy` are retired: data split into source and sensitivity, and
+// deployment split into capability, hosting and governance tier, per the
+// reviewed option matrix. Old keys are dropped rather than mapped, because a
+// stale client sending them would otherwise get a half-populated profile.
+const PROFILE_FIELDS = [
+  'industry', 'role', 'usecase', 'autonomy',
+  'dataSource', 'dataSensitivity', 'capability', 'hosting', 'governance',
+];
 const DEFAULT_CAP = 120;
 export const FIELD_CAPS = { industry: 200 };
 
