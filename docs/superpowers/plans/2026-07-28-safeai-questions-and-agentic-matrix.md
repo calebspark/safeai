@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- **No `package.json`.** This is a static Vercel site with an `/api` folder. Adding `package.json` risks Vercel switching to a build pipeline. Tests run via `node --test tests/` directly; `.mjs` files are ESM regardless.
+- **No `package.json`.** This is a static Vercel site with an `/api` folder. Adding `package.json` risks Vercel switching to a build pipeline. Tests run via `node --test "tests/*.test.mjs"` directly; `.mjs` files are ESM regardless.
 - **No new runtime dependencies.** Everything ships as plain ES modules loaded by the browser.
 - **No em dashes** anywhere in user-facing copy. House style.
 - Tier names stay exactly **Low / Moderate / High / Severe**. Do not rename "Moderate" to "Medium".
@@ -107,7 +107,7 @@ test('industryValue formats as "CODE - Title"', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd "/Users/caleb/Desktop/SPARK/SPARK Projects/SafeAI" && node --test tests/`
+Run: `cd "/Users/caleb/Desktop/SPARK/SPARK Projects/SafeAI" && node --test "tests/*.test.mjs"`
 Expected: FAIL, cannot find module `../assets/ssic.mjs`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -198,7 +198,7 @@ export function industryValue(section) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test "tests/*.test.mjs"`
 Expected: PASS, 8 tests.
 
 - [ ] **Step 5: Commit**
@@ -316,7 +316,7 @@ Replace it with:
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test "tests/*.test.mjs"`
 Expected: PASS, all suites.
 
 - [ ] **Step 5: Commit**
@@ -521,7 +521,7 @@ export function flatten(groups) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test "tests/*.test.mjs"`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -679,7 +679,7 @@ export function fuzzyMatch(input, entries, synonyms = {}) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test "tests/*.test.mjs"`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -1037,7 +1037,7 @@ export function governanceGap(rows) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test "tests/*.test.mjs"`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -1240,7 +1240,7 @@ In `server.mjs`, immediately after the existing `/api/assess` block, add:
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test "tests/*.test.mjs"`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -2154,7 +2154,7 @@ git commit -m "Add agentic deployed branch: Dayos action tiering with governance
 
 - [ ] **Step 1: Run the whole suite**
 
-Run: `cd "/Users/caleb/Desktop/SPARK/SPARK Projects/SafeAI" && node --test tests/`
+Run: `cd "/Users/caleb/Desktop/SPARK/SPARK Projects/SafeAI" && node --test "tests/*.test.mjs"`
 Expected: all suites pass. Record the count.
 
 - [ ] **Step 2: End-to-end walk on the local server**
