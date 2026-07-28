@@ -55,10 +55,16 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/classify') {
     if (req.method !== 'POST') { res.writeHead(405); return res.end('Method not allowed'); }
     const body = await readBody(req);
-    const { classify } = await import('./api/classify.mjs');
-    const result = await classify(body, body.options || []);
+    const { classify, rateLimited, clientIp, publicError } = await import('./api/classify.mjs');
+    const ip = clientIp(req);
+    if (rateLimited(ip)) {
+      res.writeHead(429, { 'content-type': 'application/json' });
+      return res.end(JSON.stringify(publicError('rate_limited')));
+    }
+    const result = await classify(body);
+    if (!result.ok) console.error('classify failed:', result.reason, result.detail);
     res.writeHead(result.ok ? 200 : (result.status || 500), { 'content-type': 'application/json' });
-    return res.end(JSON.stringify(result.ok ? result.data : { error: result.reason, detail: result.detail }));
+    return res.end(JSON.stringify(result.ok ? result.data : publicError(result.reason)));
   }
 
   // static

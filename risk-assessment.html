@@ -623,7 +623,7 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
     try{
       const r=await fetch("/api/classify",{
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ field:key, text:raw, options:entries.map(e=>e.value) }),
+        body:JSON.stringify({ field:key, text:raw }),
       });
       if(r.ok) res=await r.json();
     }catch{ /* offline or blocked, fall through */ }
@@ -747,7 +747,7 @@ function groupPicker(key, groups, { noun }){
     try{
       const r=await fetch("/api/classify",{
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ field:key, text:raw, options:entries.map(e=>e.value) }),
+        body:JSON.stringify({ field:key, text:raw }),
       });
       if(r.ok) res=await r.json();
     }catch{ /* offline or blocked, fall through */ }

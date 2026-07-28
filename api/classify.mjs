@@ -6,10 +6,22 @@
 //
 // The API key is read from the environment and never sent to the browser.
 
+import { SSIC_SECTIONS, industryValue } from '../assets/ssic.mjs';
+import { ROLE_GROUPS, USECASE_GROUPS, flatten } from '../assets/options.mjs';
+
 const MODEL = process.env.SAFEAI_CLASSIFY_MODEL || 'claude-haiku-4-5-20251001';
 
 export const CLASSIFY_FIELDS = ['industry', 'role', 'usecase'];
 const TEXT_CAP = 120;
+
+// The option list is derived server-side, never taken from the request. The
+// caller has no business telling us what the valid answers are, and a
+// client-supplied list is an unbounded prompt-inflation (i.e. billing) vector.
+const SERVER_OPTIONS = {
+  industry: SSIC_SECTIONS.map(industryValue),
+  role: flatten(ROLE_GROUPS),
+  usecase: flatten(USECASE_GROUPS),
+};
 
 const FIELD_NOUN = {
   industry: 'industry or business sector',
@@ -62,10 +74,36 @@ const TOOL = {
   },
 };
 
+// Crude per-IP limiter. Serverless instances are not shared, so this only
+// blunts a flood hitting one warm instance. The durable control is a Vercel
+// Firewall rate-limit rule on /api/*, which is a dashboard action.
+const RATE_MAX = 20;            // requests
+const RATE_WINDOW_MS = 60_000;  // per minute per IP
+const hits = new Map();
+
+export function rateLimited(ip, now = Date.now()) {
+  const key = ip || 'unknown';
+  const bucket = (hits.get(key) || []).filter(t => now - t < RATE_WINDOW_MS);
+  bucket.push(now);
+  hits.set(key, bucket);
+  if (hits.size > 5000) hits.clear(); // bound memory on a long-lived instance
+  return bucket.length > RATE_MAX;
+}
+
+export function clientIp(req) {
+  const fwd = req.headers?.['x-forwarded-for'];
+  return (Array.isArray(fwd) ? fwd[0] : String(fwd || '')).split(',')[0].trim()
+    || req.socket?.remoteAddress || '';
+}
+
 // Returns { ok:true, data } or { ok:false, status, reason, detail }.
-export async function classify(body, options) {
+// `detail` is for the SERVER LOG. Only `reason` and a generic message go to
+// the client, so upstream error bodies never reach the browser.
+export async function classify(body) {
   const input = sanitizeClassifyInput(body);
   if (!input) return { ok: false, status: 400, reason: 'bad_input', detail: 'Unknown field or empty text.' };
+
+  const options = SERVER_OPTIONS[input.field];
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return { ok: false, status: 500, reason: 'no_key', detail: 'ANTHROPIC_API_KEY is not configured on the server.' };
@@ -100,10 +138,35 @@ export async function classify(body, options) {
   return { ok: true, data: block.input };
 }
 
+// Messages safe to show a user. Anything not listed gets the generic line, so
+// upstream/network internals cannot leak through.
+const PUBLIC_REASON = {
+  bad_input: 'That entry could not be read. Try describing it in a few words.',
+  rate_limited: 'Too many requests. Wait a moment and try again.',
+};
+const GENERIC = 'Could not verify that entry right now.';
+
+export function publicError(reason) {
+  return { error: reason, message: PUBLIC_REASON[reason] || GENERIC };
+}
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') { res.status(405).json({ error: 'method_not_allowed' }); return; }
-  const body = req.body || {};
-  const result = await classify(body, body.options || []);
-  if (result.ok) res.status(200).json(result.data);
-  else res.status(result.status || 500).json({ error: result.reason, detail: result.detail });
+  if (req.method !== 'POST') { res.status(405).json(publicError('method_not_allowed')); return; }
+
+  const ip = clientIp(req);
+  if (rateLimited(ip)) {
+    console.warn(JSON.stringify({ evt: 'rate_limited', route: '/api/classify', ip, at: new Date().toISOString() }));
+    res.status(429).json(publicError('rate_limited'));
+    return;
+  }
+
+  const result = await classify(req.body || {});
+  if (result.ok) { res.status(200).json(result.data); return; }
+
+  // Full detail to the server log, generic message to the caller.
+  console.error(JSON.stringify({
+    evt: 'classify_failed', route: '/api/classify', reason: result.reason,
+    detail: result.detail, ip, at: new Date().toISOString(),
+  }));
+  res.status(result.status || 500).json(publicError(result.reason));
 }
