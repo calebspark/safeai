@@ -303,6 +303,10 @@
     .picker-back:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
     .pill.group{ font-weight:600; color:var(--ink); }
     .pill.other{ color:var(--accent); }
+    /* Small tier: 8px vertical, 16px horizontal, the house 2:1 ratio. */
+    .btn-sm{ padding:8px 16px; border-radius:var(--r-sm); font-size:calc(var(--fs-base)*.9); }
+    .picker .pills{ align-items:center; }
+    .picker-free{ flex:1 1 240px; min-width:0; }
 
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
   </style>
@@ -368,37 +372,30 @@
 
             <div class="field" data-key="role">
               <label>Role / responsibility</label>
-              <div class="pills" role="radiogroup" aria-label="Role">
-                <button type="button" class="pill" data-val="End User">End user<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="Business Sponsor">Business sponsor<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="Legal/Compliance">Legal / compliance<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="IT Ops">IT operations<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="ML Engineer">ML engineer<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="Data Scientist">Data scientist<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-              </div>
               <div class="hint">Tailors the language and ownership of the recommendations.</div>
+              <div class="picker" data-picker="role">
+                <div class="picker-crumb" hidden><button type="button" class="picker-back"><ion-icon name="chevron-back-outline"></ion-icon><span></span></button></div>
+                <div class="pills" role="radiogroup" aria-label="Role"></div>
+              </div>
+              <div class="combo-note" data-note="role" hidden></div>
             </div>
 
             <div class="field" data-key="usecase">
               <label>AI system / use case type</label>
-              <div class="pills" role="radiogroup" aria-label="Use case">
-                <button type="button" class="pill" data-val="1|RPA (robotic process automation)">RPA<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Predictive Analytics">Predictive analytics<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Computer Vision">Computer vision<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Generative AI (text/image)">Generative AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Conversational Agent">Conversational agent<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3|Automated Decision Making">Automated decision making<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3|Agentic AI (tool-using)">Agentic AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-              </div>
               <div class="hint">Dictates the likely attack vectors. GenAI needs prompt-injection controls.</div>
+              <div class="picker" data-picker="usecase">
+                <div class="picker-crumb" hidden><button type="button" class="picker-back"><ion-icon name="chevron-back-outline"></ion-icon><span></span></button></div>
+                <div class="pills" role="radiogroup" aria-label="Use case"></div>
+              </div>
+              <div class="combo-note" data-note="usecase" hidden></div>
             </div>
 
             <div class="field" data-key="autonomy">
               <label>Autonomy level</label>
               <div class="pills" role="radiogroup" aria-label="Autonomy">
-                <button type="button" class="pill" data-val="1|Human-in-the-Loop">Human-in-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Human-over-the-Loop">Human-over-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3|Fully Autonomous">Fully autonomous<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Human-in-the-Loop">Human-in-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Human-over-the-Loop">Human-over-the-loop<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Fully Autonomous">Fully autonomous<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
               </div>
               <div class="hint">Higher autonomy sharply increases the risk multiplier.</div>
             </div>
@@ -406,10 +403,10 @@
             <div class="field" data-key="data">
               <label>Data source &amp; sensitivity</label>
               <div class="pills" role="radiogroup" aria-label="Data sensitivity">
-                <button type="button" class="pill" data-val="1|Public/Open Source">Public / open source<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Internal Confidential">Internal confidential<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="3|PII (personal data)">PII (personal data)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="4|PHI (health / medical)">PHI (health / medical)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Public/Open Source">Public / open source<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Internal Confidential">Internal confidential<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="PII (personal data)">PII (personal data)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="PHI (health / medical)">PHI (health / medical)<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
               </div>
               <div class="hint">The main driver of data protection and privacy requirements.</div>
             </div>
@@ -417,10 +414,10 @@
             <div class="field" data-key="deploy">
               <label>Deployment model</label>
               <div class="pills" role="radiogroup" aria-label="Deployment">
-                <button type="button" class="pill" data-val="1|Cloud PaaS/IaaS (self-hosted)">Cloud PaaS / IaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="1|On-Premises">On-premises<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|3rd-Party SaaS">3rd-party SaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-                <button type="button" class="pill" data-val="2|Edge Device">Edge device<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Cloud PaaS/IaaS (self-hosted)">Cloud PaaS / IaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="On-Premises">On-premises<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="3rd-Party SaaS">3rd-party SaaS<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+                <button type="button" class="pill" data-val="Edge Device">Edge device<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
               </div>
               <div class="hint">Sets the infrastructure and IT architecture expectations.</div>
             </div>
@@ -464,6 +461,7 @@
    can be unit tested headlessly with `node --test`.
    ============================================================ */
 import { SSIC_SYNONYMS, SSIC_COMMON, orderedSections, industryValue } from './assets/ssic.mjs';
+import { ROLE_GROUPS, USECASE_GROUPS, flatten } from './assets/options.mjs';
 import { fuzzyMatch, CONFIDENT } from './assets/match.mjs';
 
 const $ = s => document.querySelector(s);
@@ -603,6 +601,126 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
   }
 
   return { commit, reset(){ state[key]=""; input.value=""; setNote(""); close(); } };
+}
+
+/* ---------- two-level group picker (role, use case) ----------
+   Tap a group, its items replace the row, the crumb goes back. "Not listed"
+   swaps in an inline field rather than a native prompt, so the free-text path
+   looks and behaves like the rest of the form. */
+function groupPicker(key, groups, { noun }){
+  const root  = document.querySelector(`.picker[data-picker="${key}"]`);
+  const pills = root.querySelector(".pills");
+  const crumb = root.querySelector(".picker-crumb");
+  const crumbLabel = crumb.querySelector("span");
+  const note  = document.querySelector(`.combo-note[data-note="${key}"]`);
+  const field = root.closest(".field");
+  const entries = flatten(groups).map(v=>({ value:v, label:v }));
+  let busy=false;
+
+  function setNote(html, kind){
+    if(!html){ note.hidden=true; note.innerHTML=""; return; }
+    note.hidden=false;
+    note.className="combo-note "+(kind||"");
+    const ico = kind==="bad" ? "alert-circle-outline" : "checkmark-circle-outline";
+    note.innerHTML=`<ion-icon name="${ico}"></ion-icon>${html}`;
+  }
+
+  const pillHTML = (text, attrs) =>
+    `<button type="button" class="pill ${attrs.cls||""}" ${attrs.data} role="radio" aria-checked="${attrs.checked?"true":"false"}">${escapeHtml(text)}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`;
+
+  function showGroups(){
+    crumb.hidden=true;
+    pills.innerHTML =
+      groups.map(g=>{
+        const holds = g.items.includes(state[key]);
+        return pillHTML(g.group, { cls:"group", data:`data-group="${escapeHtml(g.group)}"`, checked:holds });
+      }).join("") +
+      pillHTML("Not listed", { cls:"other", data:'data-other="1"' });
+  }
+
+  function showItems(groupName){
+    const g = groups.find(x=>x.group===groupName);
+    crumb.hidden=false;
+    crumbLabel.textContent=g.group;
+    pills.innerHTML = g.items.map(i=>
+      pillHTML(i, { data:`data-item="${escapeHtml(i)}"`, checked: state[key]===i })
+    ).join("");
+  }
+
+  function showFreeInput(){
+    crumb.hidden=false;
+    crumbLabel.textContent="Not listed";
+    pills.innerHTML =
+      `<input type="text" class="combo-input picker-free" autocomplete="off" spellcheck="false"
+              placeholder="Describe your ${escapeHtml(noun)}" aria-label="Describe your ${escapeHtml(noun)}">
+       <button type="button" class="btn btn-sm" data-freego="1">Use this</button>`;
+    root.querySelector(".picker-free").focus();
+  }
+
+  function commit(value, msg){
+    state[key]=value;
+    field.classList.remove("miss");
+    pills.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked", String(p.dataset.item===value)));
+    setNote(msg||"", msg?"ok":null);
+    onFieldChanged();
+  }
+
+  root.addEventListener("click", async e=>{
+    if(e.target.closest(".picker-back")){ setNote(""); return showGroups(); }
+    if(e.target.closest("[data-freego]")) return resolveFree();
+    const p = e.target.closest(".pill");
+    if(!p) return;
+    if(p.dataset.group) return showItems(p.dataset.group);
+    if(p.dataset.item)  return commit(p.dataset.item);
+    if(p.dataset.other) return showFreeInput();
+  });
+  root.addEventListener("keydown", e=>{
+    if(e.target.classList.contains("picker-free") && e.key==="Enter"){ e.preventDefault(); resolveFree(); }
+  });
+
+  async function resolveFree(){
+    const box = root.querySelector(".picker-free");
+    const raw = (box ? box.value : "").trim();
+    if(!raw || busy) return;
+
+    const m = fuzzyMatch(raw, entries, {});
+    if(m && m.confidence>=CONFIDENT){
+      showGroups();
+      return commit(m.value, `Matched to <b>${escapeHtml(m.value)}</b>.`);
+    }
+
+    busy=true;
+    setNote("Checking that entry...", "ok");
+    let res=null;
+    try{
+      const r=await fetch("/api/classify",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ field:key, text:raw, options:entries.map(e=>e.value) }),
+      });
+      if(r.ok) res=await r.json();
+    }catch{ /* offline or blocked, fall through */ }
+    busy=false;
+
+    if(!res){
+      showGroups();
+      state[key]=raw; field.classList.remove("miss");
+      setNote("Could not verify that entry, so we will use it as typed.", "ok");
+      onFieldChanged(); return;
+    }
+    if(res.valid){
+      const hit = entries.find(e=>e.value===res.mappedTo);
+      showGroups();
+      if(hit) commit(hit.value, `Read as <b>${escapeHtml(hit.value)}</b>.`);
+      else { state[key]=raw; field.classList.remove("miss"); setNote("Using your description.", "ok"); onFieldChanged(); }
+      return;
+    }
+    state[key]="";
+    setNote(escapeHtml(res.reason || `That does not look like a ${noun}.`), "bad");
+    onFieldChanged();
+  }
+
+  showGroups();
+  return { reset(){ state[key]=""; setNote(""); showGroups(); } };
 }
 
 const TIERS = {
@@ -961,6 +1079,8 @@ document.querySelectorAll(".field[data-key]").forEach(field=>{
 /* Controls that own their own DOM state and so need clearing on reset. */
 const FIELD_CONTROLS = [
   comboField("industry", INDUSTRY_ENTRIES, { noun:"industry", synonyms:SSIC_SYNONYMS, showCode:true, groups:true }),
+  groupPicker("role", ROLE_GROUPS, { noun:"role" }),
+  groupPicker("usecase", USECASE_GROUPS, { noun:"AI use case" }),
 ];
 updateStepper();
 
