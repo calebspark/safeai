@@ -30,7 +30,7 @@ if (process.env.ANTHROPIC_API_KEY) {
 
 const { assess } = await import('./api/_engine.mjs');
 
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css',
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
   '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json' };
 
 function readBody(req) {
@@ -48,6 +48,15 @@ const server = http.createServer(async (req, res) => {
     if (req.method !== 'POST') { res.writeHead(405); return res.end('Method not allowed'); }
     const body = await readBody(req);
     const result = await assess(body.profile || {});
+    res.writeHead(result.ok ? 200 : (result.status || 500), { 'content-type': 'application/json' });
+    return res.end(JSON.stringify(result.ok ? result.data : { error: result.reason, detail: result.detail }));
+  }
+
+  if (url.pathname === '/api/classify') {
+    if (req.method !== 'POST') { res.writeHead(405); return res.end('Method not allowed'); }
+    const body = await readBody(req);
+    const { classify } = await import('./api/classify.mjs');
+    const result = await classify(body, body.options || []);
     res.writeHead(result.ok ? 200 : (result.status || 500), { 'content-type': 'application/json' });
     return res.end(JSON.stringify(result.ok ? result.data : { error: result.reason, detail: result.detail }));
   }
