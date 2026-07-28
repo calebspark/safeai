@@ -112,7 +112,7 @@
     .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s6); box-shadow:0 14px 34px -22px rgba(0,0,0,.55); }
     /* Each result section is its own container, so the sibling rule cannot
        reach across them. Every card after the first keeps the same rhythm. */
-    .card + .card, #rating > .card, #output > .card, #maturity > .card, #agentic > .card{ margin-top:var(--gap); }
+    .card + .card, #rating > .card, #output > .card, #maturity > .card, #agentic > .card, #compare > .card{ margin-top:var(--gap); }
     .card h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
     .card .sub{ color:var(--ink-2); margin-top:6px; font-size:calc(var(--fs-base)*.95); }
     .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s6); }
@@ -327,6 +327,38 @@
     .picker .pills{ align-items:center; }
     .picker-free{ flex:1 1 240px; min-width:0; }
     .adopt-field{ margin-bottom:var(--s6); padding-bottom:var(--s5); border-bottom:1px solid var(--line); }
+    /* ---------- inline help ---------- */
+    .field > label.with-help{ display:flex; align-items:center; gap:7px; }
+    .infobtn{ font:inherit; cursor:pointer; padding:0; border:0; background:none; color:var(--ink-3);
+      display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%;
+      transition:color .15s, background .15s; }
+    .infobtn ion-icon{ font-size:18px; }
+    .infobtn:hover{ color:var(--accent); background:var(--surface-2); }
+    .infobtn:active{ transform:translateY(1px); }
+    .infobtn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+    /* Hover tooltip. Pointer devices only: on touch the button just works. */
+    [data-tip]{ position:relative; }
+    @media (hover:hover){
+      [data-tip]::after{ content:attr(data-tip); position:absolute; left:50%; bottom:calc(100% + 8px);
+        transform:translate(-50%,4px); white-space:nowrap; pointer-events:none;
+        background:var(--surface-2); color:var(--ink); border:1px solid var(--line-2);
+        box-shadow:var(--shadow-pop); border-radius:var(--r-sm); padding:6px 10px;
+        font-size:calc(var(--fs-base)*.84); font-weight:500; opacity:0; transition:opacity .15s, transform .15s; z-index:50; }
+      [data-tip]:hover::after, [data-tip]:focus-visible::after{ opacity:1; transform:translate(-50%,0); }
+    }
+
+    /* Floating return, shown only after the help button jumps the page down. */
+    .backtop{ position:fixed; right:20px; bottom:20px; z-index:70; font:inherit; font-weight:600; cursor:pointer;
+      color:var(--ink); background:var(--surface-2); border:1px solid var(--line-2); border-radius:var(--r-pill);
+      padding:11px 22px; box-shadow:var(--shadow-pop); display:inline-flex; align-items:center; gap:.5em;
+      opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .2s, transform .2s, background .15s; }
+    .backtop.show{ opacity:1; transform:none; pointer-events:auto; }
+    .backtop:hover{ background:var(--surface-3); }
+    .backtop:active{ transform:translateY(1px); }
+    .backtop:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    .backtop ion-icon{ font-size:1.15em; color:var(--accent); }
+    @media (max-width:640px){ .backtop{ right:12px; bottom:12px; padding:10px 20px; } }
     /* What each option actually means, shown only for what is selected. */
     .adopt-desc{ order:3; margin-top:var(--s3); display:grid; gap:var(--s2); }
     .adopt-desc[hidden]{ display:none; }
@@ -349,6 +381,9 @@
        Sits inside the maturity card, so it is a table on the card surface, not
        a second card. The selected column is marked by weight and the accent,
        never by giving each column its own colour. */
+    /* The nav is sticky, so anything we scroll to keeps clear of it. */
+    .cmp-h, #compare > .card{ scroll-margin-top:124px; }
+    @media (max-width:640px){ .cmp-h, #compare > .card{ scroll-margin-top:88px; } }
     .cmp-h{ margin:var(--s6) 0 var(--s1); font-size:calc(var(--fs-base)*1.05); }
     .cmp-lead{ color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
     table.risk.cmp{ min-width:760px; }
@@ -447,7 +482,12 @@
 
         <form id="q" novalidate>
           <div class="field adopt-field">
-            <label>Which of these does your organisation use?</label>
+            <label class="with-help">Which of these does your organisation use?
+              <button type="button" class="infobtn" id="adopt-help" data-tip="See how RPA, Gen AI and Agentic AI differ"
+                      aria-label="See how RPA, Gen AI and Agentic AI differ">
+                <ion-icon name="help-circle-outline"></ion-icon>
+              </button>
+            </label>
             <div class="hint" id="adopt-hint">Select all that apply. This routes you to the right follow-up and does not affect your risk score.</div>
             <div class="pills" role="group" aria-label="AI adoption" id="adoption-pills">
               <button type="button" class="pill" data-adopt="Agentic AI" aria-pressed="false">Agentic AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
@@ -547,6 +587,11 @@
         </form>
       </div>
 
+      <!-- Holds the technology comparison when the help button is used before
+           an assessment exists. After an assessment it lives in the maturity
+           card instead, and this stays empty. -->
+      <div id="compare"></div>
+
       <!-- ===== RATING (after profile) ===== -->
       <div id="rating"></div>
       <!-- ===== ASSESSMENT DETAIL ===== -->
@@ -562,6 +607,10 @@
       <span>Maps to MindForge AI RMF · CSA Guidelines on Securing AI Systems</span>
     </div>
   </footer>
+
+  <button type="button" class="backtop" id="backtop" data-tip="Return to the question you were on">
+    <ion-icon name="arrow-up-outline"></ion-icon>Back to the question
+  </button>
 
   <div class="toast" id="toast"><ion-icon name="checkmark-circle"></ion-icon><span></span></div>
 
@@ -1374,7 +1423,7 @@ const TECH_ROWS = [
   ]},
 ];
 
-function techCompareHTML(picked){
+function techCompareHTML(picked, { heading=true }={}){
   const head = TECH_COLS.map(c=>
     `<th scope="col"${picked.includes(c)?' class="on"':""}>${escapeHtml(c)}</th>`).join("");
   const body = TECH_ROWS.map(r=>
@@ -1389,7 +1438,7 @@ function techCompareHTML(picked){
     </div>`).join("");
 
   return `
-    <h3 class="cmp-h">Key differences between RPA, Gen AI and Agentic AI</h3>
+    ${heading?'<h3 class="cmp-h">Key differences between RPA, Gen AI and Agentic AI</h3>':''}
     <p class="cmp-lead">Most organisations run more than one of these. Risk changes with how much the software decides on its own.</p>
     <div class="tbl-scroll cmp-table">
       <table class="risk cmp">
@@ -1400,8 +1449,48 @@ function techCompareHTML(picked){
     <div class="cmp-cards">${blocks}</div>`;
 }
 
+/* ---------- help button on the adoption gate ----------
+   Jumps to the comparison. Before an assessment exists there is no maturity
+   card to jump to, so the same table renders into #compare on its own. A
+   floating return sends the user back to the question they left, because a
+   jump with no way back is worse than no jump. */
+const backtop=$("#backtop");
+function showBacktop(on){ backtop.classList.toggle("show", !!on); }
+
+$("#adopt-help").addEventListener("click", ()=>{
+  let target=document.querySelector("#maturity .cmp-h");
+  if(!target){
+    $("#compare").innerHTML=`<div class="card">
+      <div class="stitle" style="margin-bottom:var(--s4)">
+        <span class="n"><ion-icon name="git-compare-outline"></ion-icon></span>
+        <div><h2>Which one do you have?</h2>
+        <div class="sub">RPA, Gen AI and Agentic AI, side by side</div></div>
+      </div>
+      ${techCompareHTML((state.adoption||[]).filter(v=>v!=="None"), { heading:false })}</div>`;
+    target=document.querySelector("#compare .card");
+  }
+  target.scrollIntoView({behavior:"smooth", block:"start"});
+  showBacktop(true);
+});
+
+backtop.addEventListener("click", ()=>{
+  showBacktop(false);
+  document.querySelector(".adopt-field").scrollIntoView({behavior:"smooth", block:"center"});
+});
+
+/* Also retire the button once the question is back on screen under its own
+   steam, so it does not hang around after the user scrolls back manually. */
+if("IntersectionObserver" in window){
+  new IntersectionObserver(entries=>{
+    if(entries.some(e=>e.isIntersecting)) showBacktop(false);
+  }, { threshold:0.4 }).observe(document.querySelector(".adopt-field"));
+}
+
 function renderMaturity(){
   const picked=(state.adoption||[]).filter(v=>v!=="None");
+  /* One copy only. Once the maturity card carries the table, drop the
+     standalone one so the page does not show it twice. */
+  $("#compare").innerHTML="";
   const rows=TRACKS.map(t=>{
     const on=picked.includes(t.id);
     return `<div class="track ${on?"on":""}">
@@ -1697,6 +1786,7 @@ $("#reset").addEventListener("click",()=>{
   countdownActive=false;
   state.agenticFactors={}; state.agenticActions=[];
   $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML=""; $("#agentic").innerHTML="";
+  $("#compare").innerHTML=""; showBacktop(false);
   $("#formhint").textContent=""; $("#formhint").style.color="var(--ink-3)"; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
 });
 </script>
