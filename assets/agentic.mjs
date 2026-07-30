@@ -132,8 +132,15 @@ export function scorePredeployment(ratings) {
   const impact = Math.round(meanOf(IMPACT_IDS, ratings));
   const likelihood = Math.round(meanOf(LIKELIHOOD_IDS, ratings));
   const raw = impact * likelihood;
-  const needle = Math.round(((raw - 1) / 24) * 100);
   const tier = raw <= 6 ? 1 : raw <= 14 ? 2 : 3;
+  // The gauge is three equal bands, but the tier thresholds are not equal
+  // thirds of raw (1-6, 7-14, 15-25). Map raw within its tier's band so the
+  // needle always sits in the band the tier text names.
+  const needle = Math.round(
+    tier === 1 ? ((raw - 1) / 5) * 32
+    : tier === 2 ? 34 + ((raw - 7) / 7) * 32
+    : 68 + ((raw - 15) / 10) * 32
+  );
   return { impact, likelihood, raw, needle, tier };
 }
 

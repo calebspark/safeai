@@ -178,6 +178,58 @@
   </style>
 </head>
 <body>
+
+<!-- Private preview gate. Client-side only: it keeps casual visitors out
+     while the assessment is validated, it is not real security (the page
+     source is public). To rotate the password, replace GATE_HASH with the
+     SHA-256 hex of the new one: printf 'newpass' | shasum -a 256 -->
+<style>
+  #gate{ position:fixed; inset:0; z-index:120; background:var(--bg); display:grid; place-items:center; padding:24px; }
+  #gate[hidden]{ display:none; }
+  .gate-card{ width:min(380px,100%); background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; box-shadow:var(--raise); }
+  .gate-card h1{ margin:0 0 10px; font-size:calc(var(--fs-base)*1.35); line-height:1.2; }
+  .gate-card p{ margin:0 0 20px; color:var(--ink-2); line-height:1.55; }
+  .gate-card label{ display:block; margin:0 0 8px; font-weight:600; }
+  .gate-pass{ width:100%; box-sizing:border-box; font:inherit; color:var(--ink); background:var(--surface-2); border:1px solid var(--line-2); border-radius:var(--r-sm); padding:10px 12px; margin:0 0 12px; }
+  .gate-pass:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .gate-err{ margin:0 0 12px; color:var(--danger); font-size:calc(var(--fs-base)*.92); }
+  .gate-err[hidden]{ display:none; }
+  #gate .btn{ width:100%; justify-content:center; }
+</style>
+<div id="gate" hidden>
+  <form class="gate-card" id="gate-form">
+    <h1>Private preview</h1>
+    <p>This tool is still being validated and is not yet public. Enter the access password to continue.</p>
+    <label for="gate-pass">Password</label>
+    <input class="gate-pass" id="gate-pass" type="password" autocomplete="off" />
+    <p class="gate-err" id="gate-err" hidden>That password is not right. Try again.</p>
+    <button type="submit" class="btn btn-accent">Unlock</button>
+  </form>
+</div>
+<script>
+(()=>{
+  const GATE_HASH="2db60abd46a6dad224d023d8f5915a736ecb0c5b6e8f99cee44669d42d95fbae";
+  const KEY="safeai-gate";
+  const gate=document.getElementById("gate");
+  const open=()=>{ gate.remove(); document.documentElement.style.overflow=""; };
+  if(sessionStorage.getItem(KEY)===GATE_HASH) return open();
+  gate.hidden=false; document.documentElement.style.overflow="hidden";
+  const pass=document.getElementById("gate-pass");
+  document.getElementById("gate-form").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const buf=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pass.value));
+    const hex=[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+    if(hex===GATE_HASH){ sessionStorage.setItem(KEY,GATE_HASH); open(); }
+    else{ document.getElementById("gate-err").hidden=false; pass.select(); }
+  });
+  pass.focus();
+})();
+</script>
+  <nav>
+    <a href="/index.html" class="nav-brand">
+      <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
+    </a>
+    <div class="nav-right">
   <nav>
     <a href="/index.html" class="nav-brand">
       <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />

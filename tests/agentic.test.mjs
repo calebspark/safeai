@@ -57,8 +57,21 @@ test('all twos gives raw 4, tier 1', () => {
   assert.equal(s.tier, 1);
 });
 
-test('needle normalises raw 1..25 onto 0..100', () => {
-  assert.equal(scorePredeployment(flat(3)).needle, Math.round((9 - 1) / 24 * 100));
+test('needle lands inside the band its tier names', () => {
+  // Gauge bands are equal thirds: tier 1 up to 33, tier 2 to 67, tier 3 above.
+  // Raw 9 is tier 2, so its needle must sit in the middle band.
+  const mid = scorePredeployment(flat(3));
+  assert.equal(mid.tier, 2);
+  assert.ok(mid.needle >= 34 && mid.needle <= 66, `tier 2 needle ${mid.needle} outside 34..66`);
+  // Raw 15 is the lowest tier 3 score. Under the old linear mapping it landed
+  // at 58, inside the tier 2 band, while the text said Tier 3.
+  const low3 = { impact: 3, likelihood: 5 };
+  const ratings = {};
+  for (const f of IMPACT_FACTORS) ratings[f.id] = low3.impact;
+  for (const f of LIKELIHOOD_FACTORS) ratings[f.id] = low3.likelihood;
+  ratings[SHARED_FACTOR_ID] = 5;
+  const s = scorePredeployment(ratings);
+  if (s.tier === 3) assert.ok(s.needle >= 68, `tier 3 needle ${s.needle} below 68`);
 });
 
 test('tier bands follow raw <=6, 7-14, >=15', () => {

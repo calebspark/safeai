@@ -436,6 +436,53 @@
   </style>
 </head>
 <body>
+
+<!-- Private preview gate. Client-side only: it keeps casual visitors out
+     while the assessment is validated, it is not real security (the page
+     source is public). To rotate the password, replace GATE_HASH with the
+     SHA-256 hex of the new one: printf 'newpass' | shasum -a 256 -->
+<style>
+  #gate{ position:fixed; inset:0; z-index:120; background:var(--bg); display:grid; place-items:center; padding:24px; }
+  #gate[hidden]{ display:none; }
+  .gate-card{ width:min(380px,100%); background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; box-shadow:var(--raise); }
+  .gate-card h1{ margin:0 0 10px; font-size:calc(var(--fs-base)*1.35); line-height:1.2; }
+  .gate-card p{ margin:0 0 20px; color:var(--ink-2); line-height:1.55; }
+  .gate-card label{ display:block; margin:0 0 8px; font-weight:600; }
+  .gate-pass{ width:100%; box-sizing:border-box; font:inherit; color:var(--ink); background:var(--surface-2); border:1px solid var(--line-2); border-radius:var(--r-sm); padding:10px 12px; margin:0 0 12px; }
+  .gate-pass:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .gate-err{ margin:0 0 12px; color:var(--danger); font-size:calc(var(--fs-base)*.92); }
+  .gate-err[hidden]{ display:none; }
+  #gate .btn{ width:100%; justify-content:center; }
+</style>
+<div id="gate" hidden>
+  <form class="gate-card" id="gate-form">
+    <h1>Private preview</h1>
+    <p>This tool is still being validated and is not yet public. Enter the access password to continue.</p>
+    <label for="gate-pass">Password</label>
+    <input class="gate-pass" id="gate-pass" type="password" autocomplete="off" />
+    <p class="gate-err" id="gate-err" hidden>That password is not right. Try again.</p>
+    <button type="submit" class="btn btn-accent">Unlock</button>
+  </form>
+</div>
+<script>
+(()=>{
+  const GATE_HASH="2db60abd46a6dad224d023d8f5915a736ecb0c5b6e8f99cee44669d42d95fbae";
+  const KEY="safeai-gate";
+  const gate=document.getElementById("gate");
+  const open=()=>{ gate.remove(); document.documentElement.style.overflow=""; };
+  if(sessionStorage.getItem(KEY)===GATE_HASH) return open();
+  gate.hidden=false; document.documentElement.style.overflow="hidden";
+  const pass=document.getElementById("gate-pass");
+  document.getElementById("gate-form").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const buf=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pass.value));
+    const hex=[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+    if(hex===GATE_HASH){ sessionStorage.setItem(KEY,GATE_HASH); open(); }
+    else{ document.getElementById("gate-err").hidden=false; pass.select(); }
+  });
+  pass.focus();
+})();
+</script>
   <nav>
     <a href="/index.html" class="nav-brand">
       <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
@@ -1541,8 +1588,8 @@ function agenticCard(inner){
 }
 
 function renderAgenticIntro(){
-  /* Start over means start over. Both branches reset. */
-  state.agenticFactors={}; state.agenticActions=[];
+  /* Navigation only. The reset lives in the Start over handler, so Back can
+     return here without wiping half-finished answers. */
   $("#agentic").innerHTML=agenticCard(`
     <p style="color:var(--ink-2);margin:0 0 var(--s4);line-height:1.6">These two paths use different parts of the framework. Before deployment we assess whether the use case is suitable at all. After deployment we tier each action and check how much autonomy it has actually been given.</p>
     <label style="display:block;margin-bottom:var(--s3);font-weight:600">Have you already deployed any AI agents?</label>
@@ -1576,7 +1623,14 @@ $("#agentic").addEventListener("click", async e=>{
     return;
   }
   if(e.target.closest("#agentic-run")) return renderPredeployResult(scorePredeployment(state.agenticFactors));
-  if(e.target.closest("#agentic-restart")) return renderAgenticIntro();
+  /* Back steps to the previous screen with answers intact. Start over is the
+     only control that wipes them. */
+  if(e.target.closest("#agentic-back-intro")) return renderAgenticIntro();
+  if(e.target.closest("#agentic-back-form")) return renderPredeployForm();
+  if(e.target.closest("#agentic-restart")){
+    state.agenticFactors={}; state.agenticActions=[];
+    return renderAgenticIntro();
+  }
 
   if(e.target.closest("#add-action")){
     state.agenticActions.push({label:"",severity:1,reversibility:1,oversight:1,granted:3});
@@ -1636,9 +1690,14 @@ function renderPredeployForm(){
     ${LIKELIHOOD_ONLY.map(factorBlock).join("")}
     <div class="actions">
       <button type="button" class="btn btn-accent" id="agentic-run" disabled>Score this agent</button>
-      <button type="button" class="btn btn-ghost" id="agentic-restart">Back</button>
+      <button type="button" class="btn btn-ghost" id="agentic-back-intro">Back</button>
       <span class="formhint" id="agentic-hint"></span>
     </div>`);
+  /* Returning from the result or the intro: re-check the pills already answered. */
+  Object.entries(state.agenticFactors).forEach(([id,score])=>{
+    const pill=document.querySelector(`#agentic [data-factor="${CSS.escape(id)}"][data-score="${score}"]`);
+    if(pill) pill.setAttribute("aria-checked","true");
+  });
   updatePredeployReady();
   $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -1665,6 +1724,7 @@ function renderPredeployResult(s){
     <h3 style="margin:var(--s6) 0 var(--s2)">Autonomy ceiling</h3>
     <p style="color:var(--ink-2);margin:0;line-height:1.6">${escapeHtml(AUTONOMY_CEILING_COPY[s.tier])}</p>
     <div class="actions">
+      <button type="button" class="btn" id="agentic-back-form">Back</button>
       <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
     </div>
     <p class="disclaim">Scored locally from the factor tables in the IMDA Model AI Governance Framework for Agentic AI, pages 15 to 17. Decision support, not a substitute for a formal risk assessment.</p>`);
@@ -1710,7 +1770,7 @@ function renderDeployedForm(){
     <div class="actions">
       <button type="button" class="btn btn-accent" id="score-actions">Check governance gap</button>
       <button type="button" class="btn" id="add-action"><ion-icon name="add-outline"></ion-icon>Add action type</button>
-      <button type="button" class="btn btn-ghost" id="agentic-restart">Back</button>
+      <button type="button" class="btn btn-ghost" id="agentic-back-intro">Back</button>
     </div>`);
   $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
 }
