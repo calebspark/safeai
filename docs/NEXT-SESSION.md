@@ -1,7 +1,21 @@
 # SafeAI, next session
 
-Last session: 2026-07-28. Everything below is outstanding. Nothing here blocks
+Last session: 2026-07-30. Everything below is outstanding. Nothing here blocks
 the live site, which is healthy.
+
+## 0. Preview lockdown, revert when the assessment is "validated"
+
+Done 2026-07-30 (`b26a85d`) at David's request. When David or Joe declare the
+assessment validated, undo all three:
+
+- [ ] `index.html`: restore the hero "Know my AI Risk" button and the two
+      Resources card links. Both originals sit in HTML comments marked
+      "Restore"; delete the "Coming soon" spans next to them.
+- [ ] Remove the password gate block (style + `#gate` div + script) sitting
+      right after `<body>` in `risk-assessment.html` and `checklist.html`.
+      Until then the password is `safeai2026`; to rotate it, replace
+      `GATE_HASH` in both files with `printf 'newpass' | shasum -a 256`.
+      Client-side only, it deters casual visitors, it is not security.
 
 Context: spec `docs/superpowers/specs/2026-07-28-safeai-questions-and-agentic-matrix-design.md`,
 plan `docs/superpowers/plans/2026-07-28-safeai-questions-and-agentic-matrix.md`.
