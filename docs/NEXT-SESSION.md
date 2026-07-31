@@ -29,14 +29,10 @@ Both fully implemented and deployed as of `15e229e`.
       all, and calls Sonnet at `max_tokens: 5000`, so it is an open
       wallet-drain. `/api/classify` has a per-instance per-IP bucket, which
       only blunts a single-source flood.
-- [ ] **Upload `~/Downloads/ssic2025report.pdf`** to Joe Chiu's Drive folder,
-      "Safe AI Risk Assessment Reference"
-      (`1qireLpI9tcG-9vi4RX4dFXFfu_rQkX1x`). 1.7MB, too large to push through
-      the Drive API, needs a manual drag.
-- [ ] **Joe to review the 1/3/5 anchor text** on the ten IMDA agentic factors
-      in `assets/agentic.mjs`. Drafted from the illustration column of the
-      source tables. These anchors decide whether two people rating the same
-      system land on the same number, so they should not be one person's call.
+- [x] **Upload `~/Downloads/ssic2025report.pdf`** to Joe Chiu's Drive folder.
+      Done, confirmed 2026-07-31.
+- [x] **Joe to review the 1/3/5 anchor text** on the ten IMDA agentic factors
+      in `assets/agentic.mjs`. Done, confirmed 2026-07-31.
 
 ## 2. Decisions waiting on you
 
