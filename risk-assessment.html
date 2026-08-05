@@ -624,11 +624,14 @@
         <div class="step muted"><span class="node"><span class="nnum">5</span></span><span class="stxt">Monitoring &amp; reporting<span class="next">soon</span></span></div>
       </div>
 
+      <!-- Restore: the checklist companion link, archived 2026-08-05 at
+           David's request. Put it back only when he asks for it.
       <a href="/checklist.html" class="companion">
         <ion-icon name="checkbox-outline"></ion-icon>
         <span>Prefer a plain-language starting point? <b>Try the AI Safety Checklist</b></span>
         <ion-icon class="arr" name="arrow-forward-outline"></ion-icon>
       </a>
+      -->
     </div>
   </section>
 
@@ -640,7 +643,9 @@
 
         <form id="q" novalidate>
           <div class="field adopt-field">
-            <label class="with-help"><span class="qn">1.</span>Which of these does your organisation use?
+            <!-- Unnumbered on purpose: this routes the follow-up rather than
+                 feeding the score, so the numbered list starts at Industry. -->
+            <label class="with-help">Which of these does your organisation use?
               <button type="button" class="infobtn" id="adopt-help" data-tip="See how Gen AI and Agentic AI differ"
                       aria-label="See how Gen AI and Agentic AI differ">
                 <ion-icon name="help-circle-outline"></ion-icon>
@@ -657,7 +662,7 @@
 
           <div class="fgrid">
             <div class="field" data-key="industry">
-              <label for="industry-input"><span class="qn">2.</span>Industry</label>
+              <label for="industry-input"><span class="qn">1.</span>Industry</label>
               <div class="hint">Sets the regulatory baseline. Financial, health and public sector carry stricter compliance.</div>
               <div class="combo" data-combo="industry">
                 <input id="industry-input" class="combo-input" type="text" autocomplete="off" spellcheck="false"
@@ -669,7 +674,7 @@
             </div>
 
             <div class="field" data-key="role">
-              <label><span class="qn">3.</span>Role / responsibility</label>
+              <label><span class="qn">2.</span>Role / responsibility</label>
               <div class="hint">Tailors the language and ownership of the recommendations.</div>
               <div class="picker" data-picker="role">
                 <div class="picker-crumb" hidden><button type="button" class="picker-back"><ion-icon name="chevron-back-outline"></ion-icon><span></span></button></div>
@@ -679,7 +684,7 @@
             </div>
 
             <div class="field" data-key="usecase">
-              <label><span class="qn">4.</span>AI system / use case type</label>
+              <label><span class="qn">3.</span>AI system / use case type</label>
               <div class="hint">Dictates the likely attack vectors. GenAI needs prompt-injection controls.</div>
               <div class="picker" data-picker="usecase">
                 <div class="picker-crumb" hidden><button type="button" class="picker-back"><ion-icon name="chevron-back-outline"></ion-icon><span></span></button></div>
@@ -691,28 +696,28 @@
             <!-- The five scale questions render from assets/options.mjs, so the
                  option text and its explanation live in one reviewed place. -->
             <div class="field" data-key="autonomy" data-scale="AUTONOMY">
-              <label><span class="qn">5.</span>Autonomy level</label>
+              <label><span class="qn">4.</span>Autonomy level</label>
               <div class="hint">How much the system decides and does on its own. This is the sharpest risk multiplier.</div>
               <div class="pills" role="radiogroup" aria-label="Autonomy level"></div>
               <div class="opt-desc" hidden></div>
             </div>
 
             <div class="field" data-key="dataSource" data-scale="DATA_SOURCE">
-              <label><span class="qn">6.</span>Data source</label>
+              <label><span class="qn">5.</span>Data source</label>
               <div class="hint">Where the system reads from. Pick the main one.</div>
               <div class="pills" role="radiogroup" aria-label="Data source"></div>
               <div class="opt-desc" hidden></div>
             </div>
 
             <div class="field" data-key="dataSensitivity" data-scale="DATA_SENSITIVITY">
-              <label><span class="qn">7.</span>Data sensitivity</label>
+              <label><span class="qn">6.</span>Data sensitivity</label>
               <div class="hint">The most sensitive class of data it can reach. The main driver of data protection requirements.</div>
               <div class="pills" role="radiogroup" aria-label="Data sensitivity"></div>
               <div class="opt-desc" hidden></div>
             </div>
 
             <div class="field" data-key="capability" data-scale="CAPABILITY">
-              <label><span class="qn">8.</span>Agent capability level</label>
+              <label><span class="qn">7.</span>Agent capability level</label>
               <div class="hint">How far a single run reaches: one call, a chain, memory across days, or other agents.</div>
               <div class="pills" role="radiogroup" aria-label="Capability level"></div>
               <div class="cap-note" hidden></div>
@@ -720,7 +725,7 @@
             </div>
 
             <div class="field" data-key="hosting" data-scale="HOSTING">
-              <label><span class="qn">9.</span>Infrastructure hosting model</label>
+              <label><span class="qn">8.</span>Infrastructure hosting model</label>
               <div class="hint">Where it runs, and therefore who else can reach the data.</div>
               <div class="pills" role="radiogroup" aria-label="Hosting model"></div>
               <div class="opt-desc" hidden></div>
