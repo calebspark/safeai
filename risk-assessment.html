@@ -976,7 +976,15 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
     onFieldChanged();
   }
 
-  return { commit, reset(){ state[key]=""; input.value=""; setNote(""); close(); } };
+  /* restore replays a saved answer after a reload. It goes through commit, so
+     the field paints exactly as it did when it was picked, and it never calls
+     /api/classify: the value was already resolved once. */
+  return {
+    key,
+    commit,
+    restore(value){ if(value) commit(value); },
+    reset(){ state[key]=""; input.value=""; setNote(""); close(); },
+  };
 }
 
 /* ---------- two-level group picker (role, use case) ----------
@@ -1106,7 +1114,11 @@ function groupPicker(key, groups, { noun }){
   }
 
   showGroups();
-  return { reset(){ state[key]=""; setNote(""); showGroups(); } };
+  return {
+    key,
+    restore(value){ if(value) commit(value); },
+    reset(){ state[key]=""; setNote(""); showGroups(); },
+  };
 }
 
 const TIERS = {
@@ -1461,6 +1473,10 @@ async function runAssessment(vals){
 
 /* ---------- pill selection ---------- */
 let hasRun=false;
+/* The last /api/assess payload and the profile it came from. Kept so a reload
+   can redraw the rating and the mapped controls without calling the model
+   again, and so the detail shown always matches the numbers beside it. */
+let lastResult=null, lastResultProfile=null;
 
 /* Live countdown. Once the user has been told how many fields are outstanding,
    that number has to keep up as they answer, and clear itself at zero. */
@@ -1488,6 +1504,7 @@ function refreshCountdown(){
 function onFieldChanged(){
   assessedComplete=false;
   updateStepper();
+  save();
   document.querySelectorAll(".field[data-key]").forEach(f=>{
     if(KEYS.includes(f.dataset.key) && state[f.dataset.key]) f.classList.remove("miss");
   });
@@ -1525,7 +1542,11 @@ function scaleField(field){
   });
 
   paint();
-  return { reset(){ state[key]=""; paint(); } };
+  return {
+    key,
+    restore(value){ if(value){ state[key]=value; paint(); } },
+    reset(){ state[key]=""; paint(); },
+  };
 }
 const SCALE_FIELDS = [...document.querySelectorAll(".field[data-scale]")].map(scaleField);
 
@@ -1559,13 +1580,20 @@ document.getElementById("adoption-pills").addEventListener("click", e=>{
       ? state.adoption.filter(v=>v!==val)
       : [...state.adoption.filter(v=>v!=="None"), val];
   }
+  paintAdoption();
+  save();
+});
+
+/* Split out from the handler so a restored session can repaint the gate from
+   state without faking a click on each pill. */
+function paintAdoption(){
   document.querySelectorAll("#adoption-pills .pill")
     .forEach(x=>x.setAttribute("aria-pressed", String(state.adoption.includes(x.dataset.adopt))));
   $("#adopt-hint").textContent = state.adoption.includes("Agentic AI")
     ? "Agentic AI adds a short second survey after your results."
     : "Select all that apply. This routes you to the right follow-up and does not affect your risk score.";
   renderAdoptDesc();
-});
+}
 
 /* Plain-language meaning of each option, shown only once it is selected, so
    nobody has to guess which one their software counts as. */
@@ -1742,6 +1770,7 @@ function showTrack(view, { push=true }={}){
   if(push) history.pushState({ view }, "", "#"+view);
   jumpToTop();
   $("#track-back").focus({ preventScroll:true });
+  save();
 }
 
 function showMain({ push=true, scrollTo="#maturity" }={}){
@@ -1753,6 +1782,7 @@ function showMain({ push=true, scrollTo="#maturity" }={}){
   const target = scrollTo && $(scrollTo);
   if(target && target.firstChild) target.scrollIntoView({ behavior:"instant", block:"start" });
   else jumpToTop();
+  save();
 }
 
 $("#track-back").addEventListener("click", ()=>showMain());
@@ -1763,8 +1793,10 @@ window.addEventListener("popstate", e=>{
   else showMain({ push:false });
 });
 
-/* Landing straight on #genai or #agentic: clear it, there is nothing behind it
-   on a fresh load. */
+/* Landing straight on #genai or #agentic: clear it. A shared link has nothing
+   behind it, and a track with no assessment above it is a dead end. If this tab
+   does have a saved session, restoreSession at the bottom of this file puts the
+   hash back and reopens the track. */
 if(location.hash==="#genai" || location.hash==="#agentic"){
   history.replaceState({ view:"main" }, "", location.pathname);
 }
@@ -1830,6 +1862,7 @@ $("#agentic").addEventListener("click", async e=>{
       state.agenticFactors[f.dataset.factor]=Number(f.dataset.score);
     }
     updatePredeployReady();
+    save();
     return;
   }
   if(e.target.closest("#agentic-run")) return renderPredeployResult(scorePredeployment(state.agenticFactors));
@@ -1863,6 +1896,7 @@ $("#agentic").addEventListener("input", e=>{
   const el=e.target.closest("[data-row]"); if(!el) return;
   const row=state.agenticActions[Number(el.dataset.row)];
   row[el.dataset.key] = el.dataset.key==="label" ? el.value : Number(el.value);
+  save();
 });
 
 /* --- pre-deployment: the ten factors --- */
@@ -2137,12 +2171,14 @@ $("#genai").addEventListener("click", e=>{
       state.genaiAnswers[p.dataset.gq]=p.dataset.gv;
     }
     updateGenaiReady();
+    save();
     return;
   }
   if(e.target.closest("#genai-run")) return renderGenaiResult(scoreReadiness(state.genaiAnswers));
   if(e.target.closest("#genai-back")) return renderGenaiForm();
   if(e.target.closest("#genai-clear")){
     state.genaiAnswers={};
+    save();
     return renderGenaiForm();
   }
 });
@@ -2171,6 +2207,7 @@ form.addEventListener("submit", async e=>{
     await new Promise(r=>setTimeout(r,420));           // let 100% land, then fade in the needle
     renderRating(data); renderOutput(state, data); renderMaturity();
     hasRun=true; assessedComplete=true; updateStepper(); setLabel("Reassess");
+    lastResult=data; lastResultProfile=profileOf(state); save();
     toast("Assessment complete");
   }catch(err){
     stopAssessing();
@@ -2196,7 +2233,114 @@ $("#reset").addEventListener("click",()=>{
      visitor back from one. Scroll to the top: there is no rating to return to. */
   showMain({ scrollTo:null });
   $("#formhint").textContent=""; $("#formhint").style.color="var(--ink-3)"; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
+  clearSaved();
 });
+
+/* ---------- surviving a reload ----------
+   Everything the visitor has answered is mirrored into sessionStorage and
+   replayed on load, so refreshing, or being bounced by a network blip, does not
+   throw the work away. Reset is still the only thing that clears it.
+
+   sessionStorage, not localStorage: it is scoped to the tab and goes when the
+   tab closes, which matches the password gate and means a shared machine does
+   not hand the next person someone else's risk profile.
+
+   SAVE_VERSION guards the shape. KEYS has changed before, and a stale save
+   written by an older build would restore a half-empty profile that looks
+   complete. Bump it whenever KEYS or anything saved below changes. */
+const SAVE_KEY = "safeai.assessment";
+const SAVE_VERSION = 1;
+
+function profileOf(src){ return Object.fromEntries(KEYS.map(k=>[k, src[k]||""])); }
+
+/* Replaying a saved answer goes through the same commit path a click does, so
+   it fires onFieldChanged, so it would save. Half way through a restore the
+   result has not been put back yet, and that write would erase it from the very
+   record being restored. Hold writes until the restore has finished. */
+let restoring=false;
+
+function save(){
+  if(restoring) return;
+  try{
+    sessionStorage.setItem(SAVE_KEY, JSON.stringify({
+      v: SAVE_VERSION,
+      profile: profileOf(state),
+      adoption: state.adoption || [],
+      agenticFactors: state.agenticFactors || {},
+      agenticActions: state.agenticActions || [],
+      genaiAnswers: state.genaiAnswers || {},
+      result: lastResult,
+      resultProfile: lastResultProfile,
+      view: document.body.dataset.view,
+    }));
+  }catch{ /* private mode or quota: persistence is a convenience, not a feature */ }
+}
+
+function clearSaved(){
+  lastResult=null; lastResultProfile=null;
+  try{ sessionStorage.removeItem(SAVE_KEY); }catch{}
+}
+
+function readSaved(){
+  try{
+    const raw = sessionStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    if(!d || d.v !== SAVE_VERSION) { sessionStorage.removeItem(SAVE_KEY); return null; }
+    return d;
+  }catch{ return null; }
+}
+
+function restoreSession(){
+  const d = readSaved();
+  if(!d) return;
+  restoring = true;
+  try{ replay(d); } finally { restoring = false; }
+  save();
+}
+
+function replay(d){
+
+  /* Fields first, so the stepper and the countdown recompute from real values. */
+  const profile = d.profile || {};
+  [...FIELD_CONTROLS, ...SCALE_FIELDS].forEach(c=>c.restore(profile[c.key]));
+
+  state.adoption = Array.isArray(d.adoption) ? d.adoption : [];
+  paintAdoption();
+
+  state.agenticFactors = d.agenticFactors || {};
+  state.agenticActions = Array.isArray(d.agenticActions) ? d.agenticActions : [];
+  state.genaiAnswers   = d.genaiAnswers || {};
+
+  /* The rating and the mapped controls are rendered from the saved API payload
+     rather than being asked for again: a reload should not cost another call to
+     the model, and the visitor should see the same numbers they left. */
+  if(d.result){
+    lastResult = d.result;
+    lastResultProfile = d.resultProfile || profile;
+    try{
+      renderRating(lastResult);
+      renderOutput(lastResultProfile, lastResult);
+      renderMaturity();
+      hasRun=true; assessedComplete=true; setLabel("Reassess");
+    }catch{
+      /* A payload this build cannot render is not worth keeping. */
+      clearSaved();
+    }
+  }
+  updateStepper();
+
+  /* Back into the track that was open. Which screen within it (intro, form,
+     result) is not saved, so it reopens at the questions with the answers
+     already filled in, which is the screen someone can carry on from. */
+  if(lastResult && (d.view==="genai" || d.view==="agentic")){
+    if(d.view==="genai") renderGenaiForm(); else renderAgenticIntro();
+    showTrack(d.view, { push:false });
+    history.replaceState({ view:d.view }, "", "#"+d.view);
+  }
+}
+
+restoreSession();
 </script>
 </body>
 </html>
