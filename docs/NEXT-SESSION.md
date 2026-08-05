@@ -42,10 +42,9 @@ lower a genuinely risky score.
 
 ## 2. Waiting on David
 
-- [ ] **Scale wording.** He asked for "not compiled / partially compiled /
-      fully compiled". Shipped as "not implemented / partially implemented /
-      fully implemented", which is what the framework means by a completed
-      process check. One-line swap in `SCALE` in `assets/genai.mjs`.
+- [x] **Scale wording: settled 2026-08-05, "implemented" stays.** The original
+      ask was "compiled"; David confirmed the shipped wording is fine. Closed,
+      do not reopen.
 - [ ] **Verify the tier thresholds and control mappings.** Carried over from
       earlier sessions.
 - [ ] **Declare the assessment validated**, which triggers the revert below.
