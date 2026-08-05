@@ -258,7 +258,35 @@
     .empty ion-icon{ font-size:34px; margin-bottom:var(--s3); color:var(--ink-3); }
     .disclaim{ margin-top:var(--s6); color:var(--ink-3); font-size:calc(var(--fs-base)*.84); line-height:1.6; }
     footer{ border-top:1px solid var(--line); padding:var(--s6) 0; color:var(--ink-3); font-size:calc(var(--fs-base)*.86); }
-    footer .wrap{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:var(--s3); }
+    footer .wrap{ display:flex; flex-direction:column; gap:var(--s5); }
+
+    /* Announced to a screen reader but not drawn. Used for the "opens in a new
+       tab" note on every external link. */
+    .vh{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden;
+      clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0; }
+
+    /* ---------- footer sources ----------
+       Two columns on desktop, one on a phone. Each entry is the document title
+       as the link, then who published it and what it is used for underneath,
+       so the link text alone still says what it opens. */
+    .fsrc h2{ font-size:calc(var(--fs-base)*.82); font-weight:500; color:var(--ink-3);
+      letter-spacing:.006em; margin:0 0 var(--s3); }
+    .fsrc ul{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:var(--s4) var(--s6); margin:0; padding:0; list-style:none; }
+    @media (max-width:760px){ .fsrc ul{ grid-template-columns:1fr; } }
+    .fsrc li{ min-width:0; }
+    .fsrc a, .fsrc .nolink{ display:inline-block; color:var(--ink-2); text-decoration:none;
+      line-height:1.45; }
+    .fsrc a{ color:var(--accent); }
+    .fsrc a:hover{ text-decoration:underline; }
+    .fsrc a:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
+    .fsrc a ion-icon{ font-size:.8em; margin-left:.45em; vertical-align:middle; color:var(--ink-3); }
+    .fsrc .who{ display:block; margin-top:5px; color:var(--ink-3); line-height:1.5;
+      font-size:calc(var(--fs-base)*.8); }
+    /* The rule sits on the list, not on the note: the note is capped to a
+       readable measure, so a border on it would stop short of the column. */
+    .fsrc{ padding-bottom:var(--s5); border-bottom:1px solid var(--line); }
+    .fnote{ margin:0; color:var(--ink-3); line-height:1.55; max-width:68ch; }
 
     .toast{ position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0; background:var(--surface-2); color:var(--ink); border:1px solid var(--line-2); box-shadow:var(--shadow-pop);
       padding:11px 18px; border-radius:var(--r-pill); font-size:calc(var(--fs-base)*.9); font-weight:500; display:flex; align-items:center; gap:8px; pointer-events:none; transition:transform .25s, opacity .25s; z-index:60; }
@@ -448,20 +476,6 @@
     .ganswer.is-partial{ color:var(--t2); }
     .ganswer.is-full{ color:var(--success); }
     .ganswer.is-na{ color:var(--ink-3); }
-
-    /* ---------- sources ---------- */
-    .srclist{ margin:0; padding:0; list-style:none; }
-    .srclist li{ padding:var(--s4) 0; border-top:1px solid var(--line); }
-    .srclist li:first-child{ border-top:0; padding-top:0; }
-    .srclist b{ display:block; font-size:calc(var(--fs-base)*1.02); }
-    .srclist .who{ display:block; color:var(--ink-3); margin-top:3px;
-      font-size:calc(var(--fs-base)*.84); }
-    .srclist p{ margin:var(--s2) 0 0; color:var(--ink-2); line-height:1.6; max-width:68ch; }
-    .srclist a{ display:inline-flex; align-items:center; gap:.5em; margin-top:var(--s2);
-      color:var(--accent); text-decoration:none; }
-    .srclist a:hover{ text-decoration:underline; }
-    .srclist a ion-icon{ font-size:.85em; color:var(--ink-3); }
-    .srclist a:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
 
     .gap-list{ margin:0; padding:0; list-style:none; }
     .gap-list li{ padding:var(--s3) 0; border-top:1px solid var(--line); line-height:1.6; color:var(--ink-2); }
@@ -687,54 +701,56 @@
       <div id="agentic"></div>
       <div id="genai"></div>
 
-      <!-- ===== SOURCES =====
-           Every framework this page scores against, credited in one place so a
-           reader can go to the original rather than take our summary on faith. -->
-      <div class="card" id="sources">
-        <div class="stitle"><span class="n"><ion-icon name="library-outline"></ion-icon></span>
-          <div><h2>Sources</h2>
-          <div class="sub">The frameworks this assessment is built on</div></div>
-        </div>
-        <ul class="srclist">
-          <li>
-            <b>AI Verify Testing Framework for Traditional and Generative AI</b>
-            <span class="who">IMDA and AI Verify Foundation</span>
-            <p>The 11 AI governance principles, outcomes and process checks behind the Gen AI readiness questions. Question wording is condensed by SafeAI; the framework is the authority.</p>
-            <a href="https://aiverifyfoundation.sg/what-is-ai-verify/" target="_blank" rel="noopener">Read the full framework<ion-icon name="open-outline"></ion-icon></a>
-          </li>
-          <li>
-            <b>Model AI Governance Framework for Agentic AI</b>
-            <span class="who">IMDA and AI Verify Foundation</span>
-            <p>The impact and likelihood factor tables and the Dayos action tiering case study behind the Agentic AI matrix.</p>
-            <a href="https://www.imda.gov.sg/resources/press-releases-factsheets-and-speeches/factsheets/2025/model-ai-governance-framework-for-agentic-ai" target="_blank" rel="noopener">Read the full framework<ion-icon name="open-outline"></ion-icon></a>
-          </li>
-          <li>
-            <b>Guidelines and Companion Guide on Securing AI Systems</b>
-            <span class="who">Cyber Security Agency of Singapore</span>
-            <p>The security control expectations reflected in the overall risk rating and the mapped controls checklist.</p>
-            <a href="https://www.csa.gov.sg/resources/publications/guidelines-and-companion-guide-on-securing-ai-systems/" target="_blank" rel="noopener">Read the guidelines<ion-icon name="open-outline"></ion-icon></a>
-          </li>
-          <li>
-            <b>MindForge AI Risk Management Framework</b>
-            <span class="who">MindForge</span>
-            <p>The five step risk management flow the overall assessment follows. This tool covers steps 1 to 3.</p>
-          </li>
-          <li>
-            <b>Singapore Standard Industrial Classification 2025</b>
-            <span class="who">Department of Statistics Singapore</span>
-            <p>The industry list. Note that SSIC 2025 split section J, so the letters differ from SSIC 2020.</p>
-            <a href="https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-industrial-classification-ssic" target="_blank" rel="noopener">See the classification<ion-icon name="open-outline"></ion-icon></a>
-          </li>
-        </ul>
-        <p class="disclaim">SafeAI is not affiliated with these organisations. Their material is cited for reference and the assessments here are our own condensation of it.</p>
-      </div>
     </div>
   </main>
 
+  <!-- ===== FOOTER =====
+       Every framework this page scores against, credited here so a reader can
+       go to the original rather than take our summary on faith. Link text is
+       the full document title rather than "read more", so it still says what
+       it opens when read out of context by a screen reader. -->
   <footer>
     <div class="wrap">
-      <span>SafeAI · AI risk assessment</span>
-      <span>Maps to MindForge AI RMF · CSA Guidelines on Securing AI Systems · IMDA and AI Verify testing frameworks</span>
+      <!-- A section, not a nav: the bare `nav` selector styles the sticky top
+           bar (flex, 104px tall, sticky) and would swallow this. -->
+      <section class="fsrc" aria-labelledby="src-h">
+        <h2 id="src-h">Sources</h2>
+        <ul>
+          <li>
+            <a href="https://aiverifyfoundation.sg/what-is-ai-verify/" target="_blank" rel="noopener">
+              AI Verify Testing Framework for Traditional and Generative AI<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+              <span class="vh">(opens in a new tab)</span>
+            </a>
+            <span class="who">IMDA and AI Verify Foundation · the 11 principles behind the Gen AI readiness questions</span>
+          </li>
+          <li>
+            <a href="https://www.imda.gov.sg/resources/press-releases-factsheets-and-speeches/factsheets/2025/model-ai-governance-framework-for-agentic-ai" target="_blank" rel="noopener">
+              Model AI Governance Framework for Agentic AI<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+              <span class="vh">(opens in a new tab)</span>
+            </a>
+            <span class="who">IMDA and AI Verify Foundation · the factor tables behind the Agentic AI matrix</span>
+          </li>
+          <li>
+            <a href="https://www.csa.gov.sg/resources/publications/guidelines-and-companion-guide-on-securing-ai-systems/" target="_blank" rel="noopener">
+              Guidelines and Companion Guide on Securing AI Systems<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+              <span class="vh">(opens in a new tab)</span>
+            </a>
+            <span class="who">Cyber Security Agency of Singapore · the security expectations in the risk rating</span>
+          </li>
+          <li>
+            <span class="nolink">MindForge AI Risk Management Framework</span>
+            <span class="who">MindForge · the five step flow the overall assessment follows, steps 1 to 3</span>
+          </li>
+          <li>
+            <a href="https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-industrial-classification-ssic" target="_blank" rel="noopener">
+              Singapore Standard Industrial Classification 2025<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+              <span class="vh">(opens in a new tab)</span>
+            </a>
+            <span class="who">Department of Statistics Singapore · the industry list</span>
+          </li>
+        </ul>
+      </section>
+      <p class="fnote">SafeAI · AI risk assessment. Not affiliated with these organisations. Their material is cited for reference and the assessments here are our own condensation of it.</p>
     </div>
   </footer>
 
