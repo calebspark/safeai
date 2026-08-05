@@ -125,6 +125,12 @@
     .field{ display:flex; flex-direction:column; }
     .field > label{ order:0; font-weight:600; font-size:calc(var(--fs-base)*1.02); margin-bottom:5px; }
     .field.miss > label{ color:var(--warn); }
+    /* Serial number on every question, so a reviewer can say "question 4"
+       and mean the same question the person filling it in is looking at.
+       Quiet ink rather than accent: it is a reference mark, not emphasis, and
+       the accent stays on the one primary action. It is written into the label
+       text, so the CSV export carries the same numbers. */
+    .qn{ color:var(--ink-3); font-weight:600; font-variant-numeric:tabular-nums; margin-right:6px; }
     .field .hint{ order:1; color:var(--ink-3); font-size:calc(var(--fs-base)*.84); margin:0 0 var(--s3); line-height:1.5; }
     .field.miss .hint{ color:var(--warn); }
     .field .pills{ order:2; }
@@ -134,7 +140,15 @@
       font-size:calc(var(--fs-base)*.9); line-height:1.55; }
     .field .opt-desc[hidden]{ display:none; }
     .field .opt-desc b{ color:var(--ink); font-weight:600; }
+    /* Why some capability levels are not offered. Sits between the pills and
+       the picked-level explanation, so the reason is next to the gap it
+       explains rather than somewhere further down the form. */
+    .field .cap-note{ order:3; margin-top:var(--s3); color:var(--ink-3);
+      font-size:calc(var(--fs-base)*.84); line-height:1.55; }
+    .field .cap-note[hidden]{ display:none; }
     .pills{ display:flex; flex-wrap:wrap; gap:8px; }
+    /* .pill is inline-flex, which would otherwise beat the [hidden] default. */
+    .pill[hidden]{ display:none; }
     .pill{ font:inherit; font-weight:500; cursor:pointer; color:var(--ink-2); background:var(--surface-2);
       border:1px solid var(--line); border-radius:var(--r-pill); padding:9px 15px;
       display:inline-flex; align-items:center; gap:6px; box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
@@ -272,9 +286,16 @@
     .fsrc h2{ font-size:calc(var(--fs-base)*.82); font-weight:500; color:var(--ink-3);
       letter-spacing:.006em; margin:0 0 var(--s3); }
     .fsrc ul{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:var(--s4) var(--s6); margin:0; padding:0; list-style:none; }
+      gap:var(--s4) var(--s6); margin:0; padding:0; list-style:none; counter-reset:src; }
     @media (max-width:760px){ .fsrc ul{ grid-template-columns:1fr; } }
-    .fsrc li{ min-width:0; }
+    /* Numbered so a citation can be referred to as "source 3". A counter, not
+       typed-in digits, so adding a source cannot leave the list misnumbered.
+       The number sits on its own line above the link rather than beside it,
+       which keeps the wrapping URL from flowing under it. */
+    .fsrc li{ min-width:0; counter-increment:src; }
+    .fsrc li::before{ content:counter(src) "."; display:block; margin-bottom:4px;
+      color:var(--ink-3); font-weight:600; font-variant-numeric:tabular-nums;
+      font-size:calc(var(--fs-base)*.84); }
     /* A URL can be longer than its column, so it wraps at any character rather
        than pushing the grid wide. */
     .fsrc a, .fsrc .nolink{ display:inline-block; text-decoration:none; line-height:1.45;
@@ -489,9 +510,13 @@
     /* ---------- Gen AI readiness checklist ----------
        Reuses .fq for the question block. The scale here carries words, not
        digits, so it uses the ordinary text pills rather than .scale circles.
-       The principle name is an eyebrow above the question, on its own line. */
-    .fq .gprin{ display:block; color:var(--ink-3); font-weight:500;
-      font-size:calc(var(--fs-base)*.82); letter-spacing:.006em; margin-bottom:6px; }
+       The principle name is the heading of the block, on its own line above
+       the question. It is the thing people scan for, so it is the largest text
+       in the block and the question below it steps down to regular weight. */
+    .fq .gprin{ display:block; color:var(--ink); font-weight:600;
+      font-size:calc(var(--fs-base)*1.22); line-height:1.35; letter-spacing:-.01em;
+      margin-bottom:8px; }
+    .fq.gq > label{ font-weight:500; color:var(--ink-2); line-height:1.55; max-width:68ch; }
     .fq .gevi{ margin-top:var(--s3); color:var(--ink-3); line-height:1.6;
       font-size:calc(var(--fs-base)*.84); }
     .fq .gevi b{ color:var(--ink-2); font-weight:600; }
@@ -615,7 +640,7 @@
 
         <form id="q" novalidate>
           <div class="field adopt-field">
-            <label class="with-help">Which of these does your organisation use?
+            <label class="with-help"><span class="qn">1.</span>Which of these does your organisation use?
               <button type="button" class="infobtn" id="adopt-help" data-tip="See how Gen AI and Agentic AI differ"
                       aria-label="See how Gen AI and Agentic AI differ">
                 <ion-icon name="help-circle-outline"></ion-icon>
@@ -625,14 +650,14 @@
             <div class="pills" role="group" aria-label="AI adoption" id="adoption-pills">
               <button type="button" class="pill" data-adopt="Agentic AI" aria-pressed="false">Agentic AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
               <button type="button" class="pill" data-adopt="Gen AI" aria-pressed="false">Gen AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-              <button type="button" class="pill" data-adopt="None" aria-pressed="false">None of these<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
+              <button type="button" class="pill" data-adopt="Both" aria-pressed="false">Both are applicable<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
             </div>
             <div class="adopt-desc" id="adopt-desc" hidden></div>
           </div>
 
           <div class="fgrid">
             <div class="field" data-key="industry">
-              <label for="industry-input">Industry</label>
+              <label for="industry-input"><span class="qn">2.</span>Industry</label>
               <div class="hint">Sets the regulatory baseline. Financial, health and public sector carry stricter compliance.</div>
               <div class="combo" data-combo="industry">
                 <input id="industry-input" class="combo-input" type="text" autocomplete="off" spellcheck="false"
@@ -644,7 +669,7 @@
             </div>
 
             <div class="field" data-key="role">
-              <label>Role / responsibility</label>
+              <label><span class="qn">3.</span>Role / responsibility</label>
               <div class="hint">Tailors the language and ownership of the recommendations.</div>
               <div class="picker" data-picker="role">
                 <div class="picker-crumb" hidden><button type="button" class="picker-back"><ion-icon name="chevron-back-outline"></ion-icon><span></span></button></div>
@@ -654,7 +679,7 @@
             </div>
 
             <div class="field" data-key="usecase">
-              <label>AI system / use case type</label>
+              <label><span class="qn">4.</span>AI system / use case type</label>
               <div class="hint">Dictates the likely attack vectors. GenAI needs prompt-injection controls.</div>
               <div class="picker" data-picker="usecase">
                 <div class="picker-crumb" hidden><button type="button" class="picker-back"><ion-icon name="chevron-back-outline"></ion-icon><span></span></button></div>
@@ -663,47 +688,41 @@
               <div class="combo-note" data-note="usecase" hidden></div>
             </div>
 
-            <!-- The six scale questions render from assets/options.mjs, so the
+            <!-- The five scale questions render from assets/options.mjs, so the
                  option text and its explanation live in one reviewed place. -->
             <div class="field" data-key="autonomy" data-scale="AUTONOMY">
-              <label>Autonomy level</label>
+              <label><span class="qn">5.</span>Autonomy level</label>
               <div class="hint">How much the system decides and does on its own. This is the sharpest risk multiplier.</div>
               <div class="pills" role="radiogroup" aria-label="Autonomy level"></div>
               <div class="opt-desc" hidden></div>
             </div>
 
             <div class="field" data-key="dataSource" data-scale="DATA_SOURCE">
-              <label>Data source</label>
+              <label><span class="qn">6.</span>Data source</label>
               <div class="hint">Where the system reads from. Pick the main one.</div>
               <div class="pills" role="radiogroup" aria-label="Data source"></div>
               <div class="opt-desc" hidden></div>
             </div>
 
             <div class="field" data-key="dataSensitivity" data-scale="DATA_SENSITIVITY">
-              <label>Data sensitivity</label>
+              <label><span class="qn">7.</span>Data sensitivity</label>
               <div class="hint">The most sensitive class of data it can reach. The main driver of data protection requirements.</div>
               <div class="pills" role="radiogroup" aria-label="Data sensitivity"></div>
               <div class="opt-desc" hidden></div>
             </div>
 
             <div class="field" data-key="capability" data-scale="CAPABILITY">
-              <label>Agent capability level</label>
+              <label><span class="qn">8.</span>Agent capability level</label>
               <div class="hint">How far a single run reaches: one call, a chain, memory across days, or other agents.</div>
               <div class="pills" role="radiogroup" aria-label="Capability level"></div>
+              <div class="cap-note" hidden></div>
               <div class="opt-desc" hidden></div>
             </div>
 
             <div class="field" data-key="hosting" data-scale="HOSTING">
-              <label>Infrastructure hosting model</label>
+              <label><span class="qn">9.</span>Infrastructure hosting model</label>
               <div class="hint">Where it runs, and therefore who else can reach the data.</div>
               <div class="pills" role="radiogroup" aria-label="Hosting model"></div>
-              <div class="opt-desc" hidden></div>
-            </div>
-
-            <div class="field" data-key="governance" data-scale="GOVERNANCE">
-              <label>Governance and risk tier</label>
-              <div class="hint">Severity of the actions it performs, and how reversible they are.</div>
-              <div class="pills" role="radiogroup" aria-label="Governance tier"></div>
               <div class="opt-desc" hidden></div>
             </div>
           </div>
@@ -827,7 +846,7 @@
 import { SSIC_SYNONYMS, SSIC_COMMON, orderedSections, industryValue } from './assets/ssic.mjs';
 import {
   ROLE_GROUPS, USECASE_GROUPS, flatten, OTHERS,
-  AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING, GOVERNANCE,
+  AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING,
 } from './assets/options.mjs';
 import { fuzzyMatch, CONFIDENT } from './assets/match.mjs';
 import {
@@ -840,9 +859,9 @@ import {
 } from './assets/genai.mjs';
 
 const $ = s => document.querySelector(s);
-const KEYS = ["industry","role","usecase","autonomy","dataSource","dataSensitivity","capability","hosting","governance"];
+const KEYS = ["industry","role","usecase","autonomy","dataSource","dataSensitivity","capability","hosting"];
 const state = KEYS.reduce((o,k)=>(o[k]="",o),{});
-const SCALES = { AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING, GOVERNANCE };
+const SCALES = { AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING };
 
 function label(v){ if(!v) return ""; const p=String(v).split("|"); return p.length>1?p.slice(1).join("|"):p[0]; }
 
@@ -1292,16 +1311,16 @@ function renderOutput(vals, d){
         <div><b>Tier ${t.n} — ${escapeHtml(t.name)}.</b> Assessed by Claude against the MindForge AI RMF and CSA Securing AI guidelines.</div>
       </div>
 
-      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">Analyst assessment</h2><span class="badge">AI-generated</span></div>
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">A. Analyst assessment</h2><span class="badge">AI-generated</span></div>
       <div class="narrative">${paras.map(p=>`<p>${escapeHtml(p)}</p>`).join("")||"<p>"+escapeHtml(d.rationale||"")+"</p>"}</div>
 
-      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">Identified risk scenarios</h2></div>
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">B. Identified risk scenarios</h2></div>
       <div class="tbl-scroll">
         <table class="risk">
           <thead><tr><th>Risk scenario</th><th>Impact</th><th>Likelihood</th><th>Proposed mitigation</th><th>Risk level</th></tr></thead>
           <tbody>
-            ${(d.scenarios||[]).map(s=>`<tr>
-              <td><b>${escapeHtml(s.scenario)}</b></td>
+            ${(d.scenarios||[]).map((s,si)=>`<tr>
+              <td><b><span class="qn">${si+1}.</span>${escapeHtml(s.scenario)}</b></td>
               <td><b>${escapeHtml(s.impactType)}</b><small>${escapeHtml(s.impactNote)}</small></td>
               <td><b class="sev-${escapeHtml(s.likelihood)}">${escapeHtml(s.likelihood)}</b><small>${escapeHtml(s.likelihoodNote)}</small></td>
               <td>${escapeHtml(s.mitigation)}</td>
@@ -1311,12 +1330,12 @@ function renderOutput(vals, d){
         </table>
       </div>
 
-      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">Recommended controls</h2><span class="badge" style="background:var(--surface-2);color:var(--ink-2)">${req} required at this tier</span></div>
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">C. Recommended controls</h2><span class="badge" style="background:var(--surface-2);color:var(--ink-2)">${req} required at this tier</span></div>
       ${(d.controls||[]).map((g,gi)=>`
         <details class="acc" ${gi===0?"open":""}>
           <summary>
             <ion-icon class="cico" name="${CAT_ICON[g.category]||'ellipse-outline'}"></ion-icon>
-            <span class="ctitle">${escapeHtml(g.category)}</span>
+            <span class="ctitle"><span class="qn">${gi+1}.</span>${escapeHtml(g.category)}</span>
             <span class="ccount">${(g.items||[]).filter(i=>i.priority==="Required").length}/${(g.items||[]).length}</span>
             <ion-icon class="chev" name="chevron-down-outline"></ion-icon>
           </summary>
@@ -1330,16 +1349,20 @@ function renderOutput(vals, d){
         </details>`).join("")}
 
       <div class="actions" style="margin-top:var(--s6)">
-        <button type="button" class="btn" id="copyBtn"><span class="lbl with-icon"><ion-icon name="copy-outline"></ion-icon><span>Copy summary</span></span></button>
+        ${summaryButton("copyBtn")}
         ${csvButton("csvRisk")}
-        <button type="button" class="btn btn-ghost" onclick="window.print()"><ion-icon name="print-outline"></ion-icon>Print / PDF</button>
+        ${printButton()}
+        ${startOverButton("risk-restart")}
       </div>
 
       <p class="disclaim">This assessment was generated by Claude from your inputs, aligned to the MindForge AI Risk Management framework and the CSA Guidelines on Securing AI Systems. It is decision support, not a substitute for a formal risk assessment signed off by your compliance function.</p>
     </div>`;
 
-  $("#copyBtn").addEventListener("click", ()=>copySummary(vals,d,t));
+  $("#copyBtn").addEventListener("click", e=>copyFormatted(buildSummary(vals,d,t), e.currentTarget));
   $("#csvRisk").addEventListener("click", e=>copyCSV(riskCSV(vals,d,t), e.currentTarget, "Risk assessment"));
+  /* Start over here is the same clearing as Reset on the form, routed through
+     the one handler so the two can never drift apart. */
+  $("#risk-restart").addEventListener("click", ()=>$("#reset").click());
   $("#rating").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -1449,9 +1472,11 @@ function buildSummary(vals,d,t){
   return { html:H.join(''), text:T.join('\n').replace(/\n{3,}/g,'\n\n').trim() };
 }
 
-async function copySummary(vals,d,t){
-  const { html, text } = buildSummary(vals,d,t);
-  const btn=$("#copyBtn"), sp=btn.querySelector(".lbl span:last-child");
+/* Puts a formatted summary on the clipboard: rich HTML for a document, plain
+   text for anything that will not take HTML. Every result view uses this, so
+   the confirmation and the fallback behave the same everywhere. */
+async function copyFormatted({ html, text }, btn){
+  const sp=btn.querySelector(".lbl span:last-child") || btn;
   const ok=()=>{ const old=sp.textContent; sp.textContent="Copied!"; toast("Summary copied"); setTimeout(()=>sp.textContent=old,1200); };
   try{
     if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
@@ -1467,6 +1492,23 @@ async function copySummary(vals,d,t){
     try{ await navigator.clipboard.writeText(text); ok(); }
     catch(e2){ toast("Could not copy"); }
   }
+}
+
+/* ---------- result actions ----------
+   Every assessment ends with the same four: copy the summary, copy the CSV,
+   print, start over. A track keeps its own Back button in front of them, since
+   going back one screen is not the same as starting again. */
+function summaryButton(id){
+  return `<button type="button" class="btn" id="${id}">
+    <span class="lbl with-icon"><ion-icon name="copy-outline"></ion-icon><span>Copy summary</span></span>
+  </button>`;
+}
+function printButton(){
+  return `<button type="button" class="btn btn-ghost" onclick="window.print()">
+    <ion-icon name="print-outline"></ion-icon>Print / PDF</button>`;
+}
+function startOverButton(id){
+  return `<button type="button" class="btn btn-ghost" id="${id}">Start over</button>`;
 }
 
 /* ---------- CSV export ----------
@@ -1511,9 +1553,11 @@ function riskCSV(vals, d, t){
   rows.push(["Export","Source","SafeAI risk assessment, safeai.sg",exportStamp()]);
   /* Read the question wording off the form rather than keeping a second copy
      of it here, which would drift the first time a label is reworded. */
+  /* The serial number is its own span, so textContent runs it straight into
+     the question ("2.Industry"). Put the space back for the export. */
   const fieldLabel = k => {
     const el = document.querySelector(`.field[data-key="${k}"] label`);
-    return el ? el.textContent.trim() : k;
+    return el ? el.textContent.trim().replace(/^(\d+\.)(?=\S)/, "$1 ") : k;
   };
   KEYS.forEach(k=>rows.push(["Profile", fieldLabel(k), label(vals[k]), ""]));
   if((state.adoption||[]).length) rows.push(["Profile","AI in use",state.adoption.join("; "),""]);
@@ -1523,10 +1567,12 @@ function riskCSV(vals, d, t){
   (d.drivers||[]).forEach(x=>rows.push(["Driver", x.label, x.level, x.note||""]));
   ((d.scoring&&d.scoring.contributions)||[]).forEach(c=>
     rows.push(["Score derivation", c.label, c.level, "weight "+c.weight+", points "+c.points]));
-  (d.scenarios||[]).forEach(s=>rows.push(["Risk scenario", s.scenario, s.impactType,
+  /* Same row numbers the page shows, so a line in the export and a line on
+     screen can be talked about as the same line. */
+  (d.scenarios||[]).forEach((s,i)=>rows.push(["Risk scenario", (i+1)+". "+s.scenario, s.impactType,
     s.mitigation+" (initial "+s.initialLevel+", residual "+s.residualLevel+")"]));
-  (d.controls||[]).forEach(g=>(g.items||[]).forEach(i=>
-    rows.push(["Control", g.category||g.cat||"", i.priority||"", i.text||""])));
+  (d.controls||[]).forEach((g,gi)=>(g.items||[]).forEach(i=>
+    rows.push(["Control", (gi+1)+". "+(g.category||g.cat||""), i.priority||"", i.text||""])));
   return toCSV(rows);
 }
 
@@ -1547,7 +1593,7 @@ function genaiCSV(res){
     res.score===null ? "" : res.score+" of 100",
     "Across "+res.applicable+" applicable principle"+(res.applicable===1?"":"s"), ""]);
   rows.push(["Summary","","Answer counts","",
-    "Fully "+res.counts.full+", partially "+res.counts.partial+", not implemented "+res.counts.none+", not applicable "+res.counts.na,
+    "Yes "+res.counts.full+", partially done "+res.counts.partial+", no "+res.counts.none+", not applicable "+res.counts.na,
     "","",""]);
   return toCSV(rows);
 }
@@ -1589,6 +1635,100 @@ function agenticDeployedCSV(res){
   rows.push(["Summary","Action types above their ceiling","","","","","",res.gaps.length+" of "+res.rows.length,""]);
   [1,2,3].forEach(t=>rows.push(["Summary","Tier "+t+" action types","","","","","",res.distribution[t],""]));
   return toCSV(rows);
+}
+
+/* ---------- track summaries ----------
+   Same two shapes buildSummary produces, rich HTML for a document and plain
+   text for everything else, so a track result pastes into a report the way the
+   overall assessment already does. The small helpers keep the inline styles in
+   one place: the HTML lands on a white page in someone else's editor, so it
+   cannot rely on this page's tokens. */
+const sumDoc = (title, body) =>
+  '<div style="font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;line-height:1.5;font-size:13px">'
+  + '<div style="font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0 0 2px">'+escapeHtml(title)+'</div>'
+  + '<div style="font-size:12px;color:#777;margin:0 0 16px">SafeAI &middot; safeai.sg</div>'
+  + body + '</div>';
+const sumH = t => '<div style="font-size:16px;font-weight:700;margin:22px 0 8px;padding-bottom:5px;border-bottom:1px solid #e3e3e3">'+escapeHtml(t)+'</div>';
+const sumP = t => '<div style="margin:0 0 8px;max-width:640px">'+escapeHtml(t)+'</div>';
+const sumOl = list => '<ol style="margin:0 0 8px;padding-left:28px">'+list.map(x=>'<li style="margin:0 0 6px;padding-left:4px">'+escapeHtml(x)+'</li>').join('')+'</ol>';
+const sumNote = t => '<div style="font-size:11px;color:#999;margin-top:22px;padding-top:10px;border-top:1px solid #e3e3e3">'+escapeHtml(t)+'</div>';
+const sumTextList = list => list.map((x,i)=>'  '+String(i+1).padStart(2)+'. '+x);
+
+const AGENTIC_SOURCE_NOTE = "Scored locally from the factor tables in the IMDA Model AI Governance Framework for Agentic AI. Decision support, not a substitute for a formal risk assessment.";
+
+function agenticPredeploySummary(s){
+  const seen=new Set(), factors=[];
+  const add=(f,axis)=>{
+    if(seen.has(f.id)) return;
+    seen.add(f.id);
+    factors.push(f.label+" ("+axis+"): "+(state.agenticFactors[f.id] ?? "not answered")+" of 5");
+  };
+  IMPACT_FACTORS.forEach(f=>add(f,"impact"));
+  LIKELIHOOD_FACTORS.forEach(f=>add(f,"likelihood"));
+
+  const headline = "Tier "+s.tier+", "+AGENTIC_PROFILE[s.tier];
+  const axes = "Impact "+s.impact+" of 5, likelihood "+s.likelihood+" of 5, likelihood times impact "+s.raw+" of 25.";
+
+  const html = sumDoc("Agentic AI Risk Assessment Matrix",
+    sumP(headline) + sumP(axes)
+    + sumH("Autonomy ceiling") + sumP(AUTONOMY_CEILING_COPY[s.tier])
+    + sumH("Your ratings") + sumOl(factors)
+    + sumNote(AGENTIC_SOURCE_NOTE));
+
+  const text = ["AGENTIC AI RISK ASSESSMENT MATRIX","SafeAI · safeai.sg","",
+    headline, axes, "",
+    "AUTONOMY CEILING", AUTONOMY_CEILING_COPY[s.tier], "",
+    "YOUR RATINGS", ...sumTextList(factors), "", AGENTIC_SOURCE_NOTE].join("\n");
+
+  return { html, text };
+}
+
+function agenticDeployedSummary(res){
+  const rows = res.rows.map(r=>
+    r.label+": tier "+r.tier+", permitted "+GRANTED_LABEL[r.ceiling].toLowerCase()
+    +", granted "+GRANTED_LABEL[r.granted].toLowerCase()+(r.gap?", above its ceiling":""));
+  const gaps = res.gaps.map(r=>r.label+". "+AUTONOMY_CEILING_COPY[r.tier]);
+  const headline = res.gaps.length+" of "+res.rows.length+" action "
+    +(res.rows.length===1?"type is":"types are")+" above the permitted autonomy ceiling.";
+  const note = "Action tiering adapted from the Dayos case study in the IMDA Model AI Governance Framework for Agentic AI. Autonomy granted is an addition by SafeAI.";
+
+  const html = sumDoc("Agentic AI governance gap",
+    sumP(headline)
+    + sumH("Action types") + sumOl(rows)
+    + (gaps.length ? sumH("What to correct") + sumOl(gaps) : "")
+    + sumNote(note));
+
+  const text = ["AGENTIC AI GOVERNANCE GAP","SafeAI · safeai.sg","", headline, "",
+    "ACTION TYPES", ...sumTextList(rows),
+    ...(gaps.length ? ["", "WHAT TO CORRECT", ...sumTextList(gaps)] : []),
+    "", note].join("\n");
+
+  return { html, text };
+}
+
+function genaiSummary(res){
+  const answers = GENAI_QUESTIONS.map(q=>
+    q.n+". "+q.principle+": "+(GENAI_SCALE_LABEL[state.genaiAnswers[q.id]] || "Not answered"));
+  const gaps = res.gaps.map(g=>
+    g.n+". "+g.principle+" is "+(g.answer==="none"?"not in place":"only partially done")+". "+g.evidence);
+  const headline = res.score===null
+    ? "Every principle was marked not applicable, so there is nothing to score."
+    : res.band.name+", "+res.score+" of 100 across "+res.applicable+" applicable principle"+(res.applicable===1?"":"s")+".";
+  const note = "Self-assessment against the 11 principles of the AI Verify Testing Framework for Traditional and Generative AI (IMDA and AI Verify Foundation). Not a substitute for the full framework checklist or an independent audit.";
+
+  const html = sumDoc("Gen AI Governance Readiness",
+    sumP(headline) + (res.band ? sumP(res.band.text) : "")
+    + sumH("Your answers") + sumOl(answers)
+    + (gaps.length ? sumH("Where to focus") + sumOl(gaps) : "")
+    + sumNote(note));
+
+  const text = ["GEN AI GOVERNANCE READINESS","SafeAI · safeai.sg","", headline,
+    ...(res.band ? [res.band.text] : []), "",
+    "YOUR ANSWERS", ...answers.map(a=>"  "+a),
+    ...(gaps.length ? ["", "WHERE TO FOCUS", ...sumTextList(gaps)] : []),
+    "", note].join("\n");
+
+  return { html, text };
 }
 
 /* ---------- the actual assessment call ---------- */
@@ -1642,24 +1782,48 @@ function onFieldChanged(){
 }
 
 /* ---------- scale fields ----------
-   The six level and tier questions render from the option module. Each option
-   carries its own explanation, shown once it is picked, because "Level 3" on
-   its own tells nobody anything. Clicking the selected pill again clears it. */
+   The five level questions render from the option module. Each option carries
+   its own explanation, shown once it is picked, because "Level 3" on its own
+   tells nobody anything. Clicking the selected pill again clears it. */
 function scaleField(field){
   const key=field.dataset.key;
   const opts=SCALES[field.dataset.scale]||[];
   const pills=field.querySelector(".pills");
   const desc=field.querySelector(".opt-desc");
+  const note=field.querySelector(".cap-note");
+  /* How many options, counting from the top of the scale, are on offer. The
+     whole list unless something narrows it. See limitTo. */
+  let allowed=opts.length;
 
   pills.innerHTML = opts.map(o=>
     `<button type="button" class="pill" role="radio" aria-checked="false" data-val="${escapeHtml(o.label)}">${escapeHtml(o.label)}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`
   ).join("");
 
   function paint(){
-    pills.querySelectorAll(".pill").forEach(p=>p.setAttribute("aria-checked", String(p.dataset.val===state[key])));
+    pills.querySelectorAll(".pill").forEach((p,i)=>{
+      p.hidden = i>=allowed;
+      p.setAttribute("aria-checked", String(p.dataset.val===state[key]));
+    });
     const hit=opts.find(o=>o.label===state[key]);
     desc.hidden=!hit;
     desc.innerHTML = hit ? `<b>${escapeHtml(hit.label)}.</b> ${escapeHtml(hit.desc)}` : "";
+  }
+
+  /* Narrow the scale to its first n options and say why. An answer that is no
+     longer on offer is cleared rather than left selected but invisible, which
+     would submit a level the visitor can no longer see. */
+  function limitTo(n, why){
+    const next = Math.max(1, Math.min(n, opts.length));
+    const wasPicked = state[key];
+    allowed = next;
+    if(note){
+      note.hidden = !why || allowed>=opts.length;
+      note.textContent = why || "";
+    }
+    const idx = opts.findIndex(o=>o.label===state[key]);
+    if(idx>=allowed) state[key]="";
+    paint();
+    if(wasPicked && !state[key]) onFieldChanged();
   }
 
   pills.addEventListener("click", e=>{
@@ -1673,11 +1837,13 @@ function scaleField(field){
   paint();
   return {
     key,
+    limitTo,
     restore(value){ if(value){ state[key]=value; paint(); } },
-    reset(){ state[key]=""; paint(); },
+    reset(){ state[key]=""; limitTo(opts.length, ""); },
   };
 }
 const SCALE_FIELDS = [...document.querySelectorAll(".field[data-scale]")].map(scaleField);
+const CAPABILITY_FIELD = SCALE_FIELDS.find(f=>f.key==="capability");
 
 /* Controls that own their own DOM state and so need clearing on reset. */
 const FIELD_CONTROLS = [
@@ -1696,18 +1862,23 @@ $("#output").addEventListener("click", e=>{
 });
 
 /* ---------- adoption gate ----------
-   Routing only. Never sent to /api/assess, which picks the nine KEYS. */
+   Routing only. Never sent to /api/assess, which picks the eight KEYS.
+
+   "Both are applicable" is a shortcut, not a third answer: it stores the same
+   two values selecting each pill would, so everything downstream keeps reading
+   a plain list of technologies. */
 state.adoption=[];
+const ADOPT_BOTH = ["Gen AI","Agentic AI"];
 document.getElementById("adoption-pills").addEventListener("click", e=>{
   const p=e.target.closest(".pill"); if(!p) return;
   const val=p.dataset.adopt;
-  if(val==="None"){
-    state.adoption = p.getAttribute("aria-pressed")==="true" ? [] : ["None"];
+  const on = p.getAttribute("aria-pressed")==="true";
+  if(val==="Both"){
+    state.adoption = on ? [] : [...ADOPT_BOTH];
   }else{
-    const on = p.getAttribute("aria-pressed")==="true";
     state.adoption = on
       ? state.adoption.filter(v=>v!==val)
-      : [...state.adoption.filter(v=>v!=="None"), val];
+      : [...state.adoption, val];
   }
   paintAdoption();
   save();
@@ -1716,12 +1887,17 @@ document.getElementById("adoption-pills").addEventListener("click", e=>{
 /* Split out from the handler so a restored session can repaint the gate from
    state without faking a click on each pill. */
 function paintAdoption(){
-  document.querySelectorAll("#adoption-pills .pill")
-    .forEach(x=>x.setAttribute("aria-pressed", String(state.adoption.includes(x.dataset.adopt))));
-  $("#adopt-hint").textContent = state.adoption.includes("Agentic AI")
+  const picked = state.adoption || [];
+  const both = ADOPT_BOTH.every(v=>picked.includes(v));
+  document.querySelectorAll("#adoption-pills .pill").forEach(x=>{
+    const v=x.dataset.adopt;
+    x.setAttribute("aria-pressed", String(v==="Both" ? both : picked.includes(v)));
+  });
+  $("#adopt-hint").textContent = picked.includes("Agentic AI")
     ? "Agentic AI adds a short second survey after your results."
     : "Select all that apply. This routes you to the right follow-up and does not affect your risk score.";
   renderAdoptDesc();
+  applyCapabilityLimit();
 }
 
 /* Plain-language meaning of each option, shown only once it is selected, so
@@ -1729,7 +1905,6 @@ function paintAdoption(){
 const ADOPT_DESC = {
   "Agentic AI":"Software agents that plan their own steps and act, calling tools, systems or other agents to finish a task instead of only answering.",
   "Gen AI":"Models that produce new content from a prompt, such as text, images, code, audio or summaries.",
-  "None":"No AI or automation in production yet. You still get the base risk rating for the use case you are planning.",
 };
 
 function renderAdoptDesc(){
@@ -1737,8 +1912,25 @@ function renderAdoptDesc(){
   const picked=state.adoption||[];
   box.hidden = !picked.length;
   box.innerHTML = picked.map(v=>
-    `<div><b>${escapeHtml(v==="None"?"None of these":v)}.</b> ${escapeHtml(ADOPT_DESC[v]||"")}</div>`
+    `<div><b>${escapeHtml(v)}.</b> ${escapeHtml(ADOPT_DESC[v]||"")}</div>`
   ).join("");
+}
+
+/* Gen AI on its own tops out at a multi-step chain inside one session. Levels
+   3 to 5 describe persistent memory across sessions and agents handing work to
+   each other, which is the agentic track, so they are not offered until
+   Agentic AI is selected. */
+const GENAI_CAPABILITY_CEILING = 2;
+function applyCapabilityLimit(){
+  if(!CAPABILITY_FIELD) return;
+  const picked = state.adoption || [];
+  const genaiOnly = picked.includes("Gen AI") && !picked.includes("Agentic AI");
+  CAPABILITY_FIELD.limitTo(
+    genaiOnly ? GENAI_CAPABILITY_CEILING : CAPABILITY.length,
+    genaiOnly
+      ? "Gen AI on its own reaches Level 2. Levels 3 to 5 describe agents that keep memory across sessions or coordinate other agents, so they appear once Agentic AI is selected."
+      : ""
+  );
 }
 
 /* ---------- AI Adoption Maturity Matrix ---------- */
@@ -1820,7 +2012,7 @@ $("#adopt-help").addEventListener("click", ()=>{
         <div><h2>Which one do you have?</h2>
         <div class="sub">Gen AI and Agentic AI, side by side</div></div>
       </div>
-      ${techCompareHTML((state.adoption||[]).filter(v=>v!=="None"), { heading:false })}</div>`;
+      ${techCompareHTML(state.adoption||[], { heading:false })}</div>`;
     target=document.querySelector("#compare .card");
   }
   target.scrollIntoView({behavior:"smooth", block:"start"});
@@ -1841,7 +2033,7 @@ if("IntersectionObserver" in window){
 }
 
 function renderMaturity(){
-  const picked=(state.adoption||[]).filter(v=>v!=="None");
+  const picked=state.adoption||[];
   /* One copy only. Once the maturity card carries the table, drop the
      standalone one so the page does not show it twice. */
   $("#compare").innerHTML="";
@@ -1963,7 +2155,7 @@ function renderAgenticIntro(){
      return here without wiping half-finished answers. */
   $("#agentic").innerHTML=agenticCard(`
     <p style="color:var(--ink-2);margin:0 0 var(--s4);line-height:1.6">These two paths use different parts of the framework. Before deployment we assess whether the use case is suitable at all. After deployment we tier each action and check how much autonomy it has actually been given.</p>
-    <label style="display:block;margin-bottom:var(--s3);font-weight:600">Have you already deployed any AI agents?</label>
+    <label style="display:block;margin-bottom:var(--s3);font-weight:600"><span class="qn">1.</span>Have you already deployed any AI agents?</label>
     <div class="pills" role="radiogroup" aria-label="Deployment status">
       <button type="button" class="pill" role="radio" aria-checked="false" data-deployed="no">No, still assessing<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
       <button type="button" class="pill" role="radio" aria-checked="false" data-deployed="yes">Yes, agents are live<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
@@ -2032,12 +2224,15 @@ $("#agentic").addEventListener("input", e=>{
 const LIKELIHOOD_ONLY = LIKELIHOOD_FACTORS.filter(f=>f.id!==SHARED_FACTOR_ID);
 const PREDEPLOY_TOTAL = IMPACT_FACTORS.length + LIKELIHOOD_ONLY.length;
 
-function factorBlock(f){
-  const opts=[1,2,3,4,5].map(n=>
-    `<button type="button" class="pill" role="radio" aria-checked="false" data-factor="${escapeHtml(f.id)}" data-score="${n}">${n}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`
+/* `n` is the serial number shown on the question. It runs on from the intro
+   question, so the two impact and likelihood sections read as one numbered
+   list rather than two lists that both start at one. */
+function factorBlock(f, n){
+  const opts=[1,2,3,4,5].map(v=>
+    `<button type="button" class="pill" role="radio" aria-checked="false" data-factor="${escapeHtml(f.id)}" data-score="${v}">${v}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`
   ).join("");
   return `<div class="fq" data-factor-block="${escapeHtml(f.id)}">
-    <label>${escapeHtml(f.label)}${f.id===SHARED_FACTOR_ID?'<span class="badge-both">Counts in both axes</span>':""}</label>
+    <label><span class="qn">${n}.</span>${escapeHtml(f.label)}${f.id===SHARED_FACTOR_ID?'<span class="badge-both">Counts in both axes</span>':""}</label>
     <p class="fdesc">${escapeHtml(f.description)}</p>
     <div class="scale" role="radiogroup" aria-label="${escapeHtml(f.label)}">${opts}</div>
     <div class="anchors"><b>1</b> ${escapeHtml(f.anchors[1])}<br><b>3</b> ${escapeHtml(f.anchors[3])}<br><b>5</b> ${escapeHtml(f.anchors[5])}</div>
@@ -2058,9 +2253,9 @@ function renderPredeployForm(){
   $("#agentic").innerHTML=agenticCard(`
     <p style="color:var(--ink-2);margin:0 0 var(--s4);line-height:1.6">Rate each factor from 1 to 5. Access to external systems appears in both IMDA tables, so it is asked once and counted in both.</p>
     <h3 style="margin:0 0 var(--s2)">Factors affecting impact</h3>
-    ${IMPACT_FACTORS.map(factorBlock).join("")}
+    ${IMPACT_FACTORS.map((f,i)=>factorBlock(f, i+2)).join("")}
     <h3 style="margin:var(--s6) 0 var(--s2)">Factors affecting likelihood</h3>
-    ${LIKELIHOOD_ONLY.map(factorBlock).join("")}
+    ${LIKELIHOOD_ONLY.map((f,i)=>factorBlock(f, IMPACT_FACTORS.length+i+2)).join("")}
     <div class="actions">
       <button type="button" class="btn btn-accent" id="agentic-run" disabled>Score this agent</button>
       <button type="button" class="btn btn-ghost" id="agentic-back-intro">Back</button>
@@ -2098,10 +2293,13 @@ function renderPredeployResult(s){
     <p style="color:var(--ink-2);margin:0;line-height:1.6">${escapeHtml(AUTONOMY_CEILING_COPY[s.tier])}</p>
     <div class="actions">
       <button type="button" class="btn" id="agentic-back-form">Back</button>
+      ${summaryButton("copyAgenticPre")}
       ${csvButton("csvAgenticPre")}
-      <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
+      ${printButton()}
+      ${startOverButton("agentic-restart")}
     </div>
     <p class="disclaim">Scored locally from the factor tables in the IMDA Model AI Governance Framework for Agentic AI, pages 15 to 17. Decision support, not a substitute for a formal risk assessment.</p>`);
+  $("#copyAgenticPre").addEventListener("click", e=>copyFormatted(agenticPredeploySummary(s), e.currentTarget));
   $("#csvAgenticPre").addEventListener("click", e=>copyCSV(agenticPredeployCSV(s), e.currentTarget, "Agentic AI assessment"));
   jumpToTop();   // it is a page now, not a section
 }
@@ -2172,10 +2370,13 @@ function renderDeployedResult(res){
       : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every action type sits at or below its permitted ceiling. Re-check when you add new agent capabilities.</div></div>`}
     <div class="actions">
       <button type="button" class="btn" id="edit-actions">Edit the list</button>
+      ${summaryButton("copyAgenticGap")}
       ${csvButton("csvAgenticGap")}
-      <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
+      ${printButton()}
+      ${startOverButton("agentic-restart")}
     </div>
     <p class="disclaim">Action tiering adapted from the Dayos case study in the IMDA Model AI Governance Framework for Agentic AI, page 18. Autonomy granted is an addition by SafeAI.</p>`);
+  $("#copyAgenticGap").addEventListener("click", e=>copyFormatted(agenticDeployedSummary(res), e.currentTarget));
   $("#csvAgenticGap").addEventListener("click", e=>copyCSV(agenticDeployedCSV(res), e.currentTarget, "Governance gap"));
   jumpToTop();   // it is a page now, not a section
 }
@@ -2207,8 +2408,8 @@ function genaiQuestionBlock(q){
     `<button type="button" class="pill" role="radio" aria-checked="false"
        data-gq="${escapeHtml(q.id)}" data-gv="${s.id}">${escapeHtml(s.label)}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`
   ).join("");
-  return `<div class="fq" data-gq-block="${escapeHtml(q.id)}">
-    <span class="gprin">${q.n}. ${escapeHtml(q.principle)}</span>
+  return `<div class="fq gq" data-gq-block="${escapeHtml(q.id)}">
+    <span class="gprin"><span class="qn">${q.n}.</span>${escapeHtml(q.principle)}</span>
     <label>${escapeHtml(q.question)}</label>
     <div class="pills" role="radiogroup" aria-label="${escapeHtml(q.principle)}">${opts}</div>
     <div class="gevi"><b>Evidence to look for.</b> ${escapeHtml(q.evidence)}</div>
@@ -2254,7 +2455,7 @@ function renderGenaiResult(res){
   }).join("");
 
   const gaps=res.gaps.map(g=>`<li>
-      <b>${g.n}. ${escapeHtml(g.principle)}</b> is ${g.answer==="none"?"not implemented":"partially implemented"}.
+      <b>${g.n}. ${escapeHtml(g.principle)}</b> is ${g.answer==="none"?"not in place":"only partially done"}.
       ${escapeHtml(g.evidence)}
     </li>`).join("");
 
@@ -2280,16 +2481,19 @@ function renderGenaiResult(res){
     </div>
     ${res.gaps.length
       ? `<h3 style="margin:var(--s6) 0 var(--s2)">Where to focus</h3>
-         <p style="color:var(--ink-2);margin:0 0 var(--s2);line-height:1.6;max-width:68ch">Not implemented first, then partial. The line under each is the evidence an auditor would ask for.</p>
+         <p style="color:var(--ink-2);margin:0 0 var(--s2);line-height:1.6;max-width:68ch">The no answers first, then the partial ones. The line under each is the evidence an auditor would ask for.</p>
          <ul class="gap-list">${gaps}</ul>`
       : res.score===null ? ""
-      : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every applicable principle is fully implemented. Re-run this when the model, the prompts or the retrieval sources change.</div></div>`}
+      : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every applicable principle is answered yes. Re-run this when the model, the prompts or the retrieval sources change.</div></div>`}
     <div class="actions">
       <button type="button" class="btn" id="genai-back">Back to the questions</button>
+      ${summaryButton("copyGenai")}
       ${csvButton("csvGenai")}
-      <button type="button" class="btn btn-ghost" id="genai-clear">Start over</button>
+      ${printButton()}
+      ${startOverButton("genai-clear")}
     </div>
     <p class="disclaim">Self-assessment, scored locally against the 11 principles of the AI Verify Testing Framework for Traditional and Generative AI (IMDA and AI Verify Foundation). It does not affect the overall risk rating above, and it is not a substitute for completing the full framework checklist or an independent audit.</p>`);
+  $("#copyGenai").addEventListener("click", e=>copyFormatted(genaiSummary(res), e.currentTarget));
   $("#csvGenai").addEventListener("click", e=>copyCSV(genaiCSV(res), e.currentTarget, "Gen AI readiness"));
   jumpToTop();   // it is a page now, not a section
 }
@@ -2359,6 +2563,9 @@ $("#reset").addEventListener("click",()=>{
   document.querySelectorAll(".field").forEach(f=>f.classList.remove("miss"));
   FIELD_CONTROLS.forEach(c=>c.reset());
   SCALE_FIELDS.forEach(c=>c.reset());
+  /* Reset clears the answers, not the adoption gate, so put the capability
+     ceiling back where the gate says it belongs. */
+  applyCapabilityLimit();
   countdownActive=false;
   state.agenticFactors={}; state.agenticActions=[]; state.genaiAnswers={};
   $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML="";
@@ -2384,7 +2591,7 @@ $("#reset").addEventListener("click",()=>{
    written by an older build would restore a half-empty profile that looks
    complete. Bump it whenever KEYS or anything saved below changes. */
 const SAVE_KEY = "safeai.assessment";
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;   // 2: governance dropped from KEYS, adoption no longer stores "None"
 
 function profileOf(src){ return Object.fromEntries(KEYS.map(k=>[k, src[k]||""])); }
 

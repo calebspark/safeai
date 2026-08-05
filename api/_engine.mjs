@@ -128,7 +128,7 @@ Anchor your judgement in these frameworks:
 Scoring mechanism (prescribed, follow it exactly):
 1. Rate each of the seven drivers Low, Medium, or High, using exactly these labels: Data sensitivity, Use-case impact, Autonomy, Regulated industry, Deployment exposure, Data source, Role.
    - Data sensitivity: read it off the stated tier. Low = Public / low sensitivity; Medium = Internal / medium sensitivity; High = Confidential / high sensitivity, or Restricted / regulated (PII, PHI, HIPAA, GDPR).
-   - Use-case impact: Low = drafting or summarising with human output review; Medium = customer-facing answers or operational decisions with oversight; High = consequential decisions about people, money, safety, or eligibility. Raise it a level when the stated governance tier is Tier 3, since that tier is reserved for critical system modifications.
+   - Use-case impact: Low = drafting or summarising with human output review; Medium = customer-facing answers or operational decisions with oversight; High = consequential decisions about people, money, safety, or eligibility. Judge the severity and reversibility of the actions yourself, from the use case, the autonomy level and the capability level. Do not expect the profile to state a severity tier: producing that tier is the point of this assessment.
    - Autonomy: read it off the stated autonomy level and capability level together. Low = autonomy Level 0 or 1, or capability Level 1. Medium = autonomy Level 2, or capability Level 2 or 3. High = autonomy Level 3, 4 or 5, or capability Level 4 or 5, because the agent then acts or coordinates other agents without per-case review.
    - Regulated industry: rate from the SSIC 2025 section given in the profile. High = L (Financial and Insurance), R (Health and Social Services), P (Public Administration and Defence). Medium = D (Electricity and Gas), E (Water and Waste), H (Transportation and Storage), Q (Education), and K (Telecommunications and Computing) where telecoms licensing applies. Low = otherwise. If the industry is free text rather than a section, judge it against the same idea.
    - Deployment exposure: rate from the hosting model. Low = self-hosted on private infrastructure, internal users only; Medium = hybrid, or a managed platform with vendor access; High = third-party SaaS, serverless platforms holding regulated data, public endpoints, or edge devices.
@@ -150,12 +150,11 @@ Use case profile:
 - Data sensitivity: ${p('dataSensitivity')}
 - Agent capability level: ${p('capability')}
 - Infrastructure hosting model: ${p('hosting')}
-- Governance and risk tier of the actions it performs: ${p('governance')}
 
 Write in plain, factual language. No em dashes anywhere. Return only via the tool.`;
 }
 
-// Whitelist the nine known fields and cap each to a sane length, so a caller
+// Whitelist the eight known fields and cap each to a sane length, so a caller
 // cannot inflate the prompt (and the Anthropic bill) with oversized input or
 // smuggle in extra keys. Unknown keys are dropped; values are coerced to string.
 //
@@ -163,13 +162,14 @@ Write in plain, factual language. No em dashes anywhere. Return only via the too
 // 121 characters. At the old flat 120 it was silently truncated mid-word, which
 // produces a subtly wrong assessment rather than a visible error. Industry
 // values come from a fixed list, so a higher cap is not an abuse vector.
-// `data` and `deploy` are retired: data split into source and sensitivity, and
-// deployment split into capability, hosting and governance tier, per the
-// reviewed option matrix. Old keys are dropped rather than mapped, because a
-// stale client sending them would otherwise get a half-populated profile.
+// `data`, `deploy` and `governance` are retired: data split into source and
+// sensitivity, deployment split into capability and hosting, and the severity
+// tier is now an output of the assessment rather than something the visitor
+// declares. Old keys are dropped rather than mapped, because a stale client
+// sending them would otherwise get a half-populated profile.
 const PROFILE_FIELDS = [
   'industry', 'role', 'usecase', 'autonomy',
-  'dataSource', 'dataSensitivity', 'capability', 'hosting', 'governance',
+  'dataSource', 'dataSensitivity', 'capability', 'hosting',
 ];
 const DEFAULT_CAP = 120;
 export const FIELD_CAPS = { industry: 200 };

@@ -24,11 +24,18 @@ export const SOURCE = {
 // The four point scale. `points` is the share of the question earned;
 // `na` is excluded from the denominator so an irrelevant principle neither
 // helps nor hurts the score.
+//
+// The labels answer the question as asked. Every question is close ended, so
+// the answer is Yes, Partially done, No, or Not applicable, rather than the
+// implementation states the labels used to carry. The ids are unchanged, so
+// saved answers and the scoring below still line up.
+// Order follows the answer, strongest first, because the question is now a
+// yes or no question and Yes is what it asks about.
 export const SCALE = [
-  { id: 'na',      label: 'Not applicable',        points: null, desc: 'This principle does not apply to how we use generative AI.' },
-  { id: 'none',    label: 'Not implemented',       points: 0,    desc: 'Nothing is in place today.' },
-  { id: 'partial', label: 'Partially implemented', points: 0.5,  desc: 'Some of it is in place, or it is done informally and not documented.' },
-  { id: 'full',    label: 'Fully implemented',     points: 1,    desc: 'In place, documented, and we could show the evidence to an auditor.' },
+  { id: 'full',    label: 'Yes',             points: 1,    desc: 'In place, documented, and we could show the evidence to an auditor.' },
+  { id: 'partial', label: 'Partially done',  points: 0.5,  desc: 'Some of it is in place, or it is done informally and not documented.' },
+  { id: 'none',    label: 'No',              points: 0,    desc: 'Nothing is in place today.' },
+  { id: 'na',      label: 'Not applicable',  points: null, desc: 'This principle does not apply to how we use generative AI.' },
 ];
 
 export const SCALE_POINTS = Object.fromEntries(SCALE.map(s => [s.id, s.points]));
@@ -49,7 +56,7 @@ export const QUESTIONS = [
     id: 'explainability',
     n: 2,
     principle: 'Explainability',
-    question: 'Can you explain what drove a given output, and did explainability count when you chose the model, for example preferring open weights or an interpretable approach where the use case allowed it?',
+    question: 'Do you have a documented way to explain what drove a given output, and did you weigh explainability when choosing the model, for example preferring open weights or an interpretable approach where the use case allowed it?',
     evidence: 'Documented explainability method and its results, plus the rationale recorded at model selection.',
     outcomes: '2.1, 2.2',
   },
@@ -89,7 +96,7 @@ export const QUESTIONS = [
     id: 'fairness',
     n: 7,
     principle: 'Fairness',
-    question: 'Have you defined what fairness means for this use case, picked the metrics and sensitive attributes to match, tested output for bias against those groups, and given people a way to flag a discriminatory result?',
+    question: 'Do you have a definition of fairness for this use case, with metrics and sensitive attributes picked to match, bias testing of the output against those groups, and a way for people to flag a discriminatory result?',
     evidence: 'A documented fairness definition and metric selection, the list of sensitive attributes, bias test results, and a working flagging mechanism.',
     outcomes: '7.1, 7.5, 7.6, 7.9',
   },
@@ -121,7 +128,7 @@ export const QUESTIONS = [
     id: 'wellbeing',
     n: 11,
     principle: 'Inclusive growth, societal and environmental well-being',
-    question: 'Have you considered the wider effects of the system on the people it touches, on your workforce and on the environment, including compute and energy use, and recorded the benefits it is meant to deliver?',
+    question: 'Do you have a record of the wider effects of the system on the people it touches, on your workforce and on the environment, including compute and energy use, alongside the benefits it is meant to deliver?',
     evidence: 'A documented statement of intended benefit, an impact consideration for affected groups and staff, and any measure taken on energy or compute footprint.',
     outcomes: '11.1, 11.2',
   },

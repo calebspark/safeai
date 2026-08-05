@@ -1,11 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import * as OPTIONS from '../assets/options.mjs';
 import {
   ROLE_GROUPS, USECASE_GROUPS, OTHERS, flatten,
-  AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING, GOVERNANCE,
+  AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING,
 } from '../assets/options.mjs';
 
-const SCALES = { AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING, GOVERNANCE };
+const SCALES = { AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING };
 
 test('role has 3 groups and 30 items', () => {
   assert.equal(ROLE_GROUPS.length, 3);
@@ -46,8 +47,10 @@ test('autonomy runs Level 0 to Level 5, capability Level 1 to Level 5', () => {
     ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5']);
 });
 
-test('governance keeps the three severity tiers', () => {
-  assert.deepEqual(GOVERNANCE.map(o => o.label.split(':')[0]), ['Tier 1', 'Tier 2', 'Tier 3']);
+// The tool assigns the severity tier now. Asking the visitor for it was asking
+// them for the answer, so the scale is gone rather than merely unused.
+test('there is no governance tier scale to ask about', () => {
+  assert.equal(OPTIONS.GOVERNANCE, undefined);
 });
 
 test('sensitivity keeps the regulated tier, which drives the strictest controls', () => {

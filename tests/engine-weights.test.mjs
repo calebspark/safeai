@@ -22,9 +22,14 @@ test('the split profile fields all survive sanitisation', () => {
     dataSensitivity: 'Restricted / regulated (PII, PHI, HIPAA, GDPR)',
     capability: 'Level 4: Multi-agent',
     hosting: 'Third-party SaaS',
-    governance: 'Tier 3: High severity',
   };
   assert.deepEqual(sanitizeProfile(profile), profile);
+});
+
+test('the retired governance tier is dropped, since the tool now assigns it', () => {
+  const out = sanitizeProfile({ hosting: 'Hybrid', governance: 'Tier 3: High severity' });
+  assert.equal(out.governance, undefined);
+  assert.equal(out.hosting, 'Hybrid');
 });
 
 test('the retired data and deploy keys are dropped, not passed through', () => {

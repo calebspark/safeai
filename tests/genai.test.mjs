@@ -35,7 +35,8 @@ test('attribution to IMDA and AI Verify is present with a link', () => {
 
 test('the scale is four points, with Not applicable excluded from scoring', () => {
   assert.equal(SCALE.length, 4);
-  assert.deepEqual(SCALE.map(s => s.id), ['na', 'none', 'partial', 'full']);
+  assert.deepEqual(SCALE.map(s => s.id), ['full', 'partial', 'none', 'na']);
+  assert.deepEqual(SCALE.map(s => s.label), ['Yes', 'Partially done', 'No', 'Not applicable']);
   assert.equal(SCALE_POINTS.na, null);
   assert.equal(SCALE_POINTS.none, 0);
   assert.equal(SCALE_POINTS.partial, 0.5);

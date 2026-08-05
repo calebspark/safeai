@@ -124,9 +124,9 @@ export const OTHERS = 'Others';
    nobody has to guess what "Level 3" means.
 
    Autonomy follows the Bessemer AI Agent Autonomy Scale, capability follows
-   the agent capability levels, sensitivity follows the four governance
-   tiers, and hosting follows the infrastructure hosting models. All four
-   lists come from the reviewed option matrix. */
+   the agent capability levels, sensitivity follows the four data tiers, and
+   hosting follows the infrastructure hosting models. All four lists come from
+   the reviewed option matrix. */
 
 export const AUTONOMY = [
   { label: 'Level 0: No agency', desc: 'Fixed scripts, macros or basic chat prompts. The AI produces text and people perform every action.' },
@@ -167,11 +167,11 @@ export const HOSTING = [
   { label: 'Edge device', desc: 'Runs on devices in the field, outside the data centre perimeter and harder to patch or monitor.' },
 ];
 
-export const GOVERNANCE = [
-  { label: 'Tier 1: Low severity', desc: 'Fully automated actions that are easy to reverse, such as password resets, with periodic auditing.' },
-  { label: 'Tier 2: Moderate severity', desc: 'Partially reversible work. The agent drafts or diagnoses, and a person approves before it executes.' },
-  { label: 'Tier 3: High severity', desc: 'Critical system changes, where autonomous execution is blocked entirely.' },
-];
+/* There is no GOVERNANCE scale any more. Asking a visitor to declare the
+   severity tier of their own actions was asking them for the answer we exist
+   to give them: the tier now comes out of the assessment, not into it. The
+   agentic track still tiers individual action types, from the IMDA factor
+   tables rather than from self-report. */
 
 export function flatten(groups) {
   return groups.flatMap(g => g.items);

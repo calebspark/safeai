@@ -6,7 +6,7 @@ Deploy is `git push` to main; safeai.sg auto-deploys within about a minute from
 the **calebspark** Vercel account. Do not use the local `vercel` CLI: its
 `.vercel/project.json` still points at `safeai-sg`, deleted 2026-07-28.
 
-Tests: `node --test "tests/*.test.mjs"` (97 passing).
+Tests: `node --test "tests/*.test.mjs"` (98 passing).
 
 ## Where the risk tool stands
 
@@ -14,19 +14,36 @@ Tests: `node --test "tests/*.test.mjs"` (97 passing).
 `assets/*.mjs` for the data and local scoring, `api/` for the two serverless
 endpoints, `tests/` for the headless tests.
 
-- **Profile → overall risk rating.** Nine scored questions, rated by Claude
+- **Profile → overall risk rating.** Eight scored questions, rated by Claude
   against fixed anchors; the server recomputes the index and tier from the
   driver ratings and overrides the model. `/api/assess`.
 - **Gen AI Governance Readiness** (2026-08-05). Eleven questions, one per
-  principle of the IMDA and AI Verify Foundation testing framework, on a four
-  point scale: not applicable, not implemented, partially, fully. Not applicable
-  is excluded from the denominator, and an all-N/A set scores nothing rather
-  than zero. `assets/genai.mjs`, `tests/genai.test.mjs`. Scores in the browser.
+  principle of the IMDA and AI Verify Foundation testing framework, answered
+  Yes, Partially done, No, or Not applicable. Not applicable is excluded from
+  the denominator, and an all-N/A set scores nothing rather than zero.
+  `assets/genai.mjs`, `tests/genai.test.mjs`. Scores in the browser.
 - **Agentic AI Risk Assessment Matrix.** Pre-deployment factor tables, or the
   Dayos action tiering for anyone already deployed. `assets/agentic.mjs`.
-- Both tracks open as their own page, keep their answers, and can be copied as
-  CSV. So can the overall rating. Everything survives a reload; only Reset
-  clears it.
+- Both tracks open as their own page and keep their answers. Every result view
+  carries the same four actions: copy summary, copy as CSV, print, start over.
+  Everything survives a reload; only Reset or Start over clears it.
+
+**Changed 2026-08-05, David's asks**
+
+- The adoption gate offers Agentic AI, Gen AI, and "Both are applicable", which
+  is a shortcut that stores the same two values. "None of these" is gone.
+- **Gen AI on its own caps agent capability at Level 2.** Levels 3 to 5 are
+  hidden with a note, and a stored answer above the cap is cleared. Selecting
+  Agentic AI restores them. `applyCapabilityLimit` and `scaleField.limitTo`.
+- **The governance and risk tier question is gone.** Asking the visitor for the
+  severity tier was asking them for the answer the tool exists to produce, so
+  the model now judges severity from the use case, autonomy and capability.
+  `GOVERNANCE` is removed from `assets/options.mjs` and `governance` from
+  `PROFILE_FIELDS`. `SAVE_VERSION` is 2.
+- **Every question carries a serial number**, on the profile, the agentic
+  factors and the Gen AI principles, and the numbers go into the CSV export.
+  Result sections are lettered A, B, C; scenario rows and control categories are
+  numbered; the footer sources are numbered by a CSS counter.
 
 **Neither track feeds the overall risk rating, on purpose.** Readiness and
 inherent risk are different measures, and mixing them would let good paperwork
