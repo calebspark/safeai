@@ -433,6 +433,11 @@
     .track p{ margin:0; color:var(--ink-2); line-height:1.55; }
     .track .tact{ flex:none; align-self:center; }
     .track.on .tico{ background:var(--accent); color:var(--accent-ink); }
+    /* .ccount was only ever styled inside an accordion, so on a track heading
+       it read as part of the title: "Gen AI You selected this". */
+    .track h3 .ccount{ margin-left:8px; font-weight:500; font-size:calc(var(--fs-base)*.78);
+      color:var(--ink-2); background:var(--surface-2); padding:2px 9px;
+      border-radius:var(--r-pill); white-space:nowrap; vertical-align:1px; }
 
     /* ---------- technology comparison ----------
        Sits inside the maturity card, so it is a table on the card surface, not
@@ -831,7 +836,7 @@ import {
 } from './assets/agentic.mjs';
 import {
   QUESTIONS as GENAI_QUESTIONS, TOTAL_QUESTIONS as GENAI_TOTAL,
-  SCALE as GENAI_SCALE, scoreReadiness,
+  SCALE as GENAI_SCALE, SCALE_POINTS as GENAI_POINTS, scoreReadiness,
 } from './assets/genai.mjs';
 
 const $ = s => document.querySelector(s);
@@ -1326,6 +1331,7 @@ function renderOutput(vals, d){
 
       <div class="actions" style="margin-top:var(--s6)">
         <button type="button" class="btn" id="copyBtn"><span class="lbl with-icon"><ion-icon name="copy-outline"></ion-icon><span>Copy summary</span></span></button>
+        ${csvButton("csvRisk")}
         <button type="button" class="btn btn-ghost" onclick="window.print()"><ion-icon name="print-outline"></ion-icon>Print / PDF</button>
       </div>
 
@@ -1333,6 +1339,7 @@ function renderOutput(vals, d){
     </div>`;
 
   $("#copyBtn").addEventListener("click", ()=>copySummary(vals,d,t));
+  $("#csvRisk").addEventListener("click", e=>copyCSV(riskCSV(vals,d,t), e.currentTarget, "Risk assessment"));
   $("#rating").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
@@ -1460,6 +1467,128 @@ async function copySummary(vals,d,t){
     try{ await navigator.clipboard.writeText(text); ok(); }
     catch(e2){ toast("Could not copy"); }
   }
+}
+
+/* ---------- CSV export ----------
+   Every result view can be copied as CSV so it can go straight into a
+   spreadsheet, a GRC tool or an audit pack. Each export is one rectangular
+   table: same column count on every row, summary lines carried as rows with
+   Section "Summary", so pasting into Excel or Sheets stays aligned. */
+
+function csvCell(v){
+  let s = v==null ? "" : String(v);
+  /* Spreadsheets execute a cell that opens with one of these. The values here
+     include free text someone typed, so neutralise it rather than trust it. */
+  if(/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+
+/* RFC 4180 line endings: Excel on Windows needs the CR. */
+function toCSV(rows){ return rows.map(r=>r.map(csvCell).join(",")).join("\r\n"); }
+
+function exportStamp(){
+  /* Local time, not ISO: this is read by a person in a spreadsheet. */
+  return new Date().toLocaleString("en-SG", { dateStyle:"medium", timeStyle:"short" });
+}
+
+async function copyCSV(csv, btn, what){
+  const sp = btn.querySelector(".lbl span:last-child") || btn;
+  const ok = ()=>{ const old=sp.textContent; sp.textContent="Copied!"; toast(what+" copied as CSV");
+                   setTimeout(()=>{ sp.textContent=old; }, 1200); };
+  try{ await navigator.clipboard.writeText(csv); ok(); }
+  catch{ toast("Could not copy"); }
+}
+
+function csvButton(id){
+  return `<button type="button" class="btn" id="${id}">
+    <span class="lbl with-icon"><ion-icon name="grid-outline"></ion-icon><span>Copy as CSV</span></span>
+  </button>`;
+}
+
+/* --- the overall risk assessment --- */
+function riskCSV(vals, d, t){
+  const rows = [["Section","Item","Value","Detail"]];
+  rows.push(["Export","Source","SafeAI risk assessment, safeai.sg",exportStamp()]);
+  /* Read the question wording off the form rather than keeping a second copy
+     of it here, which would drift the first time a label is reworded. */
+  const fieldLabel = k => {
+    const el = document.querySelector(`.field[data-key="${k}"] label`);
+    return el ? el.textContent.trim() : k;
+  };
+  KEYS.forEach(k=>rows.push(["Profile", fieldLabel(k), label(vals[k]), ""]));
+  if((state.adoption||[]).length) rows.push(["Profile","AI in use",state.adoption.join("; "),""]);
+  rows.push(["Rating","Tier",t.n+" of 4",t.name]);
+  rows.push(["Rating","Risk index",(d.riskIndex|0)+" of 100","Bands 0-25 Low, 26-50 Moderate, 51-78 High, 79-100 Severe"]);
+  if(d.rationale) rows.push(["Rating","Rationale",d.rationale,""]);
+  (d.drivers||[]).forEach(x=>rows.push(["Driver", x.label, x.level, x.note||""]));
+  ((d.scoring&&d.scoring.contributions)||[]).forEach(c=>
+    rows.push(["Score derivation", c.label, c.level, "weight "+c.weight+", points "+c.points]));
+  (d.scenarios||[]).forEach(s=>rows.push(["Risk scenario", s.scenario, s.impactType,
+    s.mitigation+" (initial "+s.initialLevel+", residual "+s.residualLevel+")"]));
+  (d.controls||[]).forEach(g=>(g.items||[]).forEach(i=>
+    rows.push(["Control", g.category||g.cat||"", i.priority||"", i.text||""])));
+  return toCSV(rows);
+}
+
+/* --- Gen AI governance readiness --- */
+function genaiCSV(res){
+  const rows = [["Section","Number","Principle","Question","Answer","Points","Evidence to look for","Framework outcomes"]];
+  rows.push(["Export","","SafeAI Gen AI Governance Readiness, safeai.sg","AI Verify Testing Framework for Traditional and Generative AI, IMDA and AI Verify Foundation, 2025","","",exportStamp(),""]);
+  GENAI_QUESTIONS.forEach(q=>{
+    const a = state.genaiAnswers[q.id];
+    const pts = GENAI_POINTS[a];
+    rows.push(["Principle", q.n, q.principle, q.question,
+      GENAI_SCALE_LABEL[a] || "Not answered",
+      pts==null ? "n/a" : pts,
+      q.evidence, q.outcomes]);
+  });
+  rows.push(["Summary","","Readiness score","",
+    res.score===null ? "Not scored, every principle marked not applicable" : res.band.name,
+    res.score===null ? "" : res.score+" of 100",
+    "Across "+res.applicable+" applicable principle"+(res.applicable===1?"":"s"), ""]);
+  rows.push(["Summary","","Answer counts","",
+    "Fully "+res.counts.full+", partially "+res.counts.partial+", not implemented "+res.counts.none+", not applicable "+res.counts.na,
+    "","",""]);
+  return toCSV(rows);
+}
+
+/* --- Agentic AI, before deployment --- */
+function agenticPredeployCSV(s){
+  const rows = [["Section","Factor","Axis","Rating","Description"]];
+  rows.push(["Export","SafeAI Agentic AI Risk Assessment Matrix, safeai.sg",
+    "IMDA Model AI Governance Framework for Agentic AI, pages 15 to 17","",exportStamp()]);
+  const seen = new Set();
+  const add = (f, axis) => {
+    /* Access to external systems sits in both IMDA tables and is asked once.
+       Name both axes on the single row rather than repeating the answer. */
+    if(seen.has(f.id)){
+      const row = rows.find(r=>r[1]===f.label);
+      if(row) row[2] = "Impact and likelihood";
+      return;
+    }
+    seen.add(f.id);
+    rows.push(["Factor", f.label, axis, state.agenticFactors[f.id] ?? "Not answered", f.description]);
+  };
+  IMPACT_FACTORS.forEach(f=>add(f,"Impact"));
+  LIKELIHOOD_FACTORS.forEach(f=>add(f,"Likelihood"));
+  rows.push(["Summary","Impact","","" + s.impact + " of 5",""]);
+  rows.push(["Summary","Likelihood","","" + s.likelihood + " of 5",""]);
+  rows.push(["Summary","Likelihood times impact","",s.raw+" of 25",""]);
+  rows.push(["Summary","Tier","","Tier "+s.tier,AGENTIC_PROFILE[s.tier]]);
+  rows.push(["Summary","Autonomy ceiling","","",AUTONOMY_CEILING_COPY[s.tier]]);
+  return toCSV(rows);
+}
+
+/* --- Agentic AI, already deployed --- */
+function agenticDeployedCSV(res){
+  const rows = [["Section","Action type","Severity","Irreversibility","Oversight difficulty","Tier","Permitted autonomy","Autonomy granted","Above ceiling"]];
+  rows.push(["Export","SafeAI Agentic AI governance gap, safeai.sg","","","","",
+    "Dayos action tiering, IMDA Model AI Governance Framework for Agentic AI, page 18","",exportStamp()]);
+  res.rows.forEach(r=>rows.push(["Action", r.label, r.severity, r.reversibility, r.oversight,
+    "Tier "+r.tier, GRANTED_LABEL[r.ceiling], GRANTED_LABEL[r.granted], r.gap ? "Yes" : "No"]));
+  rows.push(["Summary","Action types above their ceiling","","","","","",res.gaps.length+" of "+res.rows.length,""]);
+  [1,2,3].forEach(t=>rows.push(["Summary","Tier "+t+" action types","","","","","",res.distribution[t],""]));
+  return toCSV(rows);
 }
 
 /* ---------- the actual assessment call ---------- */
@@ -1969,9 +2098,11 @@ function renderPredeployResult(s){
     <p style="color:var(--ink-2);margin:0;line-height:1.6">${escapeHtml(AUTONOMY_CEILING_COPY[s.tier])}</p>
     <div class="actions">
       <button type="button" class="btn" id="agentic-back-form">Back</button>
+      ${csvButton("csvAgenticPre")}
       <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
     </div>
     <p class="disclaim">Scored locally from the factor tables in the IMDA Model AI Governance Framework for Agentic AI, pages 15 to 17. Decision support, not a substitute for a formal risk assessment.</p>`);
+  $("#csvAgenticPre").addEventListener("click", e=>copyCSV(agenticPredeployCSV(s), e.currentTarget, "Agentic AI assessment"));
   jumpToTop();   // it is a page now, not a section
 }
 
@@ -2041,9 +2172,11 @@ function renderDeployedResult(res){
       : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every action type sits at or below its permitted ceiling. Re-check when you add new agent capabilities.</div></div>`}
     <div class="actions">
       <button type="button" class="btn" id="edit-actions">Edit the list</button>
+      ${csvButton("csvAgenticGap")}
       <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
     </div>
     <p class="disclaim">Action tiering adapted from the Dayos case study in the IMDA Model AI Governance Framework for Agentic AI, page 18. Autonomy granted is an addition by SafeAI.</p>`);
+  $("#csvAgenticGap").addEventListener("click", e=>copyCSV(agenticDeployedCSV(res), e.currentTarget, "Governance gap"));
   jumpToTop();   // it is a page now, not a section
 }
 
@@ -2153,9 +2286,11 @@ function renderGenaiResult(res){
       : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every applicable principle is fully implemented. Re-run this when the model, the prompts or the retrieval sources change.</div></div>`}
     <div class="actions">
       <button type="button" class="btn" id="genai-back">Back to the questions</button>
+      ${csvButton("csvGenai")}
       <button type="button" class="btn btn-ghost" id="genai-clear">Start over</button>
     </div>
     <p class="disclaim">Self-assessment, scored locally against the 11 principles of the AI Verify Testing Framework for Traditional and Generative AI (IMDA and AI Verify Foundation). It does not affect the overall risk rating above, and it is not a substitute for completing the full framework checklist or an independent audit.</p>`);
+  $("#csvGenai").addEventListener("click", e=>copyCSV(genaiCSV(res), e.currentTarget, "Gen AI readiness"));
   jumpToTop();   // it is a page now, not a section
 }
 
