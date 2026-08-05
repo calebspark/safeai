@@ -275,14 +275,20 @@
       gap:var(--s4) var(--s6); margin:0; padding:0; list-style:none; }
     @media (max-width:760px){ .fsrc ul{ grid-template-columns:1fr; } }
     .fsrc li{ min-width:0; }
-    .fsrc a, .fsrc .nolink{ display:inline-block; color:var(--ink-2); text-decoration:none;
-      line-height:1.45; }
+    /* A URL can be longer than its column, so it wraps at any character rather
+       than pushing the grid wide. */
+    .fsrc a, .fsrc .nolink{ display:inline-block; text-decoration:none; line-height:1.45;
+      overflow-wrap:anywhere; }
     .fsrc a{ color:var(--accent); }
+    .fsrc .nolink{ color:var(--ink-3); }
     .fsrc a:hover{ text-decoration:underline; }
     .fsrc a:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
     .fsrc a ion-icon{ font-size:.8em; margin-left:.45em; vertical-align:middle; color:var(--ink-3); }
-    .fsrc .who{ display:block; margin-top:5px; color:var(--ink-3); line-height:1.5;
+    .fsrc .cite, .fsrc .used{ display:block; margin-top:5px; line-height:1.5;
       font-size:calc(var(--fs-base)*.8); }
+    .fsrc .cite{ color:var(--ink-2); }
+    .fsrc cite{ font-style:normal; color:var(--ink); }
+    .fsrc .used{ color:var(--ink-3); }
     /* The rule sits on the list, not on the note: the note is capped to a
        readable measure, so a border on it would stop short of the column. */
     .fsrc{ padding-bottom:var(--s5); border-bottom:1px solid var(--line); }
@@ -396,6 +402,26 @@
     .adopt-desc div{ color:var(--ink-2); font-size:calc(var(--fs-base)*.9); line-height:1.55; }
     .adopt-desc b{ color:var(--ink); font-weight:600; }
 
+    /* ---------- track view ----------
+       One attribute on <body> decides what the page is showing: "main" is the
+       risk assessment, "genai" and "agentic" are the track assessments. Only
+       visibility changes, so every answer already given survives the switch.
+       Both track containers stay hidden unless their own view is active. */
+    body:not([data-view="main"]) #stepper,
+    body:not([data-view="main"]) .hero .companion,
+    body:not([data-view="main"]) #profile,
+    body:not([data-view="main"]) #compare,
+    body:not([data-view="main"]) #rating,
+    body:not([data-view="main"]) #output,
+    body:not([data-view="main"]) #maturity,
+    body:not([data-view="genai"]) #genai,
+    body:not([data-view="agentic"]) #agentic{ display:none; }
+
+    #trackbar{ display:flex; align-items:center; flex-wrap:wrap; gap:var(--s3) var(--s4);
+      margin-bottom:var(--gap); }
+    #trackbar[hidden]{ display:none; }
+    #trackbar .tbnote{ color:var(--ink-3); font-size:calc(var(--fs-base)*.86); line-height:1.5; }
+
     /* ---------- maturity matrix ----------
        Rows inside the one card, not nested cards. No double padding. */
     .track{ display:flex; align-items:flex-start; gap:var(--s4); padding:var(--s4) 0; border-top:1px solid var(--line); }
@@ -490,7 +516,7 @@
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
   </style>
 </head>
-<body>
+<body data-view="main">
 
 <!-- Private preview gate. Client-side only: it keeps casual visitors out
      while the assessment is validated, it is not real security (the page
@@ -579,7 +605,7 @@
   <main class="stage">
     <div class="wrap">
       <!-- ===== PROFILE (full width) ===== -->
-      <div class="card">
+      <div class="card" id="profile">
         <div class="stitle"><span class="n"><ion-icon name="clipboard-outline"></ion-icon></span><div><h2>Profile your AI use case</h2></div></div>
 
         <form id="q" novalidate>
@@ -698,6 +724,18 @@
       <!-- ===== ASSESSMENT DETAIL ===== -->
       <div id="output" aria-live="polite"></div>
       <div id="maturity"></div>
+
+      <!-- ===== TRACK VIEW =====
+           A track assessment takes over the page rather than appending to the
+           bottom of it: the profile, the rating and the maturity matrix are
+           hidden while one is open. Nothing is discarded, so coming back shows
+           the same answers and the same rating. See the router in the script. -->
+      <div id="trackbar" hidden>
+        <button type="button" class="btn" id="track-back">
+          <ion-icon name="arrow-back-outline"></ion-icon>Back to your risk assessment
+        </button>
+        <span class="tbnote">Your AI use case answers and rating are kept until you reset them.</span>
+      </div>
       <div id="agentic"></div>
       <div id="genai"></div>
 
@@ -706,9 +744,11 @@
 
   <!-- ===== FOOTER =====
        Every framework this page scores against, credited here so a reader can
-       go to the original rather than take our summary on faith. Link text is
-       the full document title rather than "read more", so it still says what
-       it opens when read out of context by a screen reader. -->
+       go to the original rather than take our summary on faith. Each entry is
+       three lines: the link, then the document it points to and its date, then
+       the section of this page it is used in. The visible link is the URL, so
+       aria-label carries the document title, which is what a screen reader
+       should announce instead of reading a URL out character by character. -->
   <footer>
     <div class="wrap">
       <!-- A section, not a nav: the bare `nav` selector styles the sticky top
@@ -717,36 +757,45 @@
         <h2 id="src-h">Sources</h2>
         <ul>
           <li>
-            <a href="https://aiverifyfoundation.sg/what-is-ai-verify/" target="_blank" rel="noopener">
-              AI Verify Testing Framework for Traditional and Generative AI<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+            <a href="https://aiverifyfoundation.sg/what-is-ai-verify/" target="_blank" rel="noopener"
+               aria-label="AI Verify Testing Framework for Traditional and Generative AI, on aiverifyfoundation.sg">
+              aiverifyfoundation.sg/what-is-ai-verify<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
               <span class="vh">(opens in a new tab)</span>
             </a>
-            <span class="who">IMDA and AI Verify Foundation · the 11 principles behind the Gen AI readiness questions</span>
+            <span class="cite">Titled <cite>AI Verify Testing Framework for Traditional and Generative AI</cite>, IMDA and AI Verify Foundation, 2025</span>
+            <span class="used">Used in: Gen AI Governance Readiness</span>
           </li>
           <li>
-            <a href="https://www.imda.gov.sg/resources/press-releases-factsheets-and-speeches/factsheets/2025/model-ai-governance-framework-for-agentic-ai" target="_blank" rel="noopener">
-              Model AI Governance Framework for Agentic AI<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+            <a href="https://www.imda.gov.sg/-/media/imda/files/news-and-events/media-room/media-releases/2026/01/factsheet-model-ai-governance-framework-for-agentic-ai.pdf" target="_blank" rel="noopener"
+               aria-label="Factsheet, Model AI Governance Framework for Agentic AI, PDF on imda.gov.sg">
+              imda.gov.sg · factsheet, Model AI Governance Framework for Agentic AI (PDF)<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
               <span class="vh">(opens in a new tab)</span>
             </a>
-            <span class="who">IMDA and AI Verify Foundation · the factor tables behind the Agentic AI matrix</span>
+            <span class="cite">Titled <cite>Model AI Governance Framework for Agentic AI</cite>, IMDA and AI Verify Foundation, January 2026</span>
+            <span class="used">Used in: Agentic AI Risk Assessment Matrix</span>
           </li>
           <li>
-            <a href="https://www.csa.gov.sg/resources/publications/guidelines-and-companion-guide-on-securing-ai-systems/" target="_blank" rel="noopener">
-              Guidelines and Companion Guide on Securing AI Systems<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+            <a href="https://www.csa.gov.sg/resources/publications/guidelines-and-companion-guide-on-securing-ai-systems/" target="_blank" rel="noopener"
+               aria-label="Guidelines and Companion Guide on Securing AI Systems, on csa.gov.sg">
+              csa.gov.sg/resources/publications/guidelines-and-companion-guide-on-securing-ai-systems<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
               <span class="vh">(opens in a new tab)</span>
             </a>
-            <span class="who">Cyber Security Agency of Singapore · the security expectations in the risk rating</span>
+            <span class="cite">Titled <cite>Guidelines and Companion Guide on Securing AI Systems</cite>, Cyber Security Agency of Singapore, 15 October 2024</span>
+            <span class="used">Used in: Overall AI Use Case Risk Rating, and the mapped controls checklist</span>
           </li>
           <li>
-            <span class="nolink">MindForge AI Risk Management Framework</span>
-            <span class="who">MindForge · the five step flow the overall assessment follows, steps 1 to 3</span>
+            <span class="nolink">No public link</span>
+            <span class="cite">Titled <cite>MindForge AI Risk Management Framework</cite>, MindForge</span>
+            <span class="used">Used in: Risk assessment, the five step flow shown in the progress stepper. This tool covers steps 1 to 3</span>
           </li>
           <li>
-            <a href="https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-industrial-classification-ssic" target="_blank" rel="noopener">
-              Singapore Standard Industrial Classification 2025<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
+            <a href="https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-industrial-classification-ssic" target="_blank" rel="noopener"
+               aria-label="Singapore Standard Industrial Classification, on singstat.gov.sg">
+              singstat.gov.sg · Singapore Standard Industrial Classification<ion-icon name="open-outline" aria-hidden="true"></ion-icon>
               <span class="vh">(opens in a new tab)</span>
             </a>
-            <span class="who">Department of Statistics Singapore · the industry list</span>
+            <span class="cite">Titled <cite>Singapore Standard Industrial Classification 2025</cite>, Department of Statistics Singapore, 15 April 2025</span>
+            <span class="used">Used in: Profile your AI use case, the industry field</span>
           </li>
         </ul>
       </section>
@@ -1665,11 +1714,69 @@ function renderMaturity(){
     </div>`;
 }
 
+/* ---------- track router ----------
+   Starting a track opens it as its own page rather than appending it below the
+   results: the profile, rating and maturity matrix are hidden, the page goes to
+   the top, and the URL gains a hash so the browser Back button works. Nothing
+   is discarded, because only visibility changes, so returning shows the same
+   answers and the same rating. Only Reset clears them.
+
+   A reload is a genuinely new page though, and the assessment lives in memory,
+   so a landing hash is stripped and the visitor starts on the main view rather
+   than on a track with no assessment behind it. */
+const TRACK_VIEWS = { "Gen AI":"genai", "Agentic AI":"agentic" };
+
+/* "instant", not "auto": auto defers to html{scroll-behavior:smooth}, so the
+   jump became an animation that was still running when the next thing measured
+   it, and the track opened part way down the page. The second jump on the next
+   frame is for the reflow: hiding the main sections shortens the document, and
+   the browser clamps the scroll position after that has happened. */
+function jumpToTop(){
+  window.scrollTo({ top:0, behavior:"instant" });
+  requestAnimationFrame(()=>window.scrollTo({ top:0, behavior:"instant" }));
+}
+
+function showTrack(view, { push=true }={}){
+  document.body.dataset.view = view;
+  $("#trackbar").hidden = false;
+  if(push) history.pushState({ view }, "", "#"+view);
+  jumpToTop();
+  $("#track-back").focus({ preventScroll:true });
+}
+
+function showMain({ push=true, scrollTo="#maturity" }={}){
+  document.body.dataset.view = "main";
+  $("#trackbar").hidden = true;
+  if(push) history.pushState({ view:"main" }, "", location.pathname);
+  /* "instant", not "auto": auto defers to html{scroll-behavior:smooth} and
+     coming back from a page should land, not glide. */
+  const target = scrollTo && $(scrollTo);
+  if(target && target.firstChild) target.scrollIntoView({ behavior:"instant", block:"start" });
+  else jumpToTop();
+}
+
+$("#track-back").addEventListener("click", ()=>showMain());
+
+window.addEventListener("popstate", e=>{
+  const view = e.state && e.state.view;
+  if(view==="genai" || view==="agentic") showTrack(view, { push:false });
+  else showMain({ push:false });
+});
+
+/* Landing straight on #genai or #agentic: clear it, there is nothing behind it
+   on a fresh load. */
+if(location.hash==="#genai" || location.hash==="#agentic"){
+  history.replaceState({ view:"main" }, "", location.pathname);
+}
+
 $("#maturity").addEventListener("click", e=>{
   const b=e.target.closest("[data-track]");
   if(!b) return;
+  const view = TRACK_VIEWS[b.dataset.track];
+  if(!view) return;
   if(b.dataset.track==="Agentic AI") renderAgenticIntro();
-  if(b.dataset.track==="Gen AI") renderGenaiForm();
+  else renderGenaiForm();
+  showTrack(view);
 });
 
 /* ---------- Agentic AI Risk Assessment Matrix ----------
@@ -1700,7 +1807,7 @@ function renderAgenticIntro(){
       <button type="button" class="pill" role="radio" aria-checked="false" data-deployed="no">No, still assessing<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
       <button type="button" class="pill" role="radio" aria-checked="false" data-deployed="yes">Yes, agents are live<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
     </div>`);
-  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+  jumpToTop();   // it is a page now, not a section
 }
 
 $("#agentic").addEventListener("click", async e=>{
@@ -1802,7 +1909,7 @@ function renderPredeployForm(){
     if(pill) pill.setAttribute("aria-checked","true");
   });
   updatePredeployReady();
-  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+  jumpToTop();   // it is a page now, not a section
 }
 
 const AGENTIC_PROFILE={1:"Low severity, fully reversible",2:"Moderate severity, partially reversible",3:"High severity, limited reversibility"};
@@ -1831,7 +1938,7 @@ function renderPredeployResult(s){
       <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
     </div>
     <p class="disclaim">Scored locally from the factor tables in the IMDA Model AI Governance Framework for Agentic AI, pages 15 to 17. Decision support, not a substitute for a formal risk assessment.</p>`);
-  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+  jumpToTop();   // it is a page now, not a section
 }
 
 /* --- deployed: Dayos action tiering --- */
@@ -1875,7 +1982,7 @@ function renderDeployedForm(){
       <button type="button" class="btn" id="add-action"><ion-icon name="add-outline"></ion-icon>Add action type</button>
       <button type="button" class="btn btn-ghost" id="agentic-back-intro">Back</button>
     </div>`);
-  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+  jumpToTop();   // it is a page now, not a section
 }
 
 function renderDeployedResult(res){
@@ -1903,7 +2010,7 @@ function renderDeployedResult(res){
       <button type="button" class="btn btn-ghost" id="agentic-restart">Start over</button>
     </div>
     <p class="disclaim">Action tiering adapted from the Dayos case study in the IMDA Model AI Governance Framework for Agentic AI, page 18. Autonomy granted is an addition by SafeAI.</p>`);
-  $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
+  jumpToTop();   // it is a page now, not a section
 }
 
 /* ---------- Gen AI governance readiness ----------
@@ -1967,7 +2074,7 @@ function renderGenaiForm(){
     if(pill) pill.setAttribute("aria-checked","true");
   });
   updateGenaiReady();
-  $("#genai").scrollIntoView({behavior:"smooth",block:"start"});
+  jumpToTop();   // it is a page now, not a section
 }
 
 function renderGenaiResult(res){
@@ -2015,7 +2122,7 @@ function renderGenaiResult(res){
       <button type="button" class="btn btn-ghost" id="genai-clear">Start over</button>
     </div>
     <p class="disclaim">Self-assessment, scored locally against the 11 principles of the AI Verify Testing Framework for Traditional and Generative AI (IMDA and AI Verify Foundation). It does not affect the overall risk rating above, and it is not a substitute for completing the full framework checklist or an independent audit.</p>`);
-  $("#genai").scrollIntoView({behavior:"smooth",block:"start"});
+  jumpToTop();   // it is a page now, not a section
 }
 
 $("#genai").addEventListener("click", e=>{
@@ -2085,6 +2192,9 @@ $("#reset").addEventListener("click",()=>{
   $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML="";
   $("#agentic").innerHTML=""; $("#genai").innerHTML="";
   $("#compare").innerHTML=""; showBacktop(false);
+  /* Reset is the only thing that clears a track, so it also has to bring the
+     visitor back from one. Scroll to the top: there is no rating to return to. */
+  showMain({ scrollTo:null });
   $("#formhint").textContent=""; $("#formhint").style.color="var(--ink-3)"; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
 });
 </script>
