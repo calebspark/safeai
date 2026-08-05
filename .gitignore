@@ -14,3 +14,6 @@ SafeAI SG Advisory Council Charter.docx
 #   SafeAI_Launch_Ministerial_Briefing_Note_1.pdf
 .vercel
 .env*
+
+# Scratch prototypes kept locally, not part of the site
+_archive/

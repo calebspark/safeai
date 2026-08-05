@@ -1,103 +1,131 @@
 # SafeAI, next session
 
-Last session: 2026-07-30. Everything below is outstanding. Nothing here blocks
-the live site, which is healthy.
+State as of **2026-08-05**. The live site is healthy. Nothing below blocks it.
 
-## 0. Preview lockdown, revert when the assessment is "validated"
+Deploy is `git push` to main; safeai.sg auto-deploys within about a minute from
+the **calebspark** Vercel account. Do not use the local `vercel` CLI: its
+`.vercel/project.json` still points at `safeai-sg`, deleted 2026-07-28.
 
-Done 2026-07-30 (`b26a85d`) at David's request. When David or Joe declare the
-assessment validated, undo all three:
+Tests: `node --test "tests/*.test.mjs"` (97 passing).
 
-- [ ] `index.html`: restore the hero "Know my AI Risk" button and the two
-      Resources card links. Both originals sit in HTML comments marked
-      "Restore"; delete the "Coming soon" spans next to them.
-- [ ] Remove the password gate block (style + `#gate` div + script) sitting
-      right after `<body>` in `risk-assessment.html` and `checklist.html`.
-      Until then the password is `safeai2026`; to rotate it, replace
-      `GATE_HASH` in both files with `printf 'newpass' | shasum -a 256`.
-      Client-side only, it deters casual visitors, it is not security.
+## Where the risk tool stands
 
-Context: spec `docs/superpowers/specs/2026-07-28-safeai-questions-and-agentic-matrix-design.md`,
-plan `docs/superpowers/plans/2026-07-28-safeai-questions-and-agentic-matrix.md`.
-Both fully implemented and deployed as of `15e229e`.
+`risk-assessment.html` behind a preview password (`safeai2026`), plus
+`assets/*.mjs` for the data and local scoring, `api/` for the two serverless
+endpoints, `tests/` for the headless tests.
+
+- **Profile → overall risk rating.** Nine scored questions, rated by Claude
+  against fixed anchors; the server recomputes the index and tier from the
+  driver ratings and overrides the model. `/api/assess`.
+- **Gen AI Governance Readiness** (2026-08-05). Eleven questions, one per
+  principle of the IMDA and AI Verify Foundation testing framework, on a four
+  point scale: not applicable, not implemented, partially, fully. Not applicable
+  is excluded from the denominator, and an all-N/A set scores nothing rather
+  than zero. `assets/genai.mjs`, `tests/genai.test.mjs`. Scores in the browser.
+- **Agentic AI Risk Assessment Matrix.** Pre-deployment factor tables, or the
+  Dayos action tiering for anyone already deployed. `assets/agentic.mjs`.
+- Both tracks open as their own page, keep their answers, and can be copied as
+  CSV. So can the overall rating. Everything survives a reload; only Reset
+  clears it.
+
+**Neither track feeds the overall risk rating, on purpose.** Readiness and
+inherent risk are different measures, and mixing them would let good paperwork
+lower a genuinely risky score.
 
 ## 1. Caleb only, cannot be done from here
 
-- [ ] **Vercel Firewall rate-limit rule on `/api/*`**, in the **calebspark**
-      project (the one whose Domains list shows `safeai.sg`, not c-lb). This is
-      the loudest item. `/api/assess` is unauthenticated, has no limiter at
-      all, and calls Sonnet at `max_tokens: 5000`, so it is an open
-      wallet-drain. `/api/classify` has a per-instance per-IP bucket, which
-      only blunts a single-source flood.
-- [x] **Upload `~/Downloads/ssic2025report.pdf`** to Joe Chiu's Drive folder.
-      Done, confirmed 2026-07-31.
-- [x] **Joe to review the 1/3/5 anchor text** on the ten IMDA agentic factors
-      in `assets/agentic.mjs`. Done, confirmed 2026-07-31.
+- [ ] **Vercel Firewall rate-limit rule on `/api/*`** in the **calebspark**
+      project (the one whose Domains list shows `safeai.sg`). The loudest open
+      item: `/api/assess` is unauthenticated, has no limiter, and calls Sonnet
+      at `max_tokens: 5000`, so it is an open wallet drain. `/api/classify` has
+      a per-instance per-IP bucket, which only blunts a single-source flood.
 
-## 2. Decisions waiting on you
+## 2. Waiting on David
 
-- [ ] **Recreate the `safeai-sg` Vercel project?** It was deleted this session.
-      It had no Git connection and no env vars in settings, but its frozen
-      deployment still held a working Anthropic key and was answering requests,
-      so it was a live spend hole. Deleting closed it. Nothing functional was
-      lost; recreating is about a minute if you want the fallback back.
-- [ ] **Verify the tier thresholds and control mappings with David.** Carried
-      over from earlier sessions, still open.
+- [ ] **Scale wording.** He asked for "not compiled / partially compiled /
+      fully compiled". Shipped as "not implemented / partially implemented /
+      fully implemented", which is what the framework means by a completed
+      process check. One-line swap in `SCALE` in `assets/genai.mjs`.
+- [ ] **Verify the tier thresholds and control mappings.** Carried over from
+      earlier sessions.
+- [ ] **Declare the assessment validated**, which triggers the revert below.
 
-## 3. Spec B, parked and ready to brainstorm
+## 3. Preview lockdown, revert on validation
 
-Backend for the risk tool. Scoped but not designed.
+Done 2026-07-30 (`b26a85d`) at David's request. When validated, undo both:
 
-- Users can see their own past assessments.
-- Internal analytics on how the tool is being used and what AI usage it reveals.
-- **Evaluate Power BI and Tableau** as the analytics surface, against a
-  hand-built dashboard. Caleb raised this specifically.
-- Natural follow-on once assessments persist: let a deployed user return and
-  work through their agentic action catalogue over time, which is the use case
-  the Dayos branch is really built for.
-- Storing free-text entries also gives a backlog of what to add to the fixed
-  option lists, and the SSIC section code makes the data joinable to ACRA
-  company records.
+- [ ] `index.html`: restore the hero "Know my AI Risk" button and the two
+      Resources card links. Originals sit in HTML comments marked "Restore";
+      delete the "Coming soon" spans beside them.
+- [ ] Remove the password gate (style + `#gate` div + script) after `<body>` in
+      `risk-assessment.html` and `checklist.html`. To rotate instead, replace
+      `GATE_HASH` in **both** files with `printf 'newpass' | shasum -a 256`.
+      Client-side only: it deters casual visitors, it is not security.
 
-## 4. Known gaps, not urgent
+## 4. Parked: Spec B, the backend
 
-- **Both maturity tracks are now live** (2026-08-05). Gen AI is an 11 question
-  governance readiness self-assessment, one question per principle of the IMDA
-  and AI Verify Foundation testing framework, on a four point scale (not
-  applicable, not implemented, partially, fully). Not applicable is excluded
-  from the denominator. Data and scoring live in `assets/genai.mjs` with tests
-  in `tests/genai.test.mjs`. It deliberately does NOT feed the overall risk
-  rating: readiness and inherent risk are different measures, and mixing them
-  would let good paperwork lower a genuinely risky score.
-- **RPA was removed entirely on 2026-08-05** (David's call: it is automation,
-  not AI, and carries low risk for the organisations that run it). Gone from
-  the adoption gate, the maturity tracks, the technology comparison table and
-  the use case list. Do not add it back without asking.
-- **Question wording note.** David asked for the scale to read "not compiled /
-  partially compiled / fully compiled". Shipped as "not implemented /
-  partially implemented / fully implemented", which is what the framework
-  means by a completed process check. Swap the labels in `SCALE` in
-  `assets/genai.mjs` if he wants his exact wording.
+Scoped, not designed. Users see their own past assessments; internal analytics
+on usage and on what AI adoption it reveals; **evaluate Power BI and Tableau**
+against a hand-built dashboard (Caleb raised this). Persisting assessments is
+what makes the Dayos branch genuinely useful, since an operator can work
+through their action catalogue over time. Stored free text also becomes a
+backlog of options to add, and the SSIC code makes the data joinable to ACRA
+company records.
+
+## 5. Known gaps, not urgent
+
+- **RPA is gone** (2026-08-05, David's call: automation, not AI, and low risk
+  for the organisations running it). Removed from the adoption gate, the
+  maturity tracks, the comparison table and the use case list. Do not put it
+  back without asking.
 - **No alerting path.** Classify failures and rate-limit trips are logged as
   structured JSON, but nothing reaches a human. A Vercel log drain alert would
   close item 10 of the gandalf checklist.
-- **The commit message on `15e229e` is missing a word** where zsh ate a
-  backticked `detail`. Cosmetic, already pushed, not worth a force-push.
+- **Session data is per tab.** The reload-survival record lives in
+  sessionStorage, so it is gone when the tab closes. That is deliberate: a
+  shared machine should not hand the next person someone else's risk profile.
 
 ## Footguns worth re-reading before touching this repo
 
-- **SSIC 2025 shifted the letters.** Financial and Insurance is **L**, not K.
-  Section J split and everything after moved. Every third-party site still
-  lists SSIC 2020 and is wrong. Only the official SingStat report is
-  trustworthy. A test pins this.
+**Repo and deploy**
+
 - **No `package.json`, deliberately.** Adding one risks Vercel switching this
-  static site to a build pipeline. Run tests with
-  `node --test "tests/*.test.mjs"`; the bare `tests/` directory form resolves
-  as a module path and fails.
-- **Deleting a Vercel env var does not revoke it from deployments already
-  built.** The value is captured at build time. Remove the deployment or
-  redeploy to actually revoke.
+  static site to a build pipeline. Run tests with `node --test "tests/*.test.mjs"`;
+  the bare `tests/` form resolves as a module path and fails.
+- **Deleting a Vercel env var does not revoke it** from deployments already
+  built; the value was captured at build time. Remove the deployment or redeploy.
 - **`vercel remove <projectName>` deletes the project**, not just deployments.
-  Pass deployment URLs to scope it to deployments.
-- **Two Vercel accounts.** `safeai.sg` lives in **calebspark**, which is not
-  authenticated locally. The c-lb CLI cannot see or change it.
+- **Two Vercel accounts.** `safeai.sg` lives in **calebspark**, not
+  authenticated locally, so the c-lb CLI cannot see or change it.
+- **imda.gov.sg returns 200 for unknown routes**, so a status check does not
+  prove a link is real. Check the content, or link a PDF where the content type
+  is proof.
+
+**Data**
+
+- **SSIC 2025 shifted the letters.** Financial and Insurance is **L**, not K.
+  Section J split and everything after moved. Third-party sites still list SSIC
+  2020 and are wrong; only the official SingStat report is trustworthy. A test
+  pins this.
+- **`SAVE_VERSION` in `risk-assessment.html` guards the saved session shape.**
+  `KEYS` has changed before, and a stale save from an older build restores a
+  half-empty profile that looks complete. Bump it whenever the saved shape or
+  `KEYS` changes.
+- **A restore replays through the same commit path a click uses**, so it fires
+  `onFieldChanged`, so it would save mid-restore and erase the result from the
+  record being restored. Writes are held by the `restoring` flag.
+
+**UI**
+
+- **The bare `nav` selector styles the sticky top bar** (flex, sticky, 104px).
+  Any other `<nav>` on the page gets swallowed by it. Use a `<section>`.
+- **`html` carries `scroll-behavior: smooth`**, so `scrollTo` with behavior
+  "auto" animates rather than jumps, and a jump issued during another scroll
+  loses. Use "instant", and repeat on the next frame when the document has just
+  got shorter.
+- **`table.risk` has `min-width: 680px`** and nowrap on the last column, which
+  pushes narrow tables off a phone. The `gtable` modifier opts out of both.
+- **Edit curls straight quotes in this HTML** and can break class attributes.
+  Grep-guard after bulk edits.
+- **Never paste a line-counted extraction between the two gated pages.** That is
+  how an unclosed `<nav>` once swallowed the whole checklist page.
