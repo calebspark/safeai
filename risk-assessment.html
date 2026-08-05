@@ -112,7 +112,7 @@
     .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s6); box-shadow:0 14px 34px -22px rgba(0,0,0,.55); }
     /* Each result section is its own container, so the sibling rule cannot
        reach across them. Every card after the first keeps the same rhythm. */
-    .card + .card, #rating > .card, #output > .card, #maturity > .card, #agentic > .card, #compare > .card{ margin-top:var(--gap); }
+    .card + .card, #rating > .card, #output > .card, #maturity > .card, #agentic > .card{ margin-top:var(--gap); }
     .card h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
     .card .sub{ color:var(--ink-2); margin-top:6px; font-size:calc(var(--fs-base)*.95); }
     .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s6); }
@@ -290,10 +290,10 @@
     @media (max-width:760px){ .fsrc ul{ grid-template-columns:1fr; } }
     /* Numbered so a citation can be referred to as "source 3". A counter, not
        typed-in digits, so adding a source cannot leave the list misnumbered.
-       The number sits on its own line above the link rather than beside it,
-       which keeps the wrapping URL from flowing under it. */
+       The number sits on the same line as the link; the link is inline-block,
+       so a wrapping URL folds within its own box instead of under the digit. */
     .fsrc li{ min-width:0; counter-increment:src; }
-    .fsrc li::before{ content:counter(src) "."; display:block; margin-bottom:4px;
+    .fsrc li::before{ content:counter(src) "."; margin-right:.5em;
       color:var(--ink-3); font-weight:600; font-variant-numeric:tabular-nums;
       font-size:calc(var(--fs-base)*.84); }
     /* A URL can be longer than its column, so it wraps at any character rather
@@ -394,6 +394,12 @@
     .infobtn:hover{ color:var(--accent); background:var(--surface-2); }
     .infobtn:active{ transform:translateY(1px); }
     .infobtn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+    /* The adoption help button carries accent ink so the comparison is
+       discoverable: it is the one place a wrong answer reroutes the whole
+       follow-up, so the pointer to "which one do I have" earns the colour. */
+    #adopt-help{ color:var(--accent); }
+    #adopt-help:hover{ color:var(--accent-2); }
+    #adopt-help[aria-expanded="true"]{ color:var(--accent-2); background:var(--surface-2); }
 
     /* Hover tooltip. Pointer devices only: on touch the button just works. */
     [data-tip]{ position:relative; }
@@ -406,22 +412,16 @@
       [data-tip]:hover::after, [data-tip]:focus-visible::after{ opacity:1; transform:translate(-50%,0); }
     }
 
-    /* Floating return, shown only after the help button jumps the page down. */
-    .backtop{ position:fixed; right:20px; bottom:20px; z-index:70; font:inherit; font-weight:600; cursor:pointer;
-      color:var(--ink); background:var(--surface-2); border:1px solid var(--line-2); border-radius:var(--r-pill);
-      padding:11px 22px; box-shadow:var(--shadow-pop); display:inline-flex; align-items:center; gap:.5em;
-      opacity:0; transform:translateY(10px); pointer-events:none; transition:opacity .2s, transform .2s, background .15s; }
-    .backtop.show{ opacity:1; transform:none; pointer-events:auto; }
-    .backtop:hover{ background:var(--surface-3); }
-    .backtop:active{ transform:translateY(1px); }
-    .backtop:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-    .backtop ion-icon{ font-size:1.15em; color:var(--accent); }
-    @media (max-width:640px){ .backtop{ right:12px; bottom:12px; padding:10px 20px; } }
     /* What each option actually means, shown only for what is selected. */
     .adopt-desc{ order:3; margin-top:var(--s3); display:grid; gap:var(--s2); }
     .adopt-desc[hidden]{ display:none; }
     .adopt-desc div{ color:var(--ink-2); font-size:calc(var(--fs-base)*.9); line-height:1.55; }
     .adopt-desc b{ color:var(--ink); font-weight:600; }
+    /* The comparison accordion. A divider, not a card: it lives inside the
+       profile card already, and nesting a second card would double the
+       padding. */
+    .adopt-compare{ order:4; margin-top:var(--s4); padding-top:var(--s4); border-top:1px solid var(--line); }
+    .adopt-compare[hidden]{ display:none; }
 
     /* ---------- track view ----------
        One attribute on <body> decides what the page is showing: "main" is the
@@ -431,7 +431,6 @@
     body:not([data-view="main"]) #stepper,
     body:not([data-view="main"]) .hero .companion,
     body:not([data-view="main"]) #profile,
-    body:not([data-view="main"]) #compare,
     body:not([data-view="main"]) #rating,
     body:not([data-view="main"]) #output,
     body:not([data-view="main"]) #maturity,
@@ -464,10 +463,6 @@
        Sits inside the maturity card, so it is a table on the card surface, not
        a second card. The selected column is marked by weight and the accent,
        never by giving each column its own colour. */
-    /* The nav is sticky, so anything we scroll to keeps clear of it. */
-    .cmp-h, #compare > .card{ scroll-margin-top:124px; }
-    @media (max-width:640px){ .cmp-h, #compare > .card{ scroll-margin-top:88px; } }
-    .cmp-h{ margin:var(--s6) 0 var(--s1); font-size:calc(var(--fs-base)*1.05); }
     .cmp-lead{ color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
     /* Two technology columns plus the row label. Was 760px when there were
        three, which forced a scrollbar the content no longer needs. */
@@ -664,6 +659,10 @@
               <button type="button" class="pill" data-adopt="Both" aria-pressed="false">Both are applicable<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
             </div>
             <div class="adopt-desc" id="adopt-desc" hidden></div>
+            <!-- The Gen AI vs Agentic AI comparison, folded away until the
+                 help button opens it, so the answer to "which one do I have"
+                 sits under the question that needs it. -->
+            <div class="adopt-compare" id="adopt-compare" hidden></div>
           </div>
 
           <div class="fgrid">
@@ -705,6 +704,7 @@
               <label><span class="qn">4.</span>Autonomy level</label>
               <div class="hint">How much the system decides and does on its own. This is the sharpest risk multiplier.</div>
               <div class="pills" role="radiogroup" aria-label="Autonomy level"></div>
+              <div class="cap-note" hidden></div>
               <div class="opt-desc" hidden></div>
             </div>
 
@@ -748,11 +748,6 @@
           </div>
         </form>
       </div>
-
-      <!-- Holds the technology comparison when the help button is used before
-           an assessment exists. After an assessment it lives in the maturity
-           card instead, and this stays empty. -->
-      <div id="compare"></div>
 
       <!-- ===== RATING (after profile) ===== -->
       <div id="rating"></div>
@@ -837,10 +832,6 @@
       <p class="fnote">SafeAI · AI risk assessment. Not affiliated with these organisations. Their material is cited for reference and the assessments here are our own condensation of it.</p>
     </div>
   </footer>
-
-  <button type="button" class="backtop" id="backtop" data-tip="Return to the question you were on">
-    <ion-icon name="arrow-up-outline"></ion-icon>Back to the question
-  </button>
 
   <div class="toast" id="toast"><ion-icon name="checkmark-circle"></ion-icon><span></span></div>
 
@@ -1867,6 +1858,7 @@ function scaleField(field){
 }
 const SCALE_FIELDS = [...document.querySelectorAll(".field[data-scale]")].map(scaleField);
 const CAPABILITY_FIELD = SCALE_FIELDS.find(f=>f.key==="capability");
+const AUTONOMY_FIELD = SCALE_FIELDS.find(f=>f.key==="autonomy");
 
 /* Controls that own their own DOM state and so need clearing on reset. */
 const FIELD_CONTROLS = [
@@ -1921,6 +1913,11 @@ function paintAdoption(){
     : "Select all that apply. This routes you to the right follow-up and does not affect your risk score.";
   renderAdoptDesc();
   applyCapabilityLimit();
+  /* If the comparison is open, repaint it so the "you selected this" column
+     highlight tracks the pills. getElementById, not the const below: this
+     runs from restore before the accordion wiring is declared. */
+  const cmp=document.getElementById("adopt-compare");
+  if(cmp && !cmp.hidden) cmp.innerHTML = techCompareHTML(picked);
 }
 
 /* Plain-language meaning of each option, shown only once it is selected, so
@@ -1944,14 +1941,22 @@ function renderAdoptDesc(){
    each other, which is the agentic track, so they are not offered until
    Agentic AI is selected. */
 const GENAI_CAPABILITY_CEILING = 2;
+/* Autonomy counts from Level 0, so "up to Level 2" is the first three options,
+   not the first two. */
+const GENAI_AUTONOMY_OPTIONS = 3;
 function applyCapabilityLimit(){
-  if(!CAPABILITY_FIELD) return;
   const picked = state.adoption || [];
   const genaiOnly = picked.includes("Gen AI") && !picked.includes("Agentic AI");
-  CAPABILITY_FIELD.limitTo(
+  if(CAPABILITY_FIELD) CAPABILITY_FIELD.limitTo(
     genaiOnly ? GENAI_CAPABILITY_CEILING : CAPABILITY.length,
     genaiOnly
       ? "Gen AI on its own reaches Level 2. Levels 3 to 5 describe agents that keep memory across sessions or coordinate other agents, so they appear once Agentic AI is selected."
+      : ""
+  );
+  if(AUTONOMY_FIELD) AUTONOMY_FIELD.limitTo(
+    genaiOnly ? GENAI_AUTONOMY_OPTIONS : AUTONOMY.length,
+    genaiOnly
+      ? "Gen AI on its own reaches Level 2. Levels 3 to 5 describe agents that act on their own, so they appear once Agentic AI is selected."
       : ""
   );
 }
@@ -1992,7 +1997,7 @@ const TECH_ROWS = [
   ]},
 ];
 
-function techCompareHTML(picked, { heading=true }={}){
+function techCompareHTML(picked){
   const head = TECH_COLS.map(c=>
     `<th scope="col"${picked.includes(c)?' class="on"':""}>${escapeHtml(c)}</th>`).join("");
   const body = TECH_ROWS.map(r=>
@@ -2007,7 +2012,6 @@ function techCompareHTML(picked, { heading=true }={}){
     </div>`).join("");
 
   return `
-    ${heading?'<h3 class="cmp-h">Key differences between Gen AI and Agentic AI</h3>':''}
     <p class="cmp-lead">Many organisations run both. Risk changes with how much the software decides on its own.</p>
     <div class="tbl-scroll cmp-table">
       <table class="risk cmp">
@@ -2019,47 +2023,23 @@ function techCompareHTML(picked, { heading=true }={}){
 }
 
 /* ---------- help button on the adoption gate ----------
-   Jumps to the comparison. Before an assessment exists there is no maturity
-   card to jump to, so the same table renders into #compare on its own. A
-   floating return sends the user back to the question they left, because a
-   jump with no way back is worse than no jump. */
-const backtop=$("#backtop");
-function showBacktop(on){ backtop.classList.toggle("show", !!on); }
-
-$("#adopt-help").addEventListener("click", ()=>{
-  let target=document.querySelector("#maturity .cmp-h");
-  if(!target){
-    $("#compare").innerHTML=`<div class="card">
-      <div class="stitle" style="margin-bottom:var(--s4)">
-        <span class="n"><ion-icon name="git-compare-outline"></ion-icon></span>
-        <div><h2>Which one do you have?</h2>
-        <div class="sub">Gen AI and Agentic AI, side by side</div></div>
-      </div>
-      ${techCompareHTML(state.adoption||[], { heading:false })}</div>`;
-    target=document.querySelector("#compare .card");
-  }
-  target.scrollIntoView({behavior:"smooth", block:"start"});
-  showBacktop(true);
+   Toggles the comparison open under the question itself, so "which one do I
+   have" is answered where it is asked instead of by a jump down the page.
+   The table renders on open, not on load, so the highlighted column always
+   matches the current selection. */
+const adoptCompare=$("#adopt-compare");
+const adoptHelp=$("#adopt-help");
+adoptHelp.setAttribute("aria-expanded","false");
+adoptHelp.setAttribute("aria-controls","adopt-compare");
+adoptHelp.addEventListener("click", ()=>{
+  const open = adoptCompare.hidden;
+  if(open) adoptCompare.innerHTML = techCompareHTML(state.adoption||[]);
+  adoptCompare.hidden = !open;
+  adoptHelp.setAttribute("aria-expanded", String(open));
 });
-
-backtop.addEventListener("click", ()=>{
-  showBacktop(false);
-  document.querySelector(".adopt-field").scrollIntoView({behavior:"smooth", block:"center"});
-});
-
-/* Also retire the button once the question is back on screen under its own
-   steam, so it does not hang around after the user scrolls back manually. */
-if("IntersectionObserver" in window){
-  new IntersectionObserver(entries=>{
-    if(entries.some(e=>e.isIntersecting)) showBacktop(false);
-  }, { threshold:0.4 }).observe(document.querySelector(".adopt-field"));
-}
 
 function renderMaturity(){
   const picked=state.adoption||[];
-  /* One copy only. Once the maturity card carries the table, drop the
-     standalone one so the page does not show it twice. */
-  $("#compare").innerHTML="";
   const rows=TRACKS.map(t=>{
     const on=picked.includes(t.id);
     return `<div class="track ${on?"on":""}">
@@ -2082,7 +2062,6 @@ function renderMaturity(){
         <div class="sub">A deeper assessment for each technology you adopt</div></div>
       </div>
       ${rows}
-      ${techCompareHTML(picked)}
     </div>`;
 }
 
@@ -2593,7 +2572,6 @@ $("#reset").addEventListener("click",()=>{
   state.agenticFactors={}; state.agenticActions=[]; state.genaiAnswers={};
   $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML="";
   $("#agentic").innerHTML=""; $("#genai").innerHTML="";
-  $("#compare").innerHTML=""; showBacktop(false);
   /* Reset is the only thing that clears a track, so it also has to bring the
      visitor back from one. Scroll to the top: there is no rating to return to. */
   showMain({ scrollTo:null });
