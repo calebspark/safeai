@@ -516,7 +516,13 @@
     .fq .gprin{ display:block; color:var(--ink); font-weight:600;
       font-size:calc(var(--fs-base)*1.22); line-height:1.35; letter-spacing:-.01em;
       margin-bottom:8px; }
-    .fq.gq > label{ font-weight:500; color:var(--ink-2); line-height:1.55; max-width:68ch; }
+    /* The question runs the full width of the card rather than being capped at
+       a reading measure: these are one or two sentences, and breaking them
+       halfway across a wide card reads as a layout accident. Full ink, since
+       the question is the thing being answered, with room before the pills so
+       the answer row is clearly a separate thing from the question. */
+    .fq.gq > label{ font-weight:500; color:var(--ink); line-height:1.55;
+      margin-bottom:var(--s4); }
     .fq .gevi{ margin-top:var(--s3); color:var(--ink-3); line-height:1.6;
       font-size:calc(var(--fs-base)*.84); }
     .fq .gevi b{ color:var(--ink-2); font-weight:600; }
@@ -639,7 +645,7 @@
     <div class="wrap">
       <!-- ===== PROFILE (full width) ===== -->
       <div class="card" id="profile">
-        <div class="stitle"><span class="n"><ion-icon name="clipboard-outline"></ion-icon></span><div><h2>Profile your AI use case</h2></div></div>
+        <div class="stitle"><span class="n"><ion-icon name="clipboard-outline"></ion-icon></span><div><h2>A. Profile your AI use case</h2></div></div>
 
         <form id="q" novalidate>
           <div class="field adopt-field">
@@ -869,6 +875,18 @@ const state = KEYS.reduce((o,k)=>(o[k]="",o),{});
 const SCALES = { AUTONOMY, DATA_SOURCE, DATA_SENSITIVITY, CAPABILITY, HOSTING };
 
 function label(v){ if(!v) return ""; const p=String(v).split("|"); return p.length>1?p.slice(1).join("|"):p[0]; }
+
+/* Three levels of label, so a reader can say exactly which line they mean:
+   a capital letter on the card title, a number on the section inside it, and a
+   lowercase roman numeral on the rows inside a table. Nothing here goes past a
+   handful of rows, but the conversion is written properly rather than as a
+   lookup table so a longer list cannot fall off the end of it. */
+const ROMAN = [[10,"x"],[9,"ix"],[5,"v"],[4,"iv"],[1,"i"]];
+function roman(n){
+  let out="", left=Math.max(1, Math.floor(n));
+  for(const [value, sign] of ROMAN) while(left>=value){ out+=sign; left-=value; }
+  return out;
+}
 
 /* Presentation order, not SSIC order: the sections most likely to be picked
    come first. The canonical A to V list still lives in assets/ssic.mjs. */
@@ -1274,7 +1292,7 @@ function renderRating(d){
   const t=tierOf(d), pct=Math.max(0,Math.min(100,d.riskIndex|0));
   $("#rating").innerHTML = `
     <div class="card">
-      <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Overall AI Use Case Risk Rating</h2></div></div>
+      <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>B. Overall AI Use Case Risk Rating</h2></div></div>
       <div class="gauge-block">${gaugeSVG(pct)}</div>
       <div class="gauge-legend">
         <span class="big" style="color:${t.color}">${escapeHtml(t.name)}</span>
@@ -1309,23 +1327,23 @@ function renderOutput(vals, d){
 
   $("#output").innerHTML = `
     <div class="card">
-      <div class="stitle"><span class="n"><ion-icon name="document-text-outline"></ion-icon></span><div><h2>Risk assessment</h2><div class="sub">${escapeHtml(label(vals.role))} · ${escapeHtml(displayName(vals.industry))} · ${escapeHtml(label(vals.usecase))}</div></div></div>
+      <div class="stitle"><span class="n"><ion-icon name="document-text-outline"></ion-icon></span><div><h2>C. Risk assessment</h2><div class="sub">${escapeHtml(label(vals.role))} · ${escapeHtml(displayName(vals.industry))} · ${escapeHtml(label(vals.usecase))}</div></div></div>
 
       <div class="banner ${t.banner}">
         <ion-icon name="${t.n>=3?'warning-outline':'information-circle-outline'}"></ion-icon>
         <div><b>Tier ${t.n} — ${escapeHtml(t.name)}.</b> Assessed by Claude against the MindForge AI RMF and CSA Securing AI guidelines.</div>
       </div>
 
-      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">A. Analyst assessment</h2><span class="badge">AI-generated</span></div>
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">1. Analyst assessment</h2><span class="badge">AI-generated</span></div>
       <div class="narrative">${paras.map(p=>`<p>${escapeHtml(p)}</p>`).join("")||"<p>"+escapeHtml(d.rationale||"")+"</p>"}</div>
 
-      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">B. Identified risk scenarios</h2></div>
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">2. Identified risk scenarios</h2></div>
       <div class="tbl-scroll">
         <table class="risk">
           <thead><tr><th>Risk scenario</th><th>Impact</th><th>Likelihood</th><th>Proposed mitigation</th><th>Risk level</th></tr></thead>
           <tbody>
             ${(d.scenarios||[]).map((s,si)=>`<tr>
-              <td><b><span class="qn">${si+1}.</span>${escapeHtml(s.scenario)}</b></td>
+              <td><b><span class="qn">${roman(si+1)}.</span>${escapeHtml(s.scenario)}</b></td>
               <td><b>${escapeHtml(s.impactType)}</b><small>${escapeHtml(s.impactNote)}</small></td>
               <td><b class="sev-${escapeHtml(s.likelihood)}">${escapeHtml(s.likelihood)}</b><small>${escapeHtml(s.likelihoodNote)}</small></td>
               <td>${escapeHtml(s.mitigation)}</td>
@@ -1335,12 +1353,12 @@ function renderOutput(vals, d){
         </table>
       </div>
 
-      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">C. Recommended controls</h2><span class="badge" style="background:var(--surface-2);color:var(--ink-2)">${req} required at this tier</span></div>
+      <div class="aihdr"><h2 style="font-size:calc(var(--fs-base)*1.15)">3. Recommended controls</h2><span class="badge" style="background:var(--surface-2);color:var(--ink-2)">${req} required at this tier</span></div>
       ${(d.controls||[]).map((g,gi)=>`
         <details class="acc" ${gi===0?"open":""}>
           <summary>
             <ion-icon class="cico" name="${CAT_ICON[g.category]||'ellipse-outline'}"></ion-icon>
-            <span class="ctitle"><span class="qn">${gi+1}.</span>${escapeHtml(g.category)}</span>
+            <span class="ctitle"><span class="qn">${roman(gi+1)}.</span>${escapeHtml(g.category)}</span>
             <span class="ccount">${(g.items||[]).filter(i=>i.priority==="Required").length}/${(g.items||[]).length}</span>
             <ion-icon class="chev" name="chevron-down-outline"></ion-icon>
           </summary>
@@ -1374,7 +1392,7 @@ function renderOutput(vals, d){
 let _apTimer=null;
 function ratingLoading(){
   $("#rating").innerHTML = `<div class="card">
-    <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>Overall AI Use Case Risk Rating</h2></div></div>
+    <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>B. Overall AI Use Case Risk Rating</h2></div></div>
     <div class="assessing">
       <div class="atext">Assessing your risk...</div>
       <div class="apct" id="apct">0%</div>
@@ -1572,12 +1590,12 @@ function riskCSV(vals, d, t){
   (d.drivers||[]).forEach(x=>rows.push(["Driver", x.label, x.level, x.note||""]));
   ((d.scoring&&d.scoring.contributions)||[]).forEach(c=>
     rows.push(["Score derivation", c.label, c.level, "weight "+c.weight+", points "+c.points]));
-  /* Same row numbers the page shows, so a line in the export and a line on
+  /* Same row labels the page shows, so a line in the export and a line on
      screen can be talked about as the same line. */
-  (d.scenarios||[]).forEach((s,i)=>rows.push(["Risk scenario", (i+1)+". "+s.scenario, s.impactType,
+  (d.scenarios||[]).forEach((s,i)=>rows.push(["Risk scenario", roman(i+1)+". "+s.scenario, s.impactType,
     s.mitigation+" (initial "+s.initialLevel+", residual "+s.residualLevel+")"]));
   (d.controls||[]).forEach((g,gi)=>(g.items||[]).forEach(i=>
-    rows.push(["Control", (gi+1)+". "+(g.category||g.cat||""), i.priority||"", i.text||""])));
+    rows.push(["Control", roman(gi+1)+". "+(g.category||g.cat||""), i.priority||"", i.text||""])));
   return toCSV(rows);
 }
 
@@ -2060,7 +2078,7 @@ function renderMaturity(){
     <div class="card">
       <div class="stitle" style="margin-bottom:var(--s4)">
         <span class="n"><ion-icon name="layers-outline"></ion-icon></span>
-        <div><h2>AI Adoption Maturity Matrix</h2>
+        <div><h2>D. AI Adoption Maturity Matrix</h2>
         <div class="sub">A deeper assessment for each technology you adopt</div></div>
       </div>
       ${rows}
@@ -2148,7 +2166,7 @@ function agenticCard(inner){
   return `<div class="card">
     <div class="stitle" style="margin-bottom:var(--s4)">
       <span class="n"><ion-icon name="git-network-outline"></ion-icon></span>
-      <div><h2>Agentic AI Risk Assessment Matrix</h2>
+      <div><h2>E. Agentic AI Risk Assessment Matrix</h2>
       <div class="sub">IMDA Model AI Governance Framework for Agentic AI</div></div>
     </div>
     ${inner}
@@ -2401,7 +2419,7 @@ function genaiCard(inner){
   return `<div class="card">
     <div class="stitle" style="margin-bottom:var(--s4)">
       <span class="n"><ion-icon name="sparkles-outline"></ion-icon></span>
-      <div><h2>Gen AI Governance Readiness</h2>
+      <div><h2>F. Gen AI Governance Readiness</h2>
       <div class="sub">AI Verify Testing Framework, 11 principles</div></div>
     </div>
     ${inner}
