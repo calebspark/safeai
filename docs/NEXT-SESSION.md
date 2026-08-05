@@ -61,8 +61,23 @@ Backend for the risk tool. Scoped but not designed.
 
 ## 4. Known gaps, not urgent
 
-- **RPA and Gen AI maturity tracks are inert placeholders.** Only the Agentic
-  AI track is live.
+- **Both maturity tracks are now live** (2026-08-05). Gen AI is an 11 question
+  governance readiness self-assessment, one question per principle of the IMDA
+  and AI Verify Foundation testing framework, on a four point scale (not
+  applicable, not implemented, partially, fully). Not applicable is excluded
+  from the denominator. Data and scoring live in `assets/genai.mjs` with tests
+  in `tests/genai.test.mjs`. It deliberately does NOT feed the overall risk
+  rating: readiness and inherent risk are different measures, and mixing them
+  would let good paperwork lower a genuinely risky score.
+- **RPA was removed entirely on 2026-08-05** (David's call: it is automation,
+  not AI, and carries low risk for the organisations that run it). Gone from
+  the adoption gate, the maturity tracks, the technology comparison table and
+  the use case list. Do not add it back without asking.
+- **Question wording note.** David asked for the scale to read "not compiled /
+  partially compiled / fully compiled". Shipped as "not implemented /
+  partially implemented / fully implemented", which is what the framework
+  means by a completed process check. Swap the labels in `SCALE` in
+  `assets/genai.mjs` if he wants his exact wording.
 - **No alerting path.** Classify failures and rate-limit trips are logged as
   structured JSON, but nothing reaches a human. A Vercel log drain alert would
   close item 10 of the gandalf checklist.

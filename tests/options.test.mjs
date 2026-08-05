@@ -12,9 +12,14 @@ test('role has 3 groups and 30 items', () => {
   assert.equal(flatten(ROLE_GROUPS).length, 30);
 });
 
-test('use case has 5 groups and 32 items', () => {
+// Was 32 until RPA was dropped on 2026-08-05: it is automation, not AI.
+test('use case has 5 groups and 31 items', () => {
   assert.equal(USECASE_GROUPS.length, 5);
-  assert.equal(flatten(USECASE_GROUPS).length, 32);
+  assert.equal(flatten(USECASE_GROUPS).length, 31);
+});
+
+test('RPA is gone from the use case list', () => {
+  assert.ok(!flatten(USECASE_GROUPS).some(i => /rpa|robotic process/i.test(i)));
 });
 
 test('"Others" is its own answer, not a group item', () => {

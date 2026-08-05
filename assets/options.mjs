@@ -105,7 +105,6 @@ export const USECASE_GROUPS = [
   {
     group: 'Automation and autonomy',
     items: [
-      'RPA (robotic process automation)',
       'Agentic AI (tool-using, multi-step)',
       'Autonomous physical systems (robotics, vehicles, drones)',
       'Industrial control and process automation',

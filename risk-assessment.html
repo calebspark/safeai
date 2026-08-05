@@ -178,7 +178,10 @@
     .tierpill{ display:inline-flex; align-items:center; gap:8px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*.86); padding:8px 16px; border-radius:var(--r-pill); }
     .gauge-block{ display:flex; justify-content:center; padding:var(--s3) 0 0; animation:gaugeIn .55s cubic-bezier(.2,.8,.2,1); }
     .gauge-block svg{ width:100%; max-width:340px; height:auto; }
-    .gauge-legend{ animation:gaugeIn .55s cubic-bezier(.2,.8,.2,1) .05s both; }
+    /* The end labels sit on the SVG's bottom edge, so the legend needs its own
+       gap: a long label such as "Foundational" reaches far enough across to
+       otherwise touch the big band name below it. */
+    .gauge-legend{ margin-top:var(--s3); animation:gaugeIn .55s cubic-bezier(.2,.8,.2,1) .05s both; }
     @keyframes gaugeIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
 
     /* assessing progress state */
@@ -386,7 +389,9 @@
     @media (max-width:640px){ .cmp-h, #compare > .card{ scroll-margin-top:88px; } }
     .cmp-h{ margin:var(--s6) 0 var(--s1); font-size:calc(var(--fs-base)*1.05); }
     .cmp-lead{ color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
-    table.risk.cmp{ min-width:760px; }
+    /* Two technology columns plus the row label. Was 760px when there were
+       three, which forced a scrollbar the content no longer needs. */
+    table.risk.cmp{ min-width:560px; }
     table.risk.cmp td, table.risk.cmp th{ white-space:normal; vertical-align:top; }
     table.risk.cmp thead th{ font-size:calc(var(--fs-base)*.9); font-weight:600; color:var(--ink); }
     table.risk.cmp thead th.on{ color:var(--accent); }
@@ -422,6 +427,42 @@
     .badge-both{ font-weight:500; font-size:calc(var(--fs-base)*.78); color:var(--info);
       background:var(--info-soft); border:1px solid var(--info-line); border-radius:var(--r-pill);
       padding:2px 9px; margin-left:8px; vertical-align:1px; }
+    /* ---------- Gen AI readiness checklist ----------
+       Reuses .fq for the question block. The scale here carries words, not
+       digits, so it uses the ordinary text pills rather than .scale circles.
+       The principle name is an eyebrow above the question, on its own line. */
+    .fq .gprin{ display:block; color:var(--ink-3); font-weight:500;
+      font-size:calc(var(--fs-base)*.82); letter-spacing:.006em; margin-bottom:6px; }
+    .fq .gevi{ margin-top:var(--s3); color:var(--ink-3); line-height:1.6;
+      font-size:calc(var(--fs-base)*.84); }
+    .fq .gevi b{ color:var(--ink-2); font-weight:600; }
+    /* Two columns only, so it does not need the 680px minimum the wide risk
+       tables carry. On a phone that minimum pushed "Your answer", the whole
+       point of the table, off the right edge of the scroller. */
+    table.risk.gtable{ min-width:0; }
+    /* The answer column may wrap here. The base table keeps it on one line,
+       which on a 390px phone was still 32px too wide to fit. */
+    table.risk.gtable td:last-child, table.risk.gtable th:last-child{ white-space:normal; }
+    .ganswer{ color:var(--ink-2); }
+    .ganswer.is-none{ color:var(--t4); }
+    .ganswer.is-partial{ color:var(--t2); }
+    .ganswer.is-full{ color:var(--success); }
+    .ganswer.is-na{ color:var(--ink-3); }
+
+    /* ---------- sources ---------- */
+    .srclist{ margin:0; padding:0; list-style:none; }
+    .srclist li{ padding:var(--s4) 0; border-top:1px solid var(--line); }
+    .srclist li:first-child{ border-top:0; padding-top:0; }
+    .srclist b{ display:block; font-size:calc(var(--fs-base)*1.02); }
+    .srclist .who{ display:block; color:var(--ink-3); margin-top:3px;
+      font-size:calc(var(--fs-base)*.84); }
+    .srclist p{ margin:var(--s2) 0 0; color:var(--ink-2); line-height:1.6; max-width:68ch; }
+    .srclist a{ display:inline-flex; align-items:center; gap:.5em; margin-top:var(--s2);
+      color:var(--accent); text-decoration:none; }
+    .srclist a:hover{ text-decoration:underline; }
+    .srclist a ion-icon{ font-size:.85em; color:var(--ink-3); }
+    .srclist a:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:4px; }
+
     .gap-list{ margin:0; padding:0; list-style:none; }
     .gap-list li{ padding:var(--s3) 0; border-top:1px solid var(--line); line-height:1.6; color:var(--ink-2); }
     .gap-list li:first-child{ border-top:0; }
@@ -530,15 +571,14 @@
         <form id="q" novalidate>
           <div class="field adopt-field">
             <label class="with-help">Which of these does your organisation use?
-              <button type="button" class="infobtn" id="adopt-help" data-tip="See how RPA, Gen AI and Agentic AI differ"
-                      aria-label="See how RPA, Gen AI and Agentic AI differ">
+              <button type="button" class="infobtn" id="adopt-help" data-tip="See how Gen AI and Agentic AI differ"
+                      aria-label="See how Gen AI and Agentic AI differ">
                 <ion-icon name="help-circle-outline"></ion-icon>
               </button>
             </label>
             <div class="hint" id="adopt-hint">Select all that apply. This routes you to the right follow-up and does not affect your risk score.</div>
             <div class="pills" role="group" aria-label="AI adoption" id="adoption-pills">
               <button type="button" class="pill" data-adopt="Agentic AI" aria-pressed="false">Agentic AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
-              <button type="button" class="pill" data-adopt="RPA" aria-pressed="false">RPA<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
               <button type="button" class="pill" data-adopt="Gen AI" aria-pressed="false">Gen AI<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
               <button type="button" class="pill" data-adopt="None" aria-pressed="false">None of these<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>
             </div>
@@ -645,13 +685,56 @@
       <div id="output" aria-live="polite"></div>
       <div id="maturity"></div>
       <div id="agentic"></div>
+      <div id="genai"></div>
+
+      <!-- ===== SOURCES =====
+           Every framework this page scores against, credited in one place so a
+           reader can go to the original rather than take our summary on faith. -->
+      <div class="card" id="sources">
+        <div class="stitle"><span class="n"><ion-icon name="library-outline"></ion-icon></span>
+          <div><h2>Sources</h2>
+          <div class="sub">The frameworks this assessment is built on</div></div>
+        </div>
+        <ul class="srclist">
+          <li>
+            <b>AI Verify Testing Framework for Traditional and Generative AI</b>
+            <span class="who">IMDA and AI Verify Foundation</span>
+            <p>The 11 AI governance principles, outcomes and process checks behind the Gen AI readiness questions. Question wording is condensed by SafeAI; the framework is the authority.</p>
+            <a href="https://aiverifyfoundation.sg/what-is-ai-verify/" target="_blank" rel="noopener">Read the full framework<ion-icon name="open-outline"></ion-icon></a>
+          </li>
+          <li>
+            <b>Model AI Governance Framework for Agentic AI</b>
+            <span class="who">IMDA and AI Verify Foundation</span>
+            <p>The impact and likelihood factor tables and the Dayos action tiering case study behind the Agentic AI matrix.</p>
+            <a href="https://www.imda.gov.sg/resources/press-releases-factsheets-and-speeches/factsheets/2025/model-ai-governance-framework-for-agentic-ai" target="_blank" rel="noopener">Read the full framework<ion-icon name="open-outline"></ion-icon></a>
+          </li>
+          <li>
+            <b>Guidelines and Companion Guide on Securing AI Systems</b>
+            <span class="who">Cyber Security Agency of Singapore</span>
+            <p>The security control expectations reflected in the overall risk rating and the mapped controls checklist.</p>
+            <a href="https://www.csa.gov.sg/resources/publications/guidelines-and-companion-guide-on-securing-ai-systems/" target="_blank" rel="noopener">Read the guidelines<ion-icon name="open-outline"></ion-icon></a>
+          </li>
+          <li>
+            <b>MindForge AI Risk Management Framework</b>
+            <span class="who">MindForge</span>
+            <p>The five step risk management flow the overall assessment follows. This tool covers steps 1 to 3.</p>
+          </li>
+          <li>
+            <b>Singapore Standard Industrial Classification 2025</b>
+            <span class="who">Department of Statistics Singapore</span>
+            <p>The industry list. Note that SSIC 2025 split section J, so the letters differ from SSIC 2020.</p>
+            <a href="https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-industrial-classification-ssic" target="_blank" rel="noopener">See the classification<ion-icon name="open-outline"></ion-icon></a>
+          </li>
+        </ul>
+        <p class="disclaim">SafeAI is not affiliated with these organisations. Their material is cited for reference and the assessments here are our own condensation of it.</p>
+      </div>
     </div>
   </main>
 
   <footer>
     <div class="wrap">
       <span>SafeAI · AI risk assessment</span>
-      <span>Maps to MindForge AI RMF · CSA Guidelines on Securing AI Systems</span>
+      <span>Maps to MindForge AI RMF · CSA Guidelines on Securing AI Systems · IMDA and AI Verify testing frameworks</span>
     </div>
   </footer>
 
@@ -681,6 +764,10 @@ import {
   IMPACT_FACTORS, LIKELIHOOD_FACTORS, SHARED_FACTOR_ID,
   scorePredeployment, governanceGap, AUTONOMY_CEILING_COPY,
 } from './assets/agentic.mjs';
+import {
+  QUESTIONS as GENAI_QUESTIONS, TOTAL_QUESTIONS as GENAI_TOTAL,
+  SCALE as GENAI_SCALE, scoreReadiness,
+} from './assets/genai.mjs';
 
 const $ = s => document.querySelector(s);
 const KEYS = ["industry","role","usecase","autonomy","dataSource","dataSensitivity","capability","hosting","governance"];
@@ -990,6 +1077,9 @@ function displayName(v){ return label(v).replace(/^[A-V]\s-\s/, ""); }
    Bands are a parameter so the three-tier agentic gauge reuses this. */
 const GAUGE_BANDS_4=[[1,24,'var(--t1)'],[26,49,'var(--t2)'],[51,77,'var(--t3)'],[79,99,'var(--t4)']];
 const GAUGE_BANDS_3=[[1,32,'var(--t1)'],[34,66,'var(--t2)'],[68,99,'var(--t4)']];
+/* Readiness runs the other way: a high score is good, so the ramp is reversed.
+   Band edges follow assets/genai.mjs (39 / 64 / 84). */
+const GAUGE_BANDS_READY=[[1,38,'var(--t4)'],[40,63,'var(--t3)'],[65,83,'var(--t2)'],[85,99,'var(--t1)']];
 
 function gaugeSVG(value, opts={}){
   const { bands=GAUGE_BANDS_4, lo="Low", hi="Severe", aria="Risk gauge" } = opts;
@@ -1001,8 +1091,11 @@ function gaugeSVG(value, opts={}){
     ${bands.map(b=>arc(b[0],b[1],b[2])).join("")}
     <line class="gneedle" x1="100" y1="100" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
     <circle cx="100" cy="100" r="7" fill="var(--surface-3)" stroke="var(--ink)" stroke-width="2"/>
-    <text x="20" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">${escapeHtml(lo)}</text>
-    <text x="180" y="115" text-anchor="middle" font-size="9" fill="var(--ink-3)" font-family="DM Sans">${escapeHtml(hi)}</text>
+    <!-- Anchored to the outer edges, not centred on the arc ends: a centred
+         label longer than about six characters ran off the left of the
+         viewBox and was clipped ("Foundational" lost its F). -->
+    <text x="8" y="115" text-anchor="start" font-size="9" fill="var(--ink-3)" font-family="DM Sans">${escapeHtml(lo)}</text>
+    <text x="192" y="115" text-anchor="end" font-size="9" fill="var(--ink-3)" font-family="DM Sans">${escapeHtml(hi)}</text>
   </svg>`;
 }
 
@@ -1410,10 +1503,9 @@ document.getElementById("adoption-pills").addEventListener("click", e=>{
 });
 
 /* Plain-language meaning of each option, shown only once it is selected, so
-   nobody has to guess whether their bots count as RPA or Gen AI. */
+   nobody has to guess which one their software counts as. */
 const ADOPT_DESC = {
   "Agentic AI":"Software agents that plan their own steps and act, calling tools, systems or other agents to finish a task instead of only answering.",
-  "RPA":"Robotic process automation. Bots that repeat fixed, rule-based steps across existing software. Predictable, and no learning involved.",
   "Gen AI":"Models that produce new content from a prompt, such as text, images, code, audio or summaries.",
   "None":"No AI or automation in production yet. You still get the base risk rating for the use case you are planning.",
 };
@@ -1431,40 +1523,33 @@ function renderAdoptDesc(){
 const TRACKS=[
   { id:"Agentic AI", icon:"git-network-outline", live:true,
     blurb:"Assessed against the IMDA Model AI Governance Framework for Agentic AI." },
-  { id:"RPA", icon:"repeat-outline", live:false,
-    blurb:"Robotic process automation track. Work in progress." },
-  { id:"Gen AI", icon:"sparkles-outline", live:false,
-    blurb:"Generative AI track. Work in progress." },
+  { id:"Gen AI", icon:"sparkles-outline", live:true,
+    blurb:"Eleven governance questions, one per principle in the IMDA and AI Verify Foundation testing framework." },
 ];
 
 /* ---------- how the three technologies differ ----------
    Sits under the tracks so someone who is unsure which one they run can place
    themselves before starting a track assessment. Columns follow the track
    order, and the column the user selected is marked, not recoloured. */
-const TECH_COLS = ["RPA","Gen AI","Agentic AI"];
+const TECH_COLS = ["Gen AI","Agentic AI"];
 const TECH_ROWS = [
   { k:"Characteristics", v:[
-    "A rule-based software bot. It repeats the same deterministic steps every run.",
     "Creates new text, images, code, audio or video from a natural language prompt. The output is not deterministic.",
     "Performs tasks on its own to reach a goal you set, and you direct it in natural language.",
   ]},
   { k:"Capabilities", v:[
-    "Task and workflow automation through scripting.",
     "Generates content and ideas, summarises, searches and translates using foundation models.",
     "Complex workflow automation that includes making decisions, using tools and generating content.",
   ]},
   { k:"Use cases", v:[
-    "Invoice processing, data entry, web scraping.",
     "Intelligent search, transcription and summaries, first drafts.",
     "Processing claims and handling exceptions, goal-driven research.",
   ]},
   { k:"Triggers", v:[
-    "A person, an event, a schedule, or another agent.",
     "Prompted by a person or by a machine.",
     "Prompted by a person or a machine, then runs with little intervention until the goal is met.",
   ]},
   { k:"How it adapts", v:[
-    "Static. It needs reprogramming to handle new conditions.",
     "Tuned by changing model parameters or the prompts.",
     "Can learn and adapt as it runs, through feedback loops.",
   ]},
@@ -1485,8 +1570,8 @@ function techCompareHTML(picked, { heading=true }={}){
     </div>`).join("");
 
   return `
-    ${heading?'<h3 class="cmp-h">Key differences between RPA, Gen AI and Agentic AI</h3>':''}
-    <p class="cmp-lead">Most organisations run more than one of these. Risk changes with how much the software decides on its own.</p>
+    ${heading?'<h3 class="cmp-h">Key differences between Gen AI and Agentic AI</h3>':''}
+    <p class="cmp-lead">Many organisations run both. Risk changes with how much the software decides on its own.</p>
     <div class="tbl-scroll cmp-table">
       <table class="risk cmp">
         <thead><tr><th scope="col"></th>${head}</tr></thead>
@@ -1511,7 +1596,7 @@ $("#adopt-help").addEventListener("click", ()=>{
       <div class="stitle" style="margin-bottom:var(--s4)">
         <span class="n"><ion-icon name="git-compare-outline"></ion-icon></span>
         <div><h2>Which one do you have?</h2>
-        <div class="sub">RPA, Gen AI and Agentic AI, side by side</div></div>
+        <div class="sub">Gen AI and Agentic AI, side by side</div></div>
       </div>
       ${techCompareHTML((state.adoption||[]).filter(v=>v!=="None"), { heading:false })}</div>`;
     target=document.querySelector("#compare .card");
@@ -1566,7 +1651,9 @@ function renderMaturity(){
 
 $("#maturity").addEventListener("click", e=>{
   const b=e.target.closest("[data-track]");
-  if(b && b.dataset.track==="Agentic AI") renderAgenticIntro();
+  if(!b) return;
+  if(b.dataset.track==="Agentic AI") renderAgenticIntro();
+  if(b.dataset.track==="Gen AI") renderGenaiForm();
 });
 
 /* ---------- Agentic AI Risk Assessment Matrix ----------
@@ -1803,6 +1890,140 @@ function renderDeployedResult(res){
   $("#agentic").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
+/* ---------- Gen AI governance readiness ----------
+   Source: IMDA and AI Verify Foundation, AI Verify Testing Framework for
+   Traditional and Generative AI. One question per principle, four point scale,
+   scored in the browser so this section survives an API outage. Answers do not
+   feed the overall risk rating: readiness and risk are different measures and
+   mixing them would let good paperwork lower an inherently risky score. */
+state.genaiAnswers={};
+
+const GENAI_SCALE_CLASS={ na:"is-na", none:"is-none", partial:"is-partial", full:"is-full" };
+const GENAI_SCALE_LABEL=Object.fromEntries(GENAI_SCALE.map(s=>[s.id,s.label]));
+
+function genaiCard(inner){
+  return `<div class="card">
+    <div class="stitle" style="margin-bottom:var(--s4)">
+      <span class="n"><ion-icon name="sparkles-outline"></ion-icon></span>
+      <div><h2>Gen AI Governance Readiness</h2>
+      <div class="sub">AI Verify Testing Framework, 11 principles</div></div>
+    </div>
+    ${inner}
+  </div>`;
+}
+
+function genaiQuestionBlock(q){
+  const opts=GENAI_SCALE.map(s=>
+    `<button type="button" class="pill" role="radio" aria-checked="false"
+       data-gq="${escapeHtml(q.id)}" data-gv="${s.id}">${escapeHtml(s.label)}<span class="pk"><ion-icon name="checkmark"></ion-icon></span></button>`
+  ).join("");
+  return `<div class="fq" data-gq-block="${escapeHtml(q.id)}">
+    <span class="gprin">${q.n}. ${escapeHtml(q.principle)}</span>
+    <label>${escapeHtml(q.question)}</label>
+    <div class="pills" role="radiogroup" aria-label="${escapeHtml(q.principle)}">${opts}</div>
+    <div class="gevi"><b>Evidence to look for.</b> ${escapeHtml(q.evidence)}</div>
+  </div>`;
+}
+
+function updateGenaiReady(){
+  const done=Object.keys(state.genaiAnswers).length;
+  const btn=$("#genai-run"); if(!btn) return;
+  btn.disabled = done<GENAI_TOTAL;
+  const left=GENAI_TOTAL-done;
+  const hint=$("#genai-hint");
+  hint.textContent = left>0 ? `${left} question${left>1?"s":""} left.` : "Ready to score.";
+  hint.style.color = left>0 ? "var(--ink-3)" : "var(--success)";
+}
+
+function renderGenaiForm(){
+  $("#genai").innerHTML=genaiCard(`
+    <p style="color:var(--ink-2);margin:0 0 var(--s4);line-height:1.6;max-width:68ch">One question per principle, condensed from the framework's outcomes and process checks. Answer for your generative AI use, not for the organisation as a whole. Not applicable is excluded from the score rather than counted against you.</p>
+    ${GENAI_QUESTIONS.map(genaiQuestionBlock).join("")}
+    <div class="actions">
+      <button type="button" class="btn btn-accent" id="genai-run" disabled>Score readiness</button>
+      <button type="button" class="btn btn-ghost" id="genai-clear">Start over</button>
+      <span class="formhint" id="genai-hint"></span>
+    </div>
+    <p class="disclaim">Questions condensed by SafeAI from the AI Verify Testing Framework for Traditional and Generative AI, published by IMDA and the AI Verify Foundation. See Sources below for the full document.</p>`);
+  /* Returning to the form keeps the answers already given. */
+  Object.entries(state.genaiAnswers).forEach(([id,val])=>{
+    const pill=document.querySelector(`#genai [data-gq="${CSS.escape(id)}"][data-gv="${val}"]`);
+    if(pill) pill.setAttribute("aria-checked","true");
+  });
+  updateGenaiReady();
+  $("#genai").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function renderGenaiResult(res){
+  const rows=GENAI_QUESTIONS.map(q=>{
+    const a=state.genaiAnswers[q.id];
+    return `<tr>
+      <td><b>${q.n}. ${escapeHtml(q.principle)}</b></td>
+      <td class="ganswer ${GENAI_SCALE_CLASS[a]||""}">${escapeHtml(GENAI_SCALE_LABEL[a]||"Not answered")}</td>
+    </tr>`;
+  }).join("");
+
+  const gaps=res.gaps.map(g=>`<li>
+      <b>${g.n}. ${escapeHtml(g.principle)}</b> is ${g.answer==="none"?"not implemented":"partially implemented"}.
+      ${escapeHtml(g.evidence)}
+    </li>`).join("");
+
+  /* Every principle marked Not applicable: a percentage of nothing is not a
+     readiness rating, so say so instead of showing a misleading zero. */
+  const head = res.score===null
+    ? `<div class="banner info" style="margin-top:var(--s2)"><ion-icon name="information-circle-outline"></ion-icon>
+        <div>Every principle was marked not applicable, so there is nothing to score. If generative AI is in use anywhere in the organisation, at least transparency, data governance and accountability will apply.</div></div>`
+    : `<div class="gauge-block">${gaugeSVG(res.score,{bands:GAUGE_BANDS_READY,lo:"Foundational",hi:"Mature",aria:"Gen AI readiness gauge"})}</div>
+       <div class="gauge-legend">
+         <span class="big" style="color:${res.band.colour}">${escapeHtml(res.band.name)}</span>
+         <span class="score">${res.score} of 100 across ${res.applicable} applicable principle${res.applicable===1?"":"s"}</span>
+       </div>
+       <p style="color:var(--ink-2);margin:var(--s4) 0 0;line-height:1.6;max-width:68ch">${escapeHtml(res.band.text)}</p>`;
+
+  $("#genai").innerHTML=genaiCard(`
+    ${head}
+    <div class="tbl-scroll" style="margin-top:var(--s5)">
+      <table class="risk gtable">
+        <thead><tr><th>Principle</th><th>Your answer</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    ${res.gaps.length
+      ? `<h3 style="margin:var(--s6) 0 var(--s2)">Where to focus</h3>
+         <p style="color:var(--ink-2);margin:0 0 var(--s2);line-height:1.6;max-width:68ch">Not implemented first, then partial. The line under each is the evidence an auditor would ask for.</p>
+         <ul class="gap-list">${gaps}</ul>`
+      : res.score===null ? ""
+      : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every applicable principle is fully implemented. Re-run this when the model, the prompts or the retrieval sources change.</div></div>`}
+    <div class="actions">
+      <button type="button" class="btn" id="genai-back">Back to the questions</button>
+      <button type="button" class="btn btn-ghost" id="genai-clear">Start over</button>
+    </div>
+    <p class="disclaim">Self-assessment, scored locally against the 11 principles of the AI Verify Testing Framework for Traditional and Generative AI (IMDA and AI Verify Foundation). It does not affect the overall risk rating above, and it is not a substitute for completing the full framework checklist or an independent audit.</p>`);
+  $("#genai").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+$("#genai").addEventListener("click", e=>{
+  const p=e.target.closest("[data-gq]");
+  if(p){
+    const block=p.closest("[data-gq-block]");
+    const wasOn=p.getAttribute("aria-checked")==="true";
+    block.querySelectorAll(".pill").forEach(x=>x.setAttribute("aria-checked","false"));
+    if(wasOn) delete state.genaiAnswers[p.dataset.gq];
+    else{
+      p.setAttribute("aria-checked","true");
+      state.genaiAnswers[p.dataset.gq]=p.dataset.gv;
+    }
+    updateGenaiReady();
+    return;
+  }
+  if(e.target.closest("#genai-run")) return renderGenaiResult(scoreReadiness(state.genaiAnswers));
+  if(e.target.closest("#genai-back")) return renderGenaiForm();
+  if(e.target.closest("#genai-clear")){
+    state.genaiAnswers={};
+    return renderGenaiForm();
+  }
+});
+
 /* ---------- submit ---------- */
 const form=$("#q");
 form.addEventListener("submit", async e=>{
@@ -1844,8 +2065,9 @@ $("#reset").addEventListener("click",()=>{
   FIELD_CONTROLS.forEach(c=>c.reset());
   SCALE_FIELDS.forEach(c=>c.reset());
   countdownActive=false;
-  state.agenticFactors={}; state.agenticActions=[];
-  $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML=""; $("#agentic").innerHTML="";
+  state.agenticFactors={}; state.agenticActions=[]; state.genaiAnswers={};
+  $("#rating").innerHTML=""; $("#output").innerHTML=""; $("#maturity").innerHTML="";
+  $("#agentic").innerHTML=""; $("#genai").innerHTML="";
   $("#compare").innerHTML=""; showBacktop(false);
   $("#formhint").textContent=""; $("#formhint").style.color="var(--ink-3)"; hasRun=false; assessedComplete=false; setLabel("Assess risk"); updateStepper();
 });
