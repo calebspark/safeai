@@ -218,6 +218,42 @@
     .dtile .k{ color:var(--ink); font-weight:700; font-size:calc(var(--fs-base)*1.02); letter-spacing:-.01em; }
     .dtile .dlevel{ margin-top:6px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*1.05); }
     .dtile .v{ margin-top:6px; color:var(--ink-3); font-size:calc(var(--fs-base)*.82); line-height:1.45; }
+    /* A rating the visitor set rather than the model. Marked on the tile so the
+       card never passes someone's own judgement off as the assessment's. */
+    .dtile .dset{ display:block; margin-top:8px; font-size:calc(var(--fs-base)*.76); font-weight:600; color:var(--info); }
+
+    /* ---------- driver rating editor ----------
+       Sliders, not pills, because the three levels are an ordered scale and the
+       point of the control is to feel like moving a rating up or down. */
+    .rate-actions{ margin-top:var(--s5); display:flex; flex-wrap:wrap; align-items:center; gap:var(--s3); }
+    .rate-actions .rnote{ color:var(--ink-3); font-size:calc(var(--fs-base)*.86); }
+    .dedit{ margin-top:var(--s4); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--s5); background:var(--surface-1); }
+    .dedit > .lead{ margin:0 0 var(--s5); color:var(--ink-2); font-size:calc(var(--fs-base)*.92); line-height:1.6; max-width:68ch; }
+    .dedit-grid{ display:grid; gap:var(--s6); }
+    .dedit-row{ display:grid; gap:4px; min-width:0; }
+    .dedit-head{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:var(--s2) var(--s3); }
+    .dedit-name{ font-weight:600; min-width:0; }
+    .dedit-val{ color:var(--ink-2); font-size:calc(var(--fs-base)*.86); white-space:nowrap; }
+    .dedit-val b{ color:var(--ink); }
+    .dedit-scale{ display:flex; justify-content:space-between; gap:var(--s3); color:var(--ink-3); font-size:calc(var(--fs-base)*.8); }
+    .dedit-scale span.on{ color:var(--ink); font-weight:600; }
+    /* Native range, restyled. Monochrome thumb: the accent stays on the one
+       primary action in this panel. */
+    input.dslider{ -webkit-appearance:none; appearance:none; width:100%; height:26px; margin:0; background:transparent; cursor:pointer; }
+    input.dslider::-webkit-slider-runnable-track{ height:4px; border-radius:var(--r-pill); background:var(--surface-3); }
+    input.dslider::-moz-range-track{ height:4px; border-radius:var(--r-pill); background:var(--surface-3); }
+    input.dslider::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width:18px; height:18px; margin-top:-7px;
+      border:0; border-radius:50%; background:var(--ink); box-shadow:var(--raise); }
+    input.dslider::-moz-range-thumb{ width:18px; height:18px; border:0; border-radius:50%; background:var(--ink); box-shadow:var(--raise); }
+    input.dslider:hover::-webkit-slider-thumb{ background:var(--ink-2); }
+    input.dslider:hover::-moz-range-thumb{ background:var(--ink-2); }
+    input.dslider:focus-visible{ outline:2px solid var(--accent); outline-offset:4px; border-radius:var(--r-sm); }
+    .dedit-sum{ margin-top:var(--s6); padding-top:var(--s4); border-top:1px solid var(--line);
+      display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--s2) var(--s5); }
+    .dedit-sum .n{ font-family:"Plus Jakarta Sans",sans-serif; font-weight:700; font-size:calc(var(--fs-base)*1.5); line-height:1.2; }
+    .dedit-sum .was{ color:var(--ink-3); font-size:calc(var(--fs-base)*.88); }
+    .dedit-actions{ margin-top:var(--s5); display:flex; flex-wrap:wrap; gap:var(--s3); }
+    .dedit-err{ margin-top:var(--s3); color:var(--danger); font-size:calc(var(--fs-base)*.86); line-height:1.5; }
 
     /* ---------- assessment output ---------- */
     .banner{ display:flex; gap:var(--s3); align-items:flex-start; padding:var(--s4) var(--s5); border-radius:var(--r-md); font-size:calc(var(--fs-base)*.95); line-height:1.6; }
@@ -1259,6 +1295,10 @@ function setLabel(txt){ const l=$("#run .lbl span:last-child"); if(l) l.textCont
 /* Strip the SSIC code for prose. The stored value keeps it. */
 function displayName(v){ return label(v).replace(/^[A-V]\s-\s/, ""); }
 
+/* Which driver ratings the visitor set for themselves. Read off the payload
+   rather than tracked separately, so a restored session and a fresh one agree. */
+function adjustedLabels(d){ return ((d && d.drivers)||[]).filter(x=>x&&x.userSet).map(x=>x.label); }
+
 /* ---------- needle gauge ----------
    Bands are a parameter so the three-tier agentic gauge reuses this. */
 const GAUGE_BANDS_4=[[1,24,'var(--t1)'],[26,49,'var(--t2)'],[51,77,'var(--t3)'],[79,99,'var(--t4)']];
@@ -1369,7 +1409,7 @@ function weightsHTML(s){
 function scoringHTML(d){
   const s=d.scoring; if(!s||!Array.isArray(s.contributions)) return "";
   const rows=s.contributions.map(c=>`<tr>
-      <td><b>${escapeHtml(c.label)}</b></td>
+      <td><b>${escapeHtml(c.label)}</b>${c.userSet?'<small>Set by you</small>':''}</td>
       <td><b class="sev-${escapeHtml(c.level)}">${escapeHtml(c.level)}</b></td>
       <td>${c.weight} &times; ${c.level==='High'?'1':c.level==='Medium'?'0.5':'0'}</td>
       <td><b>${c.points}</b></td>
@@ -1396,8 +1436,140 @@ function scoringHTML(d){
     </details>`;
 }
 
+/* ---------- driver rating editor ----------
+   The model rates the drivers, but the person filling this in knows their own
+   deployment better than a paragraph of profile can say. The editor lets them
+   set any of the seven ratings themselves and see the index move before they
+   commit to anything.
+
+   Moving a slider previews the arithmetic only. It never rewrites the card,
+   because the rationale, scenarios and controls beside the number were written
+   against the old ratings, and a page showing a High index next to a Moderate
+   narrative is worse than one that made you press a button. Committing goes
+   back through /api/assess with the chosen levels, so the whole assessment is
+   rewritten together. */
+const LEVELS = ["Low","Medium","High"];
+
+function driverEditorHTML(d){
+  const rows = d.scoring.contributions.map((c,i)=>{
+    const idx = Math.max(0, LEVELS.indexOf(c.level));
+    return `
+      <div class="dedit-row" data-label="${escapeHtml(c.label)}" data-weight="${c.weight}" data-original="${idx}">
+        <div class="dedit-head">
+          <label class="dedit-name" for="ds${i}">${escapeHtml(c.label)}</label>
+          <span class="dedit-val">weight ${c.weight}, contributing <b class="pts">${c.points}</b></span>
+        </div>
+        <input id="ds${i}" class="dslider" type="range" min="0" max="2" step="1" value="${idx}"
+               aria-label="${escapeHtml(c.label)} rating" aria-valuetext="${escapeHtml(c.level)}">
+        <div class="dedit-scale">${LEVELS.map((l,n)=>`<span class="${n===idx?"on":""}">${l}</span>`).join("")}</div>
+      </div>`;
+  }).join("");
+  return `
+    <div class="dedit" id="dedit" hidden>
+      <p class="lead">Set any rating yourself. The index below updates as you move a slider, and nothing else on the page changes until you re-assess. Re-assessing sends your ratings to the model, which keeps them and rewrites the rationale, the attack scenarios and the controls to match.</p>
+      <div class="dedit-grid">${rows}</div>
+      <div class="dedit-sum">
+        <span class="n" id="dedit-index">${d.riskIndex|0} / 100</span>
+        <span id="dedit-tier"></span>
+        <span class="was" id="dedit-was"></span>
+      </div>
+      <div class="dedit-actions">
+        <button type="button" class="btn btn-accent btn-sm" id="dedit-go">
+          <span class="spin" aria-hidden="true"></span>
+          <span class="lbl with-icon"><ion-icon name="sparkles-outline"></ion-icon><span>Re-assess with these ratings</span></span>
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm" id="dedit-undo">Undo changes</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="dedit-close">Close</button>
+      </div>
+      <div class="dedit-err" id="dedit-err" hidden></div>
+    </div>`;
+}
+
+function wireDriverEditor(d){
+  const panel = $("#dedit"); if(!panel) return;
+  const toggle = $("#edit-drivers");
+  const rows   = [...panel.querySelectorAll(".dedit-row")];
+  const baseIndex = d.riskIndex|0, baseTier = tierOf(d);
+  const err = $("#dedit-err");
+
+  const bandOf = i => (d.scoring.bands||[]).find(b=>i<=b.max);
+
+  function readLevels(){
+    const out={};
+    rows.forEach(r=>{ out[r.dataset.label] = LEVELS[+r.querySelector(".dslider").value]; });
+    return out;
+  }
+
+  function refresh(){
+    let total=0, changed=0;
+    rows.forEach(r=>{
+      const v=+r.querySelector(".dslider").value, w=+r.dataset.weight;
+      const pts = w * (v===2?1:v===1?0.5:0);
+      total += pts;
+      if(v !== +r.dataset.original) changed++;
+      r.querySelector(".pts").textContent = pts;
+      r.querySelector(".dslider").setAttribute("aria-valuetext", LEVELS[v]);
+      r.querySelectorAll(".dedit-scale span").forEach((s,n)=>s.classList.toggle("on", n===v));
+    });
+    const idx = Math.round(total), band = bandOf(idx);
+    $("#dedit-index").textContent = `${idx} / 100`;
+    const tierEl = $("#dedit-tier");
+    tierEl.textContent = band ? band.name : "";
+    tierEl.style.color = band ? (TIERS[band.tier]||{}).color || "var(--ink)" : "var(--ink)";
+    $("#dedit-was").textContent = changed
+      ? `${changed} rating${changed>1?"s":""} changed. Was ${baseIndex} / 100, ${baseTier.name}.`
+      : "Unchanged from the current rating.";
+    $("#dedit-go").disabled = !changed;
+  }
+
+  panel.addEventListener("input", e=>{ if(e.target.classList.contains("dslider")) refresh(); });
+
+  toggle.addEventListener("click", ()=>{
+    const open = panel.hidden;
+    panel.hidden = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+    $("#edit-drivers .lbl span:last-child").textContent = open ? "Hide the editor" : "Edit these ratings";
+    if(open) panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+  });
+
+  $("#dedit-close").addEventListener("click", ()=>toggle.click());
+  $("#dedit-undo").addEventListener("click", ()=>{
+    rows.forEach(r=>{ r.querySelector(".dslider").value = r.dataset.original; });
+    refresh();
+  });
+
+  $("#dedit-go").addEventListener("click", async ()=>{
+    const btn=$("#dedit-go");
+    if(btn.disabled) return;
+    err.hidden=true; err.textContent="";
+    btn.classList.add("is-loading"); btn.disabled=true;
+    try{
+      const data = await runAssessment(lastResultProfile || state, readLevels());
+      lastResult = data;
+      renderRating(data);
+      renderOutput(lastResultProfile || profileOf(state), data);
+      renderMaturity();
+      save();
+      toast("Rating updated");
+      $("#rating").scrollIntoView({behavior:"smooth",block:"start"});
+    }catch(e){
+      /* Inline, not showError: that clears the rating card, and losing the
+         assessment you already have is a harsh price for a failed retry. */
+      err.hidden=false;
+      err.textContent = (e.detail || e.message || "Could not reach the assessment engine.") + " Your ratings are still set, try again.";
+      toast("Re-assessment failed");
+    }finally{
+      btn.classList.remove("is-loading"); btn.disabled=false;
+    }
+  });
+
+  refresh();
+}
+
 function renderRating(d){
   const t=tierOf(d), pct=Math.max(0,Math.min(100,d.riskIndex|0));
+  const editable = d.scoring && Array.isArray(d.scoring.contributions) && d.scoring.contributions.length;
+  const adjusted = (d.drivers||[]).filter(dr=>dr && dr.userSet).length;
   $("#rating").innerHTML = `
     <div class="card">
       <div class="stitle" style="margin-bottom:var(--s4)"><span class="n"><ion-icon name="speedometer-outline"></ion-icon></span><div><h2>B. Overall AI Use Case Risk Rating</h2></div></div>
@@ -1407,11 +1579,22 @@ function renderRating(d){
         <span class="score">Risk index ${pct} / 100</span>
       </div>
       <div class="drivers">
-        ${(d.drivers||[]).map(dr=>{ const sv=SEV[dr.level]||{soft:'var(--surface-2)',line:'var(--line)',ink:'var(--ink-2)'}; return `<div class="dtile" style="background:${sv.soft};border-color:${sv.line}"><div class="k">${escapeHtml(dr.label)}</div><div class="dlevel" style="color:${sv.ink}">${escapeHtml(dr.level)}</div><div class="v">${escapeHtml(dr.note||'')}</div></div>`;}).join("")}
+        ${(d.drivers||[]).map(dr=>{ const sv=SEV[dr.level]||{soft:'var(--surface-2)',line:'var(--line)',ink:'var(--ink-2)'}; return `<div class="dtile" style="background:${sv.soft};border-color:${sv.line}"><div class="k">${escapeHtml(dr.label)}</div><div class="dlevel" style="color:${sv.ink}">${escapeHtml(dr.level)}</div><div class="v">${escapeHtml(dr.note||'')}</div>${dr.userSet?'<span class="dset">Rating set by you</span>':''}</div>`;}).join("")}
       </div>
+      ${editable ? `
+      <div class="rate-actions">
+        <button type="button" class="btn btn-sm" id="edit-drivers" aria-expanded="false" aria-controls="dedit">
+          <span class="lbl with-icon"><ion-icon name="options-outline"></ion-icon><span>Edit these ratings</span></span>
+        </button>
+        <span class="rnote">${adjusted
+          ? `${adjusted} of these ${d.drivers.length} ratings ${adjusted>1?"are":"is"} yours, not the model's.`
+          : "Disagree with a rating? Set it yourself and re-assess."}</span>
+      </div>
+      ${driverEditorHTML(d)}` : ""}
       ${scoringHTML(d)}
       ${tierMeaningHTML(t.name.replace(/ risk$/,""))}
     </div>`;
+  if(editable) wireDriverEditor(d);
 }
 
 /* ---------- live stepper (updates as the questionnaire is filled) ---------- */
@@ -1548,6 +1731,12 @@ function buildSummary(vals,d,t){
       +d.scoring.contributions.map(c=>escapeHtml(c.label)+' '+escapeHtml(c.level)+' ('+c.points+')').join(', ')
       +' = '+(d.riskIndex|0)+'/100. Bands: 0-25 Low, 26-50 Moderate, 51-78 High, 79-100 Severe.</div>');
   }
+  /* Provenance travels with the export. A reviewer reading this later has to be
+     able to see which ratings the person set for themselves. */
+  if(adjustedLabels(d).length){
+    H.push('<div style="font-size:12px;color:#555;margin:0 0 4px">Ratings set by the person assessed, not the model: '
+      +escapeHtml(adjustedLabels(d).join(', '))+'.</div>');
+  }
   if(profile) H.push('<div style="font-size:12px;color:#666;margin:0 0 18px">'+escapeHtml(profile)+'</div>');
 
   if(paras.length){
@@ -1585,6 +1774,8 @@ function buildSummary(vals,d,t){
   T.push('Overall: Tier '+t.n+' of 4, '+t.name+' (risk index '+(d.riskIndex|0)+'/100)');
   if(d.scoring&&Array.isArray(d.scoring.contributions)){
     T.push('Score derivation: '+d.scoring.contributions.map(c=>c.label+' '+c.level+' ('+c.points+')').join(', ')+' = '+(d.riskIndex|0)+'/100. Bands: 0-25 Low, 26-50 Moderate, 51-78 High, 79-100 Severe.');
+  if(adjustedLabels(d).length)
+    T.push('Ratings set by the person assessed, not the model: '+adjustedLabels(d).join(', ')+'.');
   }
   if(profile) T.push('Profile: '+profile);
   if(paras.length){ T.push(''); T.push('ANALYST ASSESSMENT'); T.push(''); paras.forEach(p=>T.push(p)); }
@@ -1695,7 +1886,7 @@ function riskCSV(vals, d, t){
   rows.push(["Rating","Tier",t.n+" of 4",t.name]);
   rows.push(["Rating","Risk index",(d.riskIndex|0)+" of 100","Bands 0-25 Low, 26-50 Moderate, 51-78 High, 79-100 Severe"]);
   if(d.rationale) rows.push(["Rating","Rationale",d.rationale,""]);
-  (d.drivers||[]).forEach(x=>rows.push(["Driver", x.label, x.level, x.note||""]));
+  (d.drivers||[]).forEach(x=>rows.push(["Driver", x.label, x.level, (x.note||"") + (x.userSet?" Rating set by the person assessed, not the model.":"")]));
   ((d.scoring&&d.scoring.contributions)||[]).forEach(c=>
     rows.push(["Score derivation", c.label, c.level, "weight "+c.weight+", points "+c.points]));
   /* Same row labels the page shows, so a line in the export and a line on
@@ -1863,9 +2054,14 @@ function genaiSummary(res){
 }
 
 /* ---------- the actual assessment call ---------- */
-async function runAssessment(vals){
+/* overrides: { 'Data sensitivity': 'High', ... }, the driver ratings the
+   visitor set for themselves. Sent only when they have edited something. The
+   server whitelists both the labels and the levels, and forces them back over
+   the model's answer, so the score always reflects what was chosen here. */
+async function runAssessment(vals, overrides){
   const profile = Object.fromEntries(KEYS.map(k=>[k,label(vals[k])]));
-  const r = await fetch("/api/assess",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile})});
+  const body = overrides && Object.keys(overrides).length ? {profile, overrides} : {profile};
+  const r = await fetch("/api/assess",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j = await r.json().catch(()=>({}));
   if(!r.ok){ const e=new Error(j.detail||j.error||("HTTP "+r.status)); e.detail=j.detail||j.error; throw e; }
   return j;

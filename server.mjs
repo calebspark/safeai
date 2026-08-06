@@ -47,7 +47,7 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/assess') {
     if (req.method !== 'POST') { res.writeHead(405); return res.end('Method not allowed'); }
     const body = await readBody(req);
-    const result = await assess(body.profile || {});
+    const result = await assess(body.profile || {}, body.overrides || {});
     res.writeHead(result.ok ? 200 : (result.status || 500), { 'content-type': 'application/json' });
     return res.end(JSON.stringify(result.ok ? result.data : { error: result.reason, detail: result.detail }));
   }

@@ -11,7 +11,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   const profile = (req.body && req.body.profile) || {};
-  const result = await assess(profile);
+  // Driver ratings the visitor set by hand on a previous result. Whitelisted
+  // inside the engine, so an arbitrary body cannot reach the prompt.
+  const overrides = (req.body && req.body.overrides) || {};
+  const result = await assess(profile, overrides);
   if (!result.ok) {
     return res.status(result.status || 500).json({ error: result.reason, detail: result.detail });
   }

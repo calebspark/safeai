@@ -23,6 +23,25 @@ export const DRIVER_WEIGHTS = {
 };
 const DRIVER_LABELS = Object.keys(DRIVER_WEIGHTS);
 const LEVEL_POINTS = { Low: 0, Medium: 0.5, High: 1 };
+export const DRIVER_LEVELS = Object.keys(LEVEL_POINTS);
+
+// A visitor can disagree with a driver rating and set it themselves, so the
+// browser sends { 'Data sensitivity': 'High', ... } alongside the profile.
+// Both sides of that pair are whitelisted: only the seven known labels, only
+// the three known levels. Free text never reaches the prompt through this
+// door, and an unknown label cannot invent a driver the scorer has no weight
+// for. Anything else is dropped silently, the same way sanitizeProfile drops
+// retired keys.
+export function sanitizeOverrides(overrides) {
+  const out = {};
+  if (overrides && typeof overrides === 'object' && !Array.isArray(overrides)) {
+    for (const label of DRIVER_LABELS) {
+      const v = overrides[label];
+      if (typeof v === 'string' && DRIVER_LEVELS.includes(v)) out[label] = v;
+    }
+  }
+  return out;
+}
 // Bands match the schema hint and the frontend gauge arcs.
 const TIER_BANDS = [
   { max: 25, tier: 1, name: 'Low risk' },
@@ -39,7 +58,7 @@ function scoreFromDrivers(drivers) {
     const level = d && LEVEL_POINTS[d.level] != null ? d.level : null;
     if (!level) return null; // malformed drivers: caller keeps model values
     const pts = DRIVER_WEIGHTS[label] * LEVEL_POINTS[level];
-    contributions.push({ label, level, weight: DRIVER_WEIGHTS[label], points: pts });
+    contributions.push({ label, level, weight: DRIVER_WEIGHTS[label], points: pts, userSet: !!(d && d.userSet) });
     index += pts;
   }
   index = Math.round(index);
@@ -116,8 +135,22 @@ const TOOL = {
   },
 };
 
-function buildPrompt(profile) {
+function buildPrompt(profile, overrides = {}) {
   const p = (k) => (profile && profile[k] ? String(profile[k]) : 'not specified');
+  const set = Object.entries(overrides);
+  // Ratings the visitor set for themselves after seeing a first assessment.
+  // They are given to the model rather than applied silently afterwards, so the
+  // rationale, scenarios and controls are written against the levels the score
+  // is actually computed from. The server still forces these levels back over
+  // whatever comes back, so a model that ignores this section cannot change the
+  // number the visitor chose.
+  const fixed = set.length
+    ? `
+
+Ratings the person being assessed has set themselves, after reading an earlier run of this assessment:
+${set.map(([label, level]) => `- ${label}: ${level}`).join('\n')}
+Treat those as given. Return exactly those levels for those drivers and rate the remaining drivers yourself. Write the rationale, scenarios and controls against the given levels, not against what you would have rated. If a given level looks unlikely from the profile, say so in one short clause in the rationale and still keep the level.`
+    : '';
   return `You are an AI governance analyst for SafeAI (CPI), Singapore. Perform an AI risk assessment for the use case below and return it via the return_assessment tool.
 
 Anchor your judgement in these frameworks:
@@ -150,6 +183,7 @@ Use case profile:
 - Data sensitivity: ${p('dataSensitivity')}
 - Agent capability level: ${p('capability')}
 - Infrastructure hosting model: ${p('hosting')}
+${fixed}
 
 Write in plain, factual language. No em dashes anywhere. Return only via the tool.`;
 }
@@ -187,8 +221,9 @@ export function sanitizeProfile(profile) {
 }
 
 // Runs the assessment. Returns { ok:true, data } or { ok:false, status, reason, detail }.
-export async function assess(profile) {
+export async function assess(profile, overrides) {
   profile = sanitizeProfile(profile);
+  overrides = sanitizeOverrides(overrides);
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return { ok: false, status: 500, reason: 'no_key', detail: 'ANTHROPIC_API_KEY is not configured on the server.' };
 
@@ -206,7 +241,7 @@ export async function assess(profile) {
         max_tokens: 5000,
         tools: [TOOL],
         tool_choice: { type: 'tool', name: 'return_assessment' },
-        messages: [{ role: 'user', content: buildPrompt(profile) }],
+        messages: [{ role: 'user', content: buildPrompt(profile, overrides) }],
       }),
     });
   } catch (err) {
@@ -226,6 +261,20 @@ export async function assess(profile) {
   const d = block.input;
   if (body.stop_reason === 'max_tokens' || !Array.isArray(d.scenarios) || !d.scenarios.length || !Array.isArray(d.controls) || !d.controls.length) {
     return { ok: false, status: 502, reason: 'incomplete', detail: 'The assessment came back incomplete (response was cut off). Please reassess.' };
+  }
+  // A driver the visitor set is theirs, whatever the model returned for it.
+  // Forced in before scoring, and flagged, so the page can show which ratings
+  // are the visitor's own rather than passing them off as the model's.
+  const ovLabels = Object.keys(overrides);
+  if (ovLabels.length) {
+    if (!Array.isArray(d.drivers)) d.drivers = [];
+    for (const label of ovLabels) {
+      const row = d.drivers.find((x) => x && x.label === label);
+      if (row) { row.level = overrides[label]; row.userSet = true; }
+      else d.drivers.push({ label, level: overrides[label], note: 'Set by you.', userSet: true });
+    }
+    d.userAdjusted = true;
+    d.userOverrides = overrides;
   }
   // Enforce the prescribed rubric: recompute index and tier from the driver
   // ratings and overwrite the model's values. The breakdown ships to the
