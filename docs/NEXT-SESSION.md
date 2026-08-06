@@ -1,12 +1,12 @@
 # SafeAI, next session
 
-State as of **2026-08-05**. The live site is healthy. Nothing below blocks it.
+State as of **2026-08-06**. The live site is healthy. Nothing below blocks it.
 
 Deploy is `git push` to main; safeai.sg auto-deploys within about a minute from
 the **calebspark** Vercel account. Do not use the local `vercel` CLI: its
 `.vercel/project.json` still points at `safeai-sg`, deleted 2026-07-28.
 
-Tests: `node --test "tests/*.test.mjs"` (98 passing).
+Tests: `node --test "tests/*.test.mjs"` (105 passing).
 
 ## Where the risk tool stands
 
@@ -25,8 +25,46 @@ endpoints, `tests/` for the headless tests.
 - **Agentic AI Risk Assessment Matrix.** Pre-deployment factor tables, or the
   Dayos action tiering for anyone already deployed. `assets/agentic.mjs`.
 - Both tracks open as their own page and keep their answers. Every result view
-  carries the same four actions: copy summary, copy as CSV, print, start over.
-  Everything survives a reload; only Reset or Start over clears it.
+  carries the same four actions: copy summary, copy as CSV, download the PDF
+  report, start over. Everything survives a reload; only Reset or Start over
+  clears it.
+
+**Changed 2026-08-06, David's asks**
+
+- **The profile form is one column at every width.** Two columns made the eye
+  jump between a question and its option row.
+- **One use case at a time.** The "Not listed" box on the use case picker stops
+  on an entry holding more than one (comma, slash, "and" and similar), offers
+  the first, and keeps a "Keep it as one" escape for phrases that only look
+  like two, such as "search and rescue". `MULTI_SPLIT`, `splitEntries`,
+  `warnMultiple`. Scoped to the use case picker only.
+- **Typed answers read "Your entry "x" is matched with "y"."** One `matchNote`
+  for the local fuzzy path and the `/api/classify` path, in both the industry
+  combo and the group pickers. It used to say "Read as y" in two places and
+  "Matched to y" in the other two, and never quoted back what was typed.
+- **The data source question asks for the source holding the most sensitive
+  data**, not the one read most often.
+- **"Where the weights come from"** sits under "How this score is computed": a
+  reason per driver, plus the 65 / 35 split between the three primary drivers
+  and the four secondary ones. The numbers are read off the response, not
+  retyped, so a re-weighting in `api/_engine.mjs` cannot leave it quoting a
+  dead figure. **The prose is not sourced from any document, David should read
+  it**: it is now the public explanation of the calibration.
+- **The visitor can set the driver ratings themselves.** "Edit these ratings" on
+  the rating card opens a slider per driver. Moving one previews the index and
+  tier only; committing goes back through `/api/assess` with the chosen levels
+  so the rationale, scenarios and controls are rewritten together. Only changed
+  ratings are sent. `sanitizeOverrides` whitelists both the seven labels and the
+  three levels, the levels are given to the model so the narrative is written
+  against them, and forced back over the response before scoring.
+  `tests/engine-overrides.test.mjs`. Overridden drivers come back `userSet`, and
+  the tile, the derivation table and all three exports say so.
+- **"Print / PDF" is now "Download PDF report".** It builds a separate report
+  document (white page, black wordmark, profile table, every disclosure
+  expanded, no controls) in a hidden iframe and prints that, rather than
+  printing the dark page with its accordions shut. It clones the live result
+  cards, so the tracks print through the same path. `safeai-logo-print.png` is
+  the wordmark recoloured for paper.
 
 **Changed 2026-08-05, David's asks**
 
@@ -64,6 +102,9 @@ lower a genuinely risky score.
       do not reopen.
 - [ ] **Verify the tier thresholds and control mappings.** Carried over from
       earlier sessions.
+- [ ] **Read the weight rationale** now published under "How this score is
+      computed". It is not lifted from any source document, so it needs David's
+      sign-off before the tool leaves preview.
 - [ ] **Declare the assessment validated**, which triggers the revert below.
 
 ## 3. Preview lockdown, revert on validation
