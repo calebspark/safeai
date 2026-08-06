@@ -1494,9 +1494,15 @@ function wireDriverEditor(d){
 
   const bandOf = i => (d.scoring.bands||[]).find(b=>i<=b.max);
 
+  /* Only what they actually moved. Sending all seven would come back with all
+     seven flagged as theirs, which puts the visitor's name on six ratings the
+     model made, and pins the model on ratings nobody disagreed with. */
   function readLevels(){
     const out={};
-    rows.forEach(r=>{ out[r.dataset.label] = LEVELS[+r.querySelector(".dslider").value]; });
+    rows.forEach(r=>{
+      const v = +r.querySelector(".dslider").value;
+      if(v !== +r.dataset.original) out[r.dataset.label] = LEVELS[v];
+    });
     return out;
   }
 
@@ -1826,9 +1832,195 @@ function summaryButton(id){
   </button>`;
 }
 function printButton(){
-  return `<button type="button" class="btn btn-ghost" onclick="window.print()">
-    <ion-icon name="print-outline"></ion-icon>Print / PDF</button>`;
+  /* Same .lbl wrapper the other export buttons use, so the label can be swapped
+     for "Preparing report..." without taking the icon with it. */
+  return `<button type="button" class="btn btn-ghost" data-report="1">
+    <span class="lbl with-icon"><ion-icon name="document-text-outline"></ion-icon><span>Download PDF report</span></span>
+  </button>`;
 }
+
+/* ---------- the PDF report ----------
+   This used to be window.print() on the page itself, which put the dark theme,
+   the questionnaire, the buttons and every closed accordion on the paper. A
+   reader got a screenshot of a web page with half the content folded away.
+
+   Instead this builds a separate report document and prints that. The browser's
+   own dialog still makes the PDF, since a static site with no build step has no
+   business shipping a PDF engine, but what the dialog is handed is a report:
+   white page, black wordmark, every disclosure expanded, no controls.
+
+   It clones the live result cards rather than re-rendering from the payload, so
+   the report cannot drift from what the person is looking at, and so a track
+   assessment prints through the same path as the risk rating. */
+
+/* The page's own tokens, repointed at paper. Every rule in the stylesheet reads
+   through these, so restating a dozen variables re-themes the whole document.
+   Surfaces go white to grey, ink goes black to grey, shadows go away. */
+const REPORT_CSS = `
+  :root{
+    --bg:#ffffff; --surface-1:#ffffff; --surface-2:#f5f5f6; --surface-3:#ebebee;
+    --ink:#111114; --ink-2:#3f3f46; --ink-3:#63636b;
+    --line:#dddde1; --line-2:#c9c9cf;
+    --raise:none; --shadow-pop:none;
+    --accent:#b4501c; --accent-2:#b4501c;
+    --info:#1f5fbf; --info-soft:#eef3fc; --info-line:#c3d6f4;
+    --success:#12704a; --success-soft:#ecf7f2; --success-line:#bfe3d4;
+    --warn:#8a6100; --warn-soft:#fbf4e4; --warn-line:#ecd9a8;
+    --danger:#a32b21; --danger-soft:#fbeeed; --danger-line:#f0c8c4;
+    --t1:#12704a; --t2:#8a6100; --t3:#b4501c; --t4:#a32b21;
+  }
+  @page{ size:A4; margin:14mm 12mm 16mm; }
+  html,body{ background:#fff; color:var(--ink); }
+  body{ padding:0; margin:0; font-size:10.5pt; line-height:1.55; }
+  /* No page padding in print: @page owns the margin there. On screen, for
+     anyone who opens the report instead of printing it, put the gutter back.
+     This has to sit on .rpt rather than body, because .rpt is the class that
+     zeroes it and a class beats an element selector. */
+  .rpt{ max-width:none; padding:0; }
+  @media screen{ .rpt{ padding:24px; } }
+  .card{ background:#fff; border:1px solid var(--line); box-shadow:none; margin:0 0 14px; padding:16px 18px; }
+  /* A report is read, not navigated: nothing may sit folded away. */
+  details{ display:block; }
+  details > summary{ list-style:none; cursor:auto; background:#fff !important; padding:10px 0 6px !important;
+    border-bottom:1px solid var(--line); margin-bottom:10px; font-weight:600; }
+  details > summary::-webkit-details-marker{ display:none; }
+  .acc{ border:0; border-radius:0; margin:14px 0 0; }
+  .acc + .acc{ margin-top:14px; }
+  .acc .body{ padding:0; }
+  .chev,.ccount,.spin{ display:none !important; }
+  table.risk{ min-width:0 !important; font-size:9.5pt; }
+  table.risk td,table.risk th{ padding:7px 9px; }
+  .tbl-scroll{ overflow:visible; }
+  .drivers{ grid-template-columns:repeat(2,1fr) !important; gap:8px; }
+  /* Paper has page edges, so nothing that reads as one unit may straddle one. */
+  .card,.dtile,.banner,.acc,table.risk tr,li{ break-inside:avoid; }
+  h1,h2,h3,h4,summary{ break-after:avoid; }
+  .rpt-head{ display:flex; align-items:flex-start; justify-content:space-between;
+    gap:24px; padding-bottom:12px; margin-bottom:16px; border-bottom:2px solid var(--ink); }
+  .rpt-logo{ width:190px; height:auto; flex:none; }
+  .rpt-meta{ text-align:right; font-size:9.5pt; color:var(--ink-2); line-height:1.5; }
+  .rpt-meta b{ display:block; color:var(--ink); font-size:12pt; font-weight:700; letter-spacing:-.01em; }
+  .rpt-profile{ width:100%; border-collapse:collapse; font-size:9.5pt; margin:0 0 16px; }
+  .rpt-profile th,.rpt-profile td{ text-align:left; vertical-align:top; padding:6px 10px 6px 0; border-bottom:1px solid var(--line); }
+  .rpt-profile th{ width:34%; color:var(--ink-2); font-weight:600; }
+  .rpt-foot{ margin-top:18px; padding-top:10px; border-top:1px solid var(--line);
+    font-size:8.5pt; color:var(--ink-3); line-height:1.5; }
+`;
+
+/* Everything a screen needs and paper does not. */
+function stripForReport(node){
+  node.querySelectorAll(
+    "button, input, .rate-actions, .dedit, .actions, .spin, ion-icon, .infobtn, .tip, .stitle .n"
+  ).forEach(el=>el.remove());
+  /* Nothing folded: a reader of a PDF cannot click a summary open. */
+  node.querySelectorAll("details").forEach(el=>el.open=true);
+  /* hidden="" survives cloning, and the export panels and notes it guards are
+     part of the report, so drop the attribute where the content is real. */
+  node.querySelectorAll(".acc .body[hidden], .combo-note[hidden]").forEach(el=>el.hidden=false);
+  return node;
+}
+
+function reportProfileTable(){
+  const rows = KEYS.map(k=>{
+    const field = document.querySelector(`.field[data-key="${k}"]`);
+    const q = field ? (field.querySelector("label")?.textContent || k).replace(/^\s*\d+\.\s*/,"").trim() : k;
+    return state[k] ? `<tr><th>${escapeHtml(q)}</th><td>${escapeHtml(label(state[k]))}</td></tr>` : "";
+  }).join("");
+  if(!rows) return "";
+  const adopt = (state.adoption||[]).length ? `<tr><th>AI in use</th><td>${escapeHtml(state.adoption.join(", "))}</td></tr>` : "";
+  return `<table class="rpt-profile"><tbody>${adopt}${rows}</tbody></table>`;
+}
+
+const REPORT_TITLES = {
+  main:    "AI use case risk assessment",
+  agentic: "Agentic AI risk assessment",
+  genai:   "Gen AI governance readiness",
+};
+
+function buildReportHTML(){
+  const view = document.body.dataset.view || "main";
+  /* #maturity is deliberately left out: it is the launcher for the two deeper
+     tracks, so on paper it reduces to two headings and a pair of dead buttons.
+     Those tracks print their own report. */
+  const ids = view==="main" ? ["#rating","#output"] : ["#"+view];
+  const body = ids
+    .map(sel=>document.querySelector(sel))
+    .filter(el=>el && el.innerHTML.trim())
+    .map(el=>stripForReport(el.cloneNode(true)).innerHTML)
+    .join("");
+  const styles = [...document.querySelectorAll("style")].map(s=>s.textContent).join("\n");
+  /* The type has to come with it: the stylesheet names DM Sans and Plus Jakarta
+     Sans, and without the font link the report sets in whatever the browser
+     calls sans-serif. */
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+    <base href="${location.href.split("#")[0]}">
+    <title>SafeAI ${escapeHtml(REPORT_TITLES[view]||REPORT_TITLES.main)}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>${styles}</style><style>${REPORT_CSS}</style></head>
+    <body class="rpt">
+      <header class="rpt-head">
+        <img class="rpt-logo" src="safeai-logo-print.png" alt="SafeAI.sg">
+        <div class="rpt-meta"><b>${escapeHtml(REPORT_TITLES[view]||REPORT_TITLES.main)}</b>
+          Generated ${escapeHtml(exportStamp())}<br>safeai.sg</div>
+      </header>
+      ${view==="main" ? reportProfileTable() : ""}
+      ${body}
+      <div class="rpt-foot">Produced by the SafeAI risk assessment tool, anchored to the MindForge AI Risk Management Framework, the CSA and IMDA Guidelines on Securing AI Systems, and the AI Verify Testing Framework. It supports a governance discussion. It is not legal advice and it is not a certification.</div>
+    </body></html>`;
+}
+
+let _reportFrame=null;
+async function printReport(btn){
+  /* Not named `label`: that is the global that resolves a stored value to its
+     display text, and shadowing it here would be a trap for the next edit. */
+  const lbl = btn && (btn.querySelector(".lbl span:last-child") || btn);
+  const old = lbl ? lbl.textContent : "";
+  if(lbl) lbl.textContent = "Preparing report...";
+  try{
+    if(_reportFrame) _reportFrame.remove();
+    const frame = _reportFrame = document.createElement("iframe");
+    frame.setAttribute("aria-hidden","true");
+    frame.setAttribute("title","Report preview");
+    frame.style.cssText = "position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none";
+    document.body.appendChild(frame);
+
+    await new Promise(resolve=>{
+      frame.addEventListener("load", resolve, { once:true });
+      frame.srcdoc = buildReportHTML();
+    });
+
+    /* Print before the logo and the fonts have arrived and the first page comes
+       out bare, so wait for both, with a ceiling so a blocked font host cannot
+       hang the button. */
+    const w = frame.contentWindow;
+    await Promise.race([
+      Promise.all([
+        w.document.fonts && w.document.fonts.ready,
+        ...[...w.document.images].map(img=>img.complete ? null
+          : new Promise(r=>{ img.addEventListener("load",r,{once:true}); img.addEventListener("error",r,{once:true}); })),
+      ]),
+      new Promise(r=>setTimeout(r,3000)),
+    ]);
+
+    w.focus();
+    w.print();
+    toast("Choose Save as PDF in the print dialog");
+  }catch(err){
+    toast("Could not build the report");
+  }finally{
+    if(lbl) lbl.textContent = old;
+  }
+}
+
+/* Delegated: the export bars are re-rendered on every assessment, and a track
+   view builds its own, so binding per button would mean binding in four places
+   and losing one of them at the next change. */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-report]");
+  if(b) printReport(b);
+});
 function startOverButton(id){
   return `<button type="button" class="btn btn-ghost" id="${id}">Start over</button>`;
 }
