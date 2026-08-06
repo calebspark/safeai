@@ -120,8 +120,10 @@
     .stitle .n ion-icon{ font-size:18px; }
 
     /* ---------- pill fields ---------- */
+    /* One column at every width. Two columns made the reader jump left-right
+       between a question and its option row, and long pill rows wrapped badly
+       in a half-width column. Readability beats fitting it on one screen. */
     .fgrid{ display:grid; gap:var(--s6); grid-template-columns:1fr; }
-    @media (min-width:900px){ .fgrid{ grid-template-columns:1fr 1fr; } }
     .field{ display:flex; flex-direction:column; }
     .field > label{ order:0; font-weight:600; font-size:calc(var(--fs-base)*1.02); margin-bottom:5px; }
     .field.miss > label{ color:var(--warn); }
@@ -333,6 +335,9 @@
       color:var(--accent); cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
     .combo-note button:hover{ color:var(--accent-2); }
     .combo-note button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+    /* Two choices under a reminder. Own line, so neither runs into the sentence
+       above it, and they wrap rather than overflow a narrow field. */
+    .combo-note .note-actions{ display:flex; flex-wrap:wrap; gap:var(--s4); margin-top:6px; }
 
     .combo-input{ width:100%; font:inherit; font-weight:500; color:var(--ink); background:var(--surface-2);
       border:1px solid var(--line); border-radius:var(--r-sm); padding:11px 14px;
@@ -690,7 +695,7 @@
 
             <div class="field" data-key="usecase">
               <label><span class="qn">3.</span>AI system / use case type</label>
-              <div class="hint">Dictates the likely attack vectors. GenAI needs prompt-injection controls.</div>
+              <div class="hint">Dictates the likely attack vectors. GenAI needs prompt-injection controls. Pick one use case at a time. If you run several, assess the highest risk one first, then come back for the others.</div>
               <div class="picker" data-picker="usecase">
                 <div class="picker-crumb" hidden><button type="button" class="picker-back"><ion-icon name="chevron-back-outline"></ion-icon><span></span></button></div>
                 <div class="pills" role="radiogroup" aria-label="Use case"></div>
@@ -710,7 +715,7 @@
 
             <div class="field" data-key="dataSource" data-scale="DATA_SOURCE">
               <label><span class="qn">5.</span>Data source</label>
-              <div class="hint">Where the system reads from. Pick the main one.</div>
+              <div class="hint">Where the system reads from. Pick the source that holds the most sensitive data it can reach, not the one it reads most often.</div>
               <div class="pills" role="radiogroup" aria-label="Data source"></div>
               <div class="opt-desc" hidden></div>
             </div>
@@ -974,7 +979,7 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
     const m = fuzzyMatch(raw, entries.map(e=>({value:e.value,label:e.label})), synonyms);
     if(m && m.confidence>=CONFIDENT){
       const hit = entries.find(e=>e.value===m.value || e.code===m.value);
-      if(hit) return commit(hit.value, `Matched to <b>${escapeHtml(hit.label)}</b>.`);
+      if(hit) return commit(hit.value, matchNote(raw, hit.label));
     }
 
     busy=true;
@@ -998,7 +1003,7 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
     }
     if(res.valid){
       const hit = entries.find(e=>e.value===res.mappedTo);
-      if(hit) commit(hit.value, `Read as <b>${escapeHtml(hit.label)}</b>.`);
+      if(hit) commit(hit.value, matchNote(raw, hit.label));
       else { state[key]=raw; field.classList.remove("miss"); setNote("Using your description.", "ok"); onFieldChanged(); }
       return;
     }
@@ -1029,7 +1034,7 @@ function comboField(key, entries, { noun, synonyms={}, showCode=false, groups=fa
    Tap a group, its items replace the row, the crumb goes back. "Not listed"
    swaps in an inline field rather than a native prompt, so the free-text path
    looks and behaves like the rest of the form. */
-function groupPicker(key, groups, { noun }){
+function groupPicker(key, groups, { noun, oneAtATime=false }){
   const root  = document.querySelector(`.picker[data-picker="${key}"]`);
   const pills = root.querySelector(".pills");
   const crumb = root.querySelector(".picker-crumb");
@@ -1038,6 +1043,9 @@ function groupPicker(key, groups, { noun }){
   const field = root.closest(".field");
   const entries = flatten(groups).map(v=>({ value:v, label:v }));
   let busy=false;
+  /* Set once the person has answered the "that is two use cases" reminder, so
+     the same entry is not questioned twice. */
+  let keepAsOne=false;
 
   function setNote(html, kind){
     if(!html){ note.hidden=true; note.innerHTML=""; return; }
@@ -1074,6 +1082,8 @@ function groupPicker(key, groups, { noun }){
 
   function showFreeInput(){
     crumb.hidden=false;
+    keepAsOne=false;
+    setNote("");
     crumbLabel.textContent="Not listed";
     pills.innerHTML =
       `<input type="text" class="combo-input picker-free" autocomplete="off" spellcheck="false"
@@ -1110,16 +1120,50 @@ function groupPicker(key, groups, { noun }){
   root.addEventListener("keydown", e=>{
     if(e.target.classList.contains("picker-free") && e.key==="Enter"){ e.preventDefault(); resolveFree(); }
   });
+  /* Editing the box withdraws the "keep it as one" override, so a second,
+     genuinely multiple entry is caught again. */
+  root.addEventListener("input", e=>{
+    if(e.target.classList.contains("picker-free")) keepAsOne=false;
+  });
+
+  /* Shown instead of resolving when the box holds more than one use case. It
+     offers the first one, and an escape hatch for the phrase that only looks
+     like two ("search and rescue"). */
+  function warnMultiple(parts){
+    const first = parts[0];
+    setNote(
+      `Please enter one ${escapeHtml(noun)} at a time. Assessing two together averages them into a rating that fits neither.` +
+      `<span class="note-actions">` +
+        `<button type="button" data-first="${escapeHtml(first)}">Use only &ldquo;${escapeHtml(first)}&rdquo;</button>` +
+        `<button type="button" data-asone="1">Keep it as one</button>` +
+      `</span>`,
+      "bad"
+    );
+    const box = root.querySelector(".picker-free");
+    const useFirst = note.querySelector("[data-first]");
+    const asOne    = note.querySelector("[data-asone]");
+    if(useFirst) useFirst.addEventListener("click", ()=>{
+      if(box){ box.value = first; box.focus(); }
+      keepAsOne = true;   /* the offered text is single by construction */
+      resolveFree();
+    });
+    if(asOne) asOne.addEventListener("click", ()=>{ keepAsOne = true; resolveFree(); });
+  }
 
   async function resolveFree(){
     const box = root.querySelector(".picker-free");
     const raw = (box ? box.value : "").trim();
     if(!raw || busy) return;
 
+    if(oneAtATime && !keepAsOne){
+      const parts = splitEntries(raw);
+      if(parts.length > 1) return warnMultiple(parts);
+    }
+
     const m = fuzzyMatch(raw, entries, {});
     if(m && m.confidence>=CONFIDENT){
       showGroups();
-      return commit(m.value, `Matched to <b>${escapeHtml(m.value)}</b>.`);
+      return commit(m.value, matchNote(raw, m.value));
     }
 
     busy=true;
@@ -1142,7 +1186,7 @@ function groupPicker(key, groups, { noun }){
     if(res.valid){
       const hit = entries.find(e=>e.value===res.mappedTo);
       showGroups();
-      if(hit) commit(hit.value, `Read as <b>${escapeHtml(hit.value)}</b>.`);
+      if(hit) commit(hit.value, matchNote(raw, hit.value));
       else { state[key]=raw; field.classList.remove("miss"); setNote("Using your description.", "ok"); onFieldChanged(); }
       return;
     }
@@ -1181,6 +1225,25 @@ const CAT_ICON = {
 };
 
 function escapeHtml(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+/* One wording for every "you typed something, here is what it became" note, so
+   the fuzzy path and the /api/classify path never disagree. Quoting the raw
+   entry back matters: without it people cannot tell which of their words the
+   match came from. */
+function matchNote(raw, matched){
+  return `Your entry &ldquo;${escapeHtml(raw)}&rdquo; is matched with <b>&ldquo;${escapeHtml(matched)}&rdquo;</b>.`;
+}
+
+/* One use case at a time. Two use cases in one box average into a rating that
+   describes neither, so we stop and ask rather than quietly assessing the pair.
+   Only hard separators count, and "and" is included because "chatbot and
+   document search" is the common way people type two. A phrase that genuinely
+   contains one of these ("search and rescue dispatch") is handled by the
+   "keep it as one" escape hatch on the note, not by a cleverer regex. */
+const MULTI_SPLIT = /\s*(?:,|;|\/|\+|&|\r?\n|\band\b|\balso\b|\bas well as\b)\s*/i;
+function splitEntries(raw){
+  return String(raw).split(MULTI_SPLIT).map(s=>s.trim()).filter(s=>s.length>1);
+}
+
 function toast(msg){ const t=$("#toast"); t.querySelector("span").textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),1900); }
 function tierOf(d){ return TIERS[d.tier] || TIERS[Math.min(4,Math.max(1,Math.round((d.riskIndex||0)/25)+1))]; }
 function setLabel(txt){ const l=$("#run .lbl span:last-child"); if(l) l.textContent=txt; }
@@ -1864,7 +1927,7 @@ const AUTONOMY_FIELD = SCALE_FIELDS.find(f=>f.key==="autonomy");
 const FIELD_CONTROLS = [
   comboField("industry", INDUSTRY_ENTRIES, { noun:"industry", synonyms:SSIC_SYNONYMS, showCode:false, groups:true }),
   groupPicker("role", ROLE_GROUPS, { noun:"role" }),
-  groupPicker("usecase", USECASE_GROUPS, { noun:"AI use case" }),
+  groupPicker("usecase", USECASE_GROUPS, { noun:"AI use case", oneAtATime:true }),
 ];
 updateStepper();
 
