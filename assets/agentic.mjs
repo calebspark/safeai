@@ -123,6 +123,95 @@ export const LIKELIHOOD_FACTORS = [
 const IMPACT_IDS = IMPACT_FACTORS.map(f => f.id);
 const LIKELIHOOD_IDS = LIKELIHOOD_FACTORS.map(f => f.id);
 
+// --- What a high rating means you can do about it ------------------------
+//
+// SafeAI's, not IMDA's. The framework rates the factors; it does not say which
+// of them a team can move. That distinction is the useful part of a result:
+// some factors are properties of the job itself and set a floor under the tier,
+// and others are design decisions that can be taken back this week.
+//
+// `lever: true` means the rating is a choice about how the agent was built or
+// wired, so lowering it is engineering work. `lever: false` means it comes with
+// the use case, so the only honest responses are stronger controls around it or
+// a narrower use case.
+export const FACTOR_ACTIONS = {
+  domain: { lever: false,
+    action: 'This is what the agent is for, so it does not come down without narrowing the use case. Split the workflow and let the agent hold only the steps where an error is caught cheaply.' },
+  sensitiveData: { lever: true,
+    action: 'Cut what the agent can reach: field-level filtering or masking before retrieval, and clear the memory between sessions unless persistence is genuinely required.' },
+  externalSystems: { lever: true,
+    action: 'Put an allowlist in front of the tools, treat anything fetched from outside as untrusted input rather than instruction, and drop open web access where a vetted source will do.' },
+  scope: { lever: true,
+    action: 'Replace broad computer use with a small set of named tools. A defined action space is the single biggest reduction available on the impact axis.' },
+  reversibility: { lever: true,
+    action: 'Make the irreversible step the one a human takes. Have the agent stage the change, send, transaction or commit, and leave the final action behind a confirmation.' },
+  autonomy: { lever: true,
+    action: 'Give the agent a written procedure instead of an objective. Judgement at every step is what turns one bad inference into a completed action.' },
+  taskComplexity: { lever: false,
+    action: 'Complexity belongs to the task. Break it into shorter runs with a checkpoint between them, so a wrong turn is caught at the next boundary rather than at the end.' },
+  externalParty: { lever: true,
+    action: 'Get the vendor assessment done: what the agent does with your data, what it logs, and what you can turn off. If none of that is answerable, keep the agent out of the sensitive path.' },
+  systemComplexity: { lever: true,
+    action: 'Reduce the number of agents that can act, or make handoffs explicit and logged. Emergent behaviour is a property of the wiring, not of any one agent.' },
+};
+
+export const FACTOR_LABELS = Object.fromEntries(
+  [...IMPACT_FACTORS, ...LIKELIHOOD_FACTORS].map(f => [f.id, f.label]));
+
+export const TIER_BANDS_PRE = [
+  { tier: 1, min: 1,  max: 6,  name: 'Tier 1' },
+  { tier: 2, min: 7,  max: 14, name: 'Tier 2' },
+  { tier: 3, min: 15, max: 25, name: 'Tier 3' },
+];
+
+/**
+ * Why a pre-deployment result landed on the tier it did, and what to do first.
+ * @param {Object} ratings the 1 to 5 answers, keyed by factor id
+ * @param {Object} s the return value of scorePredeployment
+ * @returns {{arithmetic:string, axis:string, drivers:Array, floor:Array, distance:string}}
+ *
+ * `drivers` are the factors rated 4 or 5, worst first, each carrying whether it
+ * can be lowered and what lowering it looks like. `floor` is the subset that
+ * cannot be lowered, which is what stops a team chasing a tier it cannot reach.
+ */
+export function explainPredeployment(ratings, s) {
+  const r = ratings || {};
+  const band = TIER_BANDS_PRE.find(b => b.tier === s.tier);
+  const all = [...IMPACT_FACTORS, ...LIKELIHOOD_FACTORS]
+    .map(f => ({
+      id: f.id,
+      label: f.label,
+      axis: IMPACT_IDS.includes(f.id) && LIKELIHOOD_IDS.includes(f.id) ? 'both'
+        : IMPACT_IDS.includes(f.id) ? 'impact' : 'likelihood',
+      score: Number(r[f.id]) || 0,
+      ...(FACTOR_ACTIONS[f.id] || {}),
+    }))
+    // A factor rated on both axes is one answer, so it appears once.
+    .filter((f, i, xs) => xs.findIndex(x => x.id === f.id) === i)
+    .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
+
+  const arithmetic = `Impact ${s.impact} times likelihood ${s.likelihood} is ${s.raw} of 25, which falls in ${band.name} (${band.min} to ${band.max}).`;
+
+  const axis = s.impact === s.likelihood
+    ? 'Both axes are rated the same, so neither one is carrying the tier on its own.'
+    : s.impact > s.likelihood
+      ? 'Impact is the higher axis: a failure here would be costly even though it is not especially likely.'
+      : 'Likelihood is the higher axis: the conditions for a failure are present even though a single failure would be survivable.';
+
+  const drivers = all.filter(f => f.score >= 4);
+  const floor = drivers.filter(f => f.lever === false);
+
+  // What the tier would be if every changeable factor were brought down to 3.
+  const capped = {};
+  for (const f of all) capped[f.id] = f.lever === false ? f.score : Math.min(f.score, 3);
+  const best = scorePredeployment(capped);
+  const distance = best.tier < s.tier
+    ? `Bringing every changeable factor down to a 3 would put this at Tier ${best.tier} (${best.raw} of 25). The factors that cannot be changed are what hold the rest.`
+    : `Bringing every changeable factor down to a 3 would still leave this at Tier ${best.tier}. The tier is set by what the agent is being asked to do, not by how it was wired, so the honest options are a narrower use case or stronger controls around it.`;
+
+  return { arithmetic, axis, drivers, floor, distance, all };
+}
+
 function meanOf(ids, ratings) {
   const vals = ids.map(id => Number(ratings[id]) || 0);
   return vals.reduce((a, b) => a + b, 0) / vals.length;
@@ -160,6 +249,14 @@ export function tierOfAction({ severity, reversibility, oversight }) {
 // Autonomy levels: 3 acts autonomously, 2 human signs off, 1 agent does not act.
 export const CEILING = { 1: 3, 2: 2, 3: 1 };
 
+// Kept here rather than in the page, so the corrective sentence below and the
+// dropdown in the form cannot drift apart.
+export const AUTONOMY_LABEL = {
+  3: 'Acts autonomously',
+  2: 'Human signs off',
+  1: 'Agent does not act',
+};
+
 export const AUTONOMY_CEILING_COPY = {
   1: 'Agent acts autonomously on a propose-confirm loop, with no engineer in the loop. Every action emits a reasoning chain and a confidence score, and a reviewer audits a cross-section biweekly.',
   2: 'Agent diagnoses and proposes, writing a diagnostic summary and a proposed fix. A qualified human signs off before anything executes.',
@@ -170,9 +267,26 @@ export function governanceGap(rows) {
   const scored = (rows || []).map(r => {
     const tier = tierOfAction(r);
     const ceiling = CEILING[tier];
-    return { ...r, tier, ceiling, gap: (Number(r.granted) || 0) > ceiling };
+    const granted = Number(r.granted) || 0;
+    return {
+      ...r, tier, ceiling, granted,
+      gap: granted > ceiling,
+      // How many autonomy steps too far. Two steps means an action that should
+      // not run at all is running unattended, which is a different finding from
+      // one that merely skips a sign-off.
+      overreach: Math.max(0, granted - ceiling),
+      why: `Severity ${r.severity || 0} and irreversibility ${r.reversibility || 0}` +
+        ((Number(r.oversight) || 0) >= 4 ? ', with oversight rated hard, which raises the tier by one' : '') +
+        ` put this at Tier ${tier}, and Tier ${tier} permits at most "${AUTONOMY_LABEL[ceiling]}".`,
+      fix: granted > ceiling
+        ? `Move it from "${AUTONOMY_LABEL[granted]}" to "${AUTONOMY_LABEL[ceiling]}".`
+        : '',
+    };
   });
-  const gaps = scored.filter(r => r.gap);
+  // Worst overreach first, then the highest tier: the action running two steps
+  // beyond its ceiling is the one to correct today.
+  const gaps = scored.filter(r => r.gap)
+    .sort((a, b) => b.overreach - a.overreach || b.tier - a.tier);
   const needle = scored.length ? Math.round((gaps.length / scored.length) * 100) : 0;
   const distribution = { 1: 0, 2: 0, 3: 0 };
   for (const r of scored) distribution[r.tier] += 1;

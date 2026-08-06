@@ -587,6 +587,21 @@
     .gap-list li{ padding:var(--s3) 0; border-top:1px solid var(--line); line-height:1.6; color:var(--ink-2); }
     .gap-list li:first-child{ border-top:0; }
     .gap-list b{ color:var(--ink); }
+    /* An ordered gap carries three lines under its heading: why it ranks where
+       it does, the one thing to do first, and the evidence an auditor asks for.
+       Each is its own block so no two of them share a line. */
+    .gap-head{ display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--s2) var(--s3); }
+    .gap-head .n{ color:var(--ink-3); font-variant-numeric:tabular-nums; }
+    /* Not .step: that is the progress stepper's class, and it carries
+       flex + text-align:center, which centred these lines mid-paragraph. */
+    .gap-list .do-first{ display:block; margin-top:6px; color:var(--ink); }
+    .gap-list .do-first b{ font-weight:600; }
+    .gap-list .ev{ display:block; margin-top:6px; color:var(--ink-3); font-size:calc(var(--fs-base)*.88); }
+    /* The reasoning block above a result list. Quiet, and measured for reading. */
+    .why-block{ margin:var(--s6) 0 0; }
+    .why-block p{ margin:0 0 var(--s3); color:var(--ink-2); line-height:1.6; max-width:68ch; }
+    .why-block p:last-child{ margin-bottom:0; }
+    .why-block b{ color:var(--ink); }
     table.risk input[type="text"], table.risk select{ width:100%; font:inherit; font-size:calc(var(--fs-base)*.92);
       color:var(--ink); background:var(--surface-2); border:1px solid var(--line);
       border-radius:var(--r-sm); padding:7px 9px; }
@@ -903,10 +918,12 @@ import { fuzzyMatch, CONFIDENT } from './assets/match.mjs';
 import {
   IMPACT_FACTORS, LIKELIHOOD_FACTORS, SHARED_FACTOR_ID,
   scorePredeployment, governanceGap, AUTONOMY_CEILING_COPY,
+  explainPredeployment, AUTONOMY_LABEL,
 } from './assets/agentic.mjs';
 import {
   QUESTIONS as GENAI_QUESTIONS, TOTAL_QUESTIONS as GENAI_TOTAL,
   SCALE as GENAI_SCALE, SCALE_POINTS as GENAI_POINTS, scoreReadiness,
+  explainReadiness,
 } from './assets/genai.mjs';
 
 const $ = s => document.querySelector(s);
@@ -2109,6 +2126,13 @@ function genaiCSV(res){
   rows.push(["Summary","","Answer counts","",
     "Yes "+res.counts.full+", partially done "+res.counts.partial+", no "+res.counts.none+", not applicable "+res.counts.na,
     "","",""]);
+  /* The work list, in the order the page recommends, so the spreadsheet can be
+     worked straight down rather than re-sorted by hand. */
+  res.gaps.forEach((g,i)=>{
+    rows.push(["Priority", i+1, g.principle,
+      g.answer==="none" ? "Nothing in place" : "Partially done",
+      g.firstStep||"", "", g.evidence, g.because||""]);
+  });
   return toCSV(rows);
 }
 
@@ -2136,6 +2160,12 @@ function agenticPredeployCSV(s){
   rows.push(["Summary","Likelihood times impact","",s.raw+" of 25",""]);
   rows.push(["Summary","Tier","","Tier "+s.tier,AGENTIC_PROFILE[s.tier]]);
   rows.push(["Summary","Autonomy ceiling","","",AUTONOMY_CEILING_COPY[s.tier]]);
+  /* The factors driving the tier, worst first, with what can be done about
+     each. Same order as the page. */
+  explainPredeployment(state.agenticFactors, s).drivers.forEach((f,i)=>{
+    rows.push(["Priority "+(i+1), f.label, f.axis==="both" ? "Impact and likelihood" : f.axis,
+      f.score+" of 5", (f.lever===false ? "Comes with the use case. " : "")+f.action]);
+  });
   return toCSV(rows);
 }
 
@@ -2148,6 +2178,9 @@ function agenticDeployedCSV(res){
     "Tier "+r.tier, GRANTED_LABEL[r.ceiling], GRANTED_LABEL[r.granted], r.gap ? "Yes" : "No"]));
   rows.push(["Summary","Action types above their ceiling","","","","","",res.gaps.length+" of "+res.rows.length,""]);
   [1,2,3].forEach(t=>rows.push(["Summary","Tier "+t+" action types","","","","","",res.distribution[t],""]));
+  /* The corrections, furthest past the ceiling first. Same order as the page. */
+  res.gaps.forEach((r,i)=>rows.push(["Priority "+(i+1), r.label, "", "", "",
+    "Tier "+r.tier, GRANTED_LABEL[r.ceiling], GRANTED_LABEL[r.granted], r.fix]));
   return toCSV(rows);
 }
 
@@ -2182,16 +2215,26 @@ function agenticPredeploySummary(s){
 
   const headline = "Tier "+s.tier+", "+AGENTIC_PROFILE[s.tier];
   const axes = "Impact "+s.impact+" of 5, likelihood "+s.likelihood+" of 5, likelihood times impact "+s.raw+" of 25.";
+  const ex = explainPredeployment(state.agenticFactors, s);
+  const why = [ex.arithmetic+" "+ex.axis, ex.distance]
+    .concat(ex.floor.length ? ["Rated 4 or 5 and not something wiring can fix: "
+      +ex.floor.map(f=>f.label).join(", ")+". Those set the floor under this tier."] : []);
+  const changes = ex.drivers.map(f=>
+    f.label+" rated "+f.score+" of 5"+(f.lever===false?" (comes with the use case)":"")+". "+f.action);
 
   const html = sumDoc("Agentic AI Risk Assessment Matrix",
     sumP(headline) + sumP(axes)
     + sumH("Autonomy ceiling") + sumP(AUTONOMY_CEILING_COPY[s.tier])
+    + sumH("Why Tier "+s.tier) + why.map(sumP).join("")
+    + (changes.length ? sumH("What to change, in order") + sumOl(changes) : "")
     + sumH("Your ratings") + sumOl(factors)
     + sumNote(AGENTIC_SOURCE_NOTE));
 
   const text = ["AGENTIC AI RISK ASSESSMENT MATRIX","SafeAI · safeai.sg","",
     headline, axes, "",
     "AUTONOMY CEILING", AUTONOMY_CEILING_COPY[s.tier], "",
+    "WHY TIER "+s.tier, ...why.map(w=>"  "+w), "",
+    ...(changes.length ? ["WHAT TO CHANGE, IN ORDER", ...sumTextList(changes), ""] : []),
     "YOUR RATINGS", ...sumTextList(factors), "", AGENTIC_SOURCE_NOTE].join("\n");
 
   return { html, text };
@@ -2201,7 +2244,9 @@ function agenticDeployedSummary(res){
   const rows = res.rows.map(r=>
     r.label+": tier "+r.tier+", permitted "+GRANTED_LABEL[r.ceiling].toLowerCase()
     +", granted "+GRANTED_LABEL[r.granted].toLowerCase()+(r.gap?", above its ceiling":""));
-  const gaps = res.gaps.map(r=>r.label+". "+AUTONOMY_CEILING_COPY[r.tier]);
+  const gaps = res.gaps.map(r=>
+    (r.label||"Unnamed action")+" runs as "+GRANTED_LABEL[r.granted].toLowerCase()
+    +". "+r.why+" "+r.fix+" "+AUTONOMY_CEILING_COPY[r.tier]);
   const headline = res.gaps.length+" of "+res.rows.length+" action "
     +(res.rows.length===1?"type is":"types are")+" above the permitted autonomy ceiling.";
   const note = "Action tiering adapted from the Dayos case study in the IMDA Model AI Governance Framework for Agentic AI. Autonomy granted is an addition by SafeAI.";
@@ -2223,23 +2268,30 @@ function agenticDeployedSummary(res){
 function genaiSummary(res){
   const answers = GENAI_QUESTIONS.map(q=>
     q.n+". "+q.principle+": "+(GENAI_SCALE_LABEL[state.genaiAnswers[q.id]] || "Not answered"));
+  /* Same order and the same first step as the page, so a pasted summary is a
+     work list rather than a restatement of the answers. */
   const gaps = res.gaps.map(g=>
-    g.n+". "+g.principle+" is "+(g.answer==="none"?"not in place":"only partially done")+". "+g.evidence);
+    g.principle+" is "+(g.answer==="none"?"not in place":"only partially done")
+    +". "+(g.because||"")+" Do this first: "+(g.firstStep||"")+" Evidence to keep: "+g.evidence);
+  const ex = explainReadiness(res);
   const headline = res.score===null
     ? "Every principle was marked not applicable, so there is nothing to score."
     : res.band.name+", "+res.score+" of 100 across "+res.applicable+" applicable principle"+(res.applicable===1?"":"s")+".";
+  const why = ex ? [ex.arithmetic, ex.distance, ex.headline].filter(Boolean) : [];
   const note = "Self-assessment against the 11 principles of the AI Verify Testing Framework for Traditional and Generative AI (IMDA and AI Verify Foundation). Not a substitute for the full framework checklist or an independent audit.";
 
   const html = sumDoc("Gen AI Governance Readiness",
     sumP(headline) + (res.band ? sumP(res.band.text) : "")
+    + (why.length ? sumH("Why this band") + why.map(sumP).join("") : "")
     + sumH("Your answers") + sumOl(answers)
-    + (gaps.length ? sumH("Where to focus") + sumOl(gaps) : "")
+    + (gaps.length ? sumH("What to fix, in order") + sumOl(gaps) : "")
     + sumNote(note));
 
   const text = ["GEN AI GOVERNANCE READINESS","SafeAI · safeai.sg","", headline,
     ...(res.band ? [res.band.text] : []), "",
+    ...(why.length ? ["WHY THIS BAND", ...why.map(w=>"  "+w), ""] : []),
     "YOUR ANSWERS", ...answers.map(a=>"  "+a),
-    ...(gaps.length ? ["", "WHERE TO FOCUS", ...sumTextList(gaps)] : []),
+    ...(gaps.length ? ["", "WHAT TO FIX, IN ORDER", ...sumTextList(gaps)] : []),
     "", note].join("\n");
 
   return { html, text };
@@ -2779,7 +2831,39 @@ function renderPredeployForm(){
 
 const AGENTIC_PROFILE={1:"Low severity, fully reversible",2:"Moderate severity, partially reversible",3:"High severity, limited reversibility"};
 
+const AXIS_LABEL={impact:"impact",likelihood:"likelihood",both:"both axes"};
+
 function renderPredeployResult(s){
+  /* The tier on its own tells a team where they are and nothing about what to
+     do next. This says which answers produced it, which of those they can
+     actually change, and what the tier would be if they changed them. */
+  const ex = explainPredeployment(state.agenticFactors, s);
+  const drivers = ex.drivers.map((f,i)=>`<li>
+      <div class="gap-head">
+        <span class="n">${i+1}.</span>
+        <b>${escapeHtml(f.label)}</b>
+        <span>rated ${f.score} of 5, on ${escapeHtml(AXIS_LABEL[f.axis])}.</span>
+        ${f.lever===false?'<span class="prio rec">Comes with the use case</span>':i<2?'<span class="prio req">Start here</span>':""}
+      </div>
+      <span class="do-first">${escapeHtml(f.action||"")}</span>
+    </li>`).join("");
+
+  const why = `
+    <div class="why-block">
+      <h3 style="margin:0 0 var(--s2)">Why Tier ${s.tier}</h3>
+      <p>${escapeHtml(ex.arithmetic)} ${escapeHtml(ex.axis)}</p>
+      <p>${escapeHtml(ex.distance)}</p>
+      ${ex.floor.length
+        ? `<p>Rated 4 or 5 and not something wiring can fix: ${
+            ex.floor.map(f=>`<b>${escapeHtml(f.label)}</b>`).join(", ")}. Those set the floor under this tier.</p>`
+        : ""}
+    </div>
+    ${ex.drivers.length
+      ? `<h3 style="margin:var(--s6) 0 var(--s2)">What to change, in order</h3>
+         <p style="color:var(--ink-2);margin:0 0 var(--s3);line-height:1.6;max-width:68ch">Every factor you rated 4 or 5, worst first. The framework rates these factors; which of them a team can move is SafeAI's reading, not IMDA's.</p>
+         <ul class="gap-list">${drivers}</ul>`
+      : `<div class="banner info" style="margin-top:var(--s5)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>No factor was rated above 3, so nothing here is driving the tier on its own. Re-score when the agent gains a tool, a data source or a second agent to hand off to.</div></div>`}`;
+
   $("#agentic").innerHTML=agenticCard(`
     <div class="gauge-block">${gaugeSVG(s.needle,{bands:GAUGE_BANDS_3,lo:"Tier 1",hi:"Tier 3",aria:"Agentic risk gauge"})}</div>
     <div class="gauge-legend">
@@ -2797,7 +2881,8 @@ function renderPredeployResult(s){
       </table>
     </div>
     <h3 style="margin:var(--s6) 0 var(--s2)">Autonomy ceiling</h3>
-    <p style="color:var(--ink-2);margin:0;line-height:1.6">${escapeHtml(AUTONOMY_CEILING_COPY[s.tier])}</p>
+    <p style="color:var(--ink-2);margin:0;line-height:1.6;max-width:68ch">${escapeHtml(AUTONOMY_CEILING_COPY[s.tier])}</p>
+    ${why}
     <div class="actions">
       <button type="button" class="btn" id="agentic-back-form">Back</button>
       ${summaryButton("copyAgenticPre")}
@@ -2858,7 +2943,29 @@ function renderDeployedForm(){
 function renderDeployedResult(res){
   const total=res.rows.length;
   const pct=t=>Math.round((res.distribution[t]/total)*100);
-  const gaps=res.gaps.map(r=>`<li><b>${escapeHtml(r.label)}</b> is Tier ${r.tier} but runs as "${escapeHtml(GRANTED_LABEL[r.granted])}". ${escapeHtml(AUTONOMY_CEILING_COPY[r.tier])}</li>`).join("");
+  /* Worst overreach first. An action two steps past its ceiling is one that
+     should not run at all and is running unattended, which is a different
+     finding from one that is merely skipping a sign-off. */
+  const gaps=res.gaps.map((r,i)=>`<li>
+      <div class="gap-head">
+        <span class="n">${i+1}.</span>
+        <b>${escapeHtml(r.label||"Unnamed action")}</b>
+        <span>runs as "${escapeHtml(GRANTED_LABEL[r.granted])}".</span>
+        <span class="prio ${r.overreach>1?"req":"rec"}">${r.overreach>1?"Two steps too far":"One step too far"}</span>
+      </div>
+      <span>${escapeHtml(r.why)}</span>
+      <span class="do-first"><b>Do this first:</b> ${escapeHtml(r.fix)}</span>
+      <span class="ev">${escapeHtml(AUTONOMY_CEILING_COPY[r.tier])}</span>
+    </li>`).join("");
+
+  const worst = res.gaps.filter(r=>r.overreach>1).length;
+  const why = res.gaps.length ? `
+    <div class="why-block">
+      <h3 style="margin:0 0 var(--s2)">Why these are gaps</h3>
+      <p>An action's tier comes from the worse of its severity and its irreversibility, raised by one where oversight is hard. The tier sets a ceiling on autonomy: Tier 1 may act on its own, Tier 2 needs a human sign-off, Tier 3 should not act at all. A gap is an action granted more autonomy than its own tier permits.</p>
+      <p>${res.gaps.length} of ${total} action ${total===1?"type":"types"} ${res.gaps.length===1?"is":"are"} above that ceiling${
+        worst?`, and ${worst} of ${worst===1?"those is":"those are"} two steps past it, meaning ${worst===1?"an action":"actions"} that should not run at all ${worst===1?"is":"are"} running unattended`:""}.</p>
+    </div>` : "";
 
   $("#agentic").innerHTML=agenticCard(`
     <div class="gauge-block">${gaugeSVG(res.needle,{bands:GAUGE_BANDS_3,lo:"Governed",hi:"Over-permitted",aria:"Governance gap gauge"})}</div>
@@ -2872,8 +2979,11 @@ function renderDeployedResult(res){
         <tbody>${[1,2,3].map(t=>`<tr><td><b>Tier ${t}</b></td><td>${res.distribution[t]}</td><td>${pct(t)}%</td></tr>`).join("")}</tbody>
       </table>
     </div>
+    ${why}
     ${res.gaps.length
-      ? `<h3 style="margin:var(--s6) 0 var(--s2)">What to correct</h3><ul class="gap-list">${gaps}</ul>`
+      ? `<h3 style="margin:var(--s6) 0 var(--s2)">What to correct, in order</h3>
+         <p style="color:var(--ink-2);margin:0 0 var(--s3);line-height:1.6;max-width:68ch">Furthest past its ceiling first.</p>
+         <ul class="gap-list">${gaps}</ul>`
       : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every action type sits at or below its permitted ceiling. Re-check when you add new agent capabilities.</div></div>`}
     <div class="actions">
       <button type="button" class="btn" id="edit-actions">Edit the list</button>
@@ -2961,10 +3071,33 @@ function renderGenaiResult(res){
     </tr>`;
   }).join("");
 
-  const gaps=res.gaps.map(g=>`<li>
-      <b>${g.n}. ${escapeHtml(g.principle)}</b> is ${g.answer==="none"?"not in place":"only partially done"}.
-      ${escapeHtml(g.evidence)}
+  /* Ordered by exposure, so the position in this list is the recommendation.
+     The first three carry a badge, because a priority list where everything is
+     a priority is just a list. */
+  const gaps=res.gaps.map((g,i)=>`<li>
+      <div class="gap-head">
+        <span class="n">${i+1}.</span>
+        <b>${escapeHtml(g.principle)}</b>
+        <span>is ${g.answer==="none"?"not in place":"only partially done"}.</span>
+        ${i<3?'<span class="prio req">Start here</span>':""}
+      </div>
+      ${g.because?`<span>${escapeHtml(g.because)}</span>`:""}
+      <span class="do-first"><b>Do this first:</b> ${escapeHtml(g.firstStep||"")}</span>
+      <span class="ev">Evidence to keep: ${escapeHtml(g.evidence)}</span>
     </li>`).join("");
+
+  /* Why this band, in the reader's own numbers. The band paragraph above is the
+     same for everyone who lands in it; this part is only true of these answers. */
+  const ex = explainReadiness(res);
+  const why = ex ? `
+    <div class="why-block">
+      <h3 style="margin:0 0 var(--s2)">Why you are at ${escapeHtml(res.band.name)}</h3>
+      <p>${escapeHtml(ex.arithmetic)}</p>
+      <p>${escapeHtml(ex.distance)}</p>
+      ${ex.headline?`<p>${escapeHtml(ex.headline)}</p>`:""}
+      ${ex.drivers.length?`<p>What is holding the score down, worst first: ${
+        ex.drivers.map(d=>`<b>${escapeHtml(d.principle)}</b>`).join(", ")}.</p>`:""}
+    </div>` : "";
 
   /* Every principle marked Not applicable: a percentage of nothing is not a
      readiness rating, so say so instead of showing a misleading zero. */
@@ -2980,6 +3113,7 @@ function renderGenaiResult(res){
 
   $("#genai").innerHTML=genaiCard(`
     ${head}
+    ${why}
     <div class="tbl-scroll" style="margin-top:var(--s5)">
       <table class="risk gtable">
         <thead><tr><th>Principle</th><th>Your answer</th></tr></thead>
@@ -2987,8 +3121,8 @@ function renderGenaiResult(res){
       </table>
     </div>
     ${res.gaps.length
-      ? `<h3 style="margin:var(--s6) 0 var(--s2)">Where to focus</h3>
-         <p style="color:var(--ink-2);margin:0 0 var(--s2);line-height:1.6;max-width:68ch">The no answers first, then the partial ones. The line under each is the evidence an auditor would ask for.</p>
+      ? `<h3 style="margin:var(--s6) 0 var(--s2)">What to fix, in order</h3>
+         <p style="color:var(--ink-2);margin:0 0 var(--s3);line-height:1.6;max-width:68ch">Ordered by exposure, meaning how fast a gap there turns into unlawful processing, a breach, a harmed person or an incident nobody can reconstruct. A principle that is partly in place counts as half a gap, so it sits lower than the same principle with nothing in place. The framework does not rank its principles; this ordering is SafeAI's.</p>
          <ul class="gap-list">${gaps}</ul>`
       : res.score===null ? ""
       : `<div class="banner info" style="margin-top:var(--s4)"><ion-icon name="checkmark-circle-outline"></ion-icon><div>Every applicable principle is answered yes. Re-run this when the model, the prompts or the retrieval sources change.</div></div>`}

@@ -6,7 +6,7 @@ Deploy is `git push` to main; safeai.sg auto-deploys within about a minute from
 the **calebspark** Vercel account. Do not use the local `vercel` CLI: its
 `.vercel/project.json` still points at `safeai-sg`, deleted 2026-07-28.
 
-Tests: `node --test "tests/*.test.mjs"` (105 passing).
+Tests: `node --test "tests/*.test.mjs"` (124 passing).
 
 ## Where the risk tool stands
 
@@ -48,8 +48,8 @@ endpoints, `tests/` for the headless tests.
   reason per driver, plus the 65 / 35 split between the three primary drivers
   and the four secondary ones. The numbers are read off the response, not
   retyped, so a re-weighting in `api/_engine.mjs` cannot leave it quoting a
-  dead figure. **The prose is not sourced from any document, David should read
-  it**: it is now the public explanation of the calibration.
+  dead figure. **The prose is not sourced from any document**: it is now the
+  public explanation of the calibration. Approved by Caleb 2026-08-06.
 - **The visitor can set the driver ratings themselves.** "Edit these ratings" on
   the rating card opens a slider per driver. Moving one previews the index and
   tier only; committing goes back through `/api/assess` with the chosen levels
@@ -59,6 +59,18 @@ endpoints, `tests/` for the headless tests.
   against them, and forced back over the response before scoring.
   `tests/engine-overrides.test.mjs`. Overridden drivers come back `userSet`, and
   the tile, the derivation table and all three exports say so.
+- **Both tracks now say why, and what to do first.** Gen AI readiness explains
+  the band in the reader's own numbers (the arithmetic, the distance to the next
+  band, the not-applicable note) and orders the gaps by exposure, each with the
+  reason for its rank and one concrete first step. `PRIORITY` and `urgencyOf` in
+  `assets/genai.mjs`, `explainReadiness` for the band. The agentic
+  pre-deployment result explains the tier, names which factors a team can
+  actually lower and which come with the use case, and says what the tier would
+  be if every changeable factor came down to a 3. `FACTOR_ACTIONS` and
+  `explainPredeployment` in `assets/agentic.mjs`. The Dayos branch orders gaps
+  by how far past the ceiling they run and names the exact change.
+  `tests/explanations.test.mjs`. **The rankings and the lever/floor split are
+  SafeAI's, not IMDA's or the AI Verify framework's, and both pages say so.**
 - **"Print / PDF" is now "Download PDF report".** It builds a separate report
   document (white page, black wordmark, profile table, every disclosure
   expanded, no controls) in a hidden iframe and prints that, rather than
@@ -102,9 +114,11 @@ lower a genuinely risky score.
       do not reopen.
 - [ ] **Verify the tier thresholds and control mappings.** Carried over from
       earlier sessions.
-- [ ] **Read the weight rationale** now published under "How this score is
-      computed". It is not lifted from any source document, so it needs David's
-      sign-off before the tool leaves preview.
+- [x] **Weight rationale: approved by Caleb 2026-08-06.** The prose under
+      "How this score is computed" is SafeAI's, not lifted from a source
+      document. Approved as written. Same applies to the two orderings added
+      the same day (Gen AI principle exposure ranks, agentic factor levers):
+      both say on the page that they are SafeAI's and not the framework's.
 - [ ] **Declare the assessment validated**, which triggers the revert below.
 
 ## 3. Preview lockdown, revert on validation
