@@ -255,6 +255,14 @@
     .acc .chev{ font-size:16px; color:var(--ink-3); transition:transform .2s; }
     .acc[open] .chev{ transform:rotate(180deg); }
     .acc .body{ padding:6px 18px 16px; }
+    /* Sub-heading inside an open accordion. Sits well clear of the paragraph
+       above it, so the two never read as one block. */
+    .acc .body h4{ margin:var(--s5) 0 var(--s2); font-size:calc(var(--fs-base)*1.02); font-weight:600; }
+    /* Weight rationale table. Its last column is a sentence, so it wraps rather
+       than inheriting the nowrap that suits the numeric cells in table.risk. */
+    table.risk.why{ min-width:520px; }
+    table.risk.why td:last-child, table.risk.why th:last-child{ white-space:normal; }
+    table.risk.why td:first-child, table.risk.why td:nth-child(2){ white-space:nowrap; }
     .acc ul{ margin:0; padding:0; list-style:none; }
     .citem{ display:flex; align-items:center; gap:var(--s3); padding:11px 0; border-top:1px solid var(--line); line-height:1.5; }
     .citem:first-child{ border-top:0; }
@@ -1312,7 +1320,52 @@ function tierMeaningHTML(current){
     </details>`;
 }
 
-/* ---------- rating card ---------- */
+/* ---------- rating card ----------
+   Why each driver carries the weight it does. Keyed on the driver label the
+   engine sends, and the numbers are read off the response rather than repeated
+   here, so a re-weighting in api/_engine.mjs cannot leave this table stating a
+   figure the score no longer uses. */
+const WEIGHT_WHY = {
+  "Use-case impact":
+    "Carries the most because severity and reversibility decide whether a failure is an inconvenience or a harm. A wrong summary is redrafted. A wrong eligibility decision is lived with.",
+  "Data sensitivity":
+    "What an incident exposes, and the driver most of the legal obligation attaches to under PDPA, GDPR and HIPAA. Personal and health records cannot be un-leaked.",
+  "Autonomy":
+    "Whether a person sees each case before the system acts. High autonomy removes the catch-all control that compensates for every other weakness, so it is rated near the top.",
+  "Regulated industry":
+    "Set below the three above because regulation raises the consequence of a failure rather than its likelihood. It moves the obligation floor, not the behaviour of the system.",
+  "Deployment exposure":
+    "Who else can reach the system. Weighted moderately because it is the driver most readily engineered away, through private hosting, network isolation and closed endpoints.",
+  "Data source":
+    "Small on purpose. It was split out of data sensitivity on 28 July 2026, and a large weight would count the same data twice. It stands alone because persistent memory and third-party sources widen what can be poisoned regardless of how sensitive the content is.",
+  "Role":
+    "The smallest, because it describes who is asking rather than what the system does. It is kept only as a proxy for blast radius: an org-wide rollout carries further than one person experimenting.",
+};
+
+/* Reads the weights out of the response so the explanation and the arithmetic
+   above it can never disagree. */
+function weightsHTML(s){
+  const list = [...s.contributions].sort((a,b)=>b.weight-a.weight);
+  const total = list.reduce((n,c)=>n+c.weight,0);
+  const top3  = list.slice(0,3).reduce((n,c)=>n+c.weight,0);
+  const rest  = total - top3;
+  const rows = list.map(c=>`<tr>
+      <td><b>${escapeHtml(c.label)}</b></td>
+      <td><b>${c.weight}</b></td>
+      <td>${WEIGHT_WHY[c.label] ? escapeHtml(WEIGHT_WHY[c.label]) : ""}</td>
+    </tr>`).join("");
+  return `
+    <h4>Where the weights come from</h4>
+    <p style="color:var(--ink-2);margin:0 0 var(--s3);max-width:68ch">These are SafeAI's calibration, not a figure published by any framework. They are set by hand and reviewed, ranked by how much each driver changes the size of a failure rather than by how often it is discussed. They add to ${total}, so the index reads as a percentage of the worst case, and each rating is Low 0, Medium 0.5 or High 1, so a driver's weight is also the most it can ever contribute.</p>
+    <div class="tbl-scroll">
+      <table class="risk why">
+        <thead><tr><th>Driver</th><th>Weight</th><th>Why it carries that weight</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p style="color:var(--ink-2);margin:var(--s3) 0 0;max-width:68ch">The split matters as much as the order. The top three total ${top3} of ${total} and the remaining four total ${rest}, which is below the High band on purpose: industry, exposure, source and role cannot on their own push a case into High risk. Something about the data, the decision or the autonomy has to be doing it. The weights were last revised on 28 July 2026, when data source became its own question, so scores produced before that date are not comparable with these.</p>`;
+}
+
 function scoringHTML(d){
   const s=d.scoring; if(!s||!Array.isArray(s.contributions)) return "";
   const rows=s.contributions.map(c=>`<tr>
@@ -1338,6 +1391,7 @@ function scoringHTML(d){
           </table>
         </div>
         <p style="color:var(--ink-2);margin:var(--s3) 0 0">Total: <b style="color:var(--ink)">${d.riskIndex|0} / 100</b>${band?`, which falls in the ${escapeHtml(band.name)} band (${band.tier===1?'0':(s.bands[band.tier-2].max+1)}&ndash;${band.max})`:''}. Bands: 0&ndash;25 Low, 26&ndash;50 Moderate, 51&ndash;78 High, 79&ndash;100 Severe.</p>
+        ${weightsHTML(s)}
       </div>
     </details>`;
 }
