@@ -151,9 +151,10 @@
     .step.done .node ion-icon{ display:inline-block; }
     .step.done .node .nnum{ display:none; }
     .step.cur .node{ border-color:var(--accent); color:var(--ink); box-shadow:var(--raise), 0 0 0 4px rgba(233,113,50,.16); }
-    .stxt{ font-size:calc(var(--fs-base)*.86); color:var(--ink-2); font-weight:500; max-width:120px; transition:color .3s; }
+    /* balance, because the labels are two and three words and a lone trailing
+       word under a full line reads as a mistake. */
+    .stxt{ font-size:calc(var(--fs-base)*.86); color:var(--ink-2); font-weight:500; max-width:124px; line-height:1.35; text-wrap:balance; transition:color .3s; }
     .step.done .stxt, .step.cur .stxt{ color:var(--ink); }
-    .stxt .next{ display:block; font-size:calc(var(--fs-base)*.74); color:var(--ink-3); font-weight:500; margin-top:2px; }
     @media (max-width:640px){ .stxt{ font-size:calc(var(--fs-base)*.74); } }
 
     /* ---------- layout ---------- */
@@ -811,11 +812,11 @@
       <div class="stepper" id="stepper" aria-label="Risk management flow">
         <div class="strack"></div>
         <div class="sfill" id="sfill"></div>
-        <div class="step"><span class="node"><span class="nnum">1</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">Risk appetite</span></div>
+        <div class="step"><span class="node"><span class="nnum">1</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">User Profiles &amp; Roles</span></div>
         <div class="step"><span class="node"><span class="nnum">2</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">Risk identification</span></div>
         <div class="step"><span class="node"><span class="nnum">3</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">Risk assessment</span></div>
-        <div class="step muted"><span class="node"><span class="nnum">4</span></span><span class="stxt">Risk treatment<span class="next">soon</span></span></div>
-        <div class="step muted"><span class="node"><span class="nnum">5</span></span><span class="stxt">Monitoring &amp; reporting<span class="next">soon</span></span></div>
+        <div class="step"><span class="node"><span class="nnum">4</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">Risk Monitoring</span></div>
+        <div class="step"><span class="node"><span class="nnum">5</span><ion-icon name="checkmark"></ion-icon></span><span class="stxt">AI Adoption Maturity Matrix</span></div>
       </div>
 
       <!-- Restore: the checklist companion link, archived 2026-08-05 at
@@ -1009,7 +1010,7 @@
           <li>
             <span class="nolink">No public link</span>
             <span class="cite">Titled <cite>MindForge AI Risk Management Framework</cite>, MindForge</span>
-            <span class="used">Used in: Risk assessment, the five step flow shown in the progress stepper. This tool covers steps 1 to 3</span>
+            <span class="used">Used in: Risk assessment, the five step flow shown in the progress stepper</span>
           </li>
           <li>
             <a href="https://www.singstat.gov.sg/standard-classifications/national-classifications/singapore-standard-industrial-classification-ssic" target="_blank" rel="noopener"
@@ -1753,15 +1754,37 @@ function renderRating(d){
 
 /* ---------- live stepper (updates as the questionnaire is filled) ---------- */
 let assessedComplete=false;
+
+/* One step per stage of the MindForge flow, each tied to something the visitor
+   has actually reached:
+     1  who they are and what they run, from the three profile fields
+     2  the five scored risk questions
+     3  the rating, once the assessment has come back
+     4  the assessment detail with its monitoring controls
+     5  the maturity matrix
+   Steps 1 and 2 fill by fraction, so the bar creeps forward on every answer
+   rather than sitting still until a step ends. */
+const STEP_ID_KEYS = ["industry","role","usecase"];
+const STEP_RISK_KEYS = KEYS.filter(k=>!STEP_ID_KEYS.includes(k));
+
 function updateStepper(){
-  const a=KEYS.filter(k=>state[k]).length;
   const steps=[...document.querySelectorAll('#stepper .step')];
   const fill=document.getElementById('sfill'); if(!fill) return;
-  let frontier, done=[false,false,false,false,false], cur=-1;
-  if(assessedComplete){ frontier=50; done=[true,true,true,false,false]; }
-  else { const n=KEYS.length; done[0]=a>=1; done[1]=a>=n; frontier = a>=n?30:(10+(a/n)*20); cur = a>=n?2:(a>=1?1:0); }
-  fill.style.width=(frontier-10)+'%';
-  steps.forEach((el,i)=>{ el.classList.toggle('done',!!done[i]); el.classList.toggle('cur', i===cur && !done[i]); });
+  const filled=(keys)=>keys.filter(k=>state[k]).length/keys.length;
+  const rendered=(id)=>{ const el=document.getElementById(id); return el && el.firstChild ? 1 : 0; };
+
+  const p=[ filled(STEP_ID_KEYS), filled(STEP_RISK_KEYS), assessedComplete?1:0,
+            rendered("output"), rendered("maturity") ];
+  /* A later step can never run ahead of an earlier one. */
+  for(let i=1;i<p.length;i++) p[i]=Math.min(p[i],p[i-1]);
+
+  /* The track runs 10% to 90%, node to node, so a step is worth 20% and the
+     first node is the zero point. */
+  const reached=p.reduce((a,b)=>a+b,0);
+  fill.style.width=Math.max(0,Math.min(80,(reached-1)*20))+'%';
+
+  const cur=p.findIndex(v=>v<1);
+  steps.forEach((el,i)=>{ el.classList.toggle('done',p[i]===1); el.classList.toggle('cur', i===cur); });
 }
 
 /* ---------- assessment detail ---------- */
@@ -3323,8 +3346,15 @@ form.addEventListener("submit", async e=>{
     const data = await runAssessment(state);
     stopAssessing();                                  // snap to 100%
     await new Promise(r=>setTimeout(r,420));           // let 100% land, then fade in the needle
-    renderRating(data); renderOutput(state, data); renderMaturity();
+    /* Rendered in three beats rather than one, so the stepper walks from the
+       rating to the detail to the maturity matrix instead of jumping the
+       whole way at once. */
+    renderRating(data);
     hasRun=true; assessedComplete=true; updateStepper(); setLabel("Reassess");
+    await new Promise(r=>setTimeout(r,320));
+    renderOutput(state, data); updateStepper();
+    await new Promise(r=>setTimeout(r,320));
+    renderMaturity(); updateStepper();
     lastResult=data; lastResultProfile=profileOf(state); save();
     toast("Assessment complete");
   }catch(err){
