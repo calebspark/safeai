@@ -15,36 +15,42 @@
   <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
   <style>
     :root {
-      --accent:     #E97132;
-      --accent-2:   #f08a52;
+      /* Light theme, matching risk-assessment.html. Both pages get walked
+         through on a projector, where a dark page with grey text washes out. */
+      --accent:     #E97132;   /* fills only */
+      --accent-2:   #d4611f;
       --accent-ink: #16100b;
-      --bg:         #0c0c0e;
-      --surface-1:  #161618;
-      --surface-2:  #202023;
-      --surface-3:  #2a2a2e;
-      --ink:        #f4f4f5;
-      --ink-2:      #a1a1aa;
-      --ink-3:      #71717a;
-      --line:       rgba(255,255,255,.07);
-      --line-2:     rgba(255,255,255,.12);
+      --accent-text:   #b4501c;  /* the accent as ink, see the block at the end */
+      --accent-text-2: #93400f;
 
-      --info:       #6ea8fe;  --info-soft: rgba(110,168,254,.12);  --info-line: rgba(110,168,254,.30);
-      --success:    #3ecf8e;  --success-soft: rgba(62,207,142,.12); --success-line: rgba(62,207,142,.30);
-      --warn:       #e6b455;  --warn-soft: rgba(230,180,85,.13);   --warn-line: rgba(230,180,85,.32);
-      --danger:     #e5695f;  --danger-soft: rgba(229,105,95,.13); --danger-line: rgba(229,105,95,.32);
+      --bg:         #f7f7f9;
+      --surface-1:  #ffffff;
+      --surface-2:  #f0f0f4;
+      --surface-3:  #e4e4ea;
+      --ink:        #0b0b0f;
+      --ink-2:      #35353d;
+      --ink-3:      #55555f;
+      --line:       rgba(11,11,15,.10);
+      --line-2:     rgba(11,11,15,.18);
+
+      --info:       #1f5fbf;  --info-soft: #eef3fc;  --info-line: #c3d6f4;
+      --success:    #12704a;  --success-soft: #ecf7f2; --success-line: #bfe3d4;
+      --warn:       #8a6100;  --warn-soft: #fbf4e4;   --warn-line: #ecd9a8;
+      --danger:     #a32b21;  --danger-soft: #fbeeed; --danger-line: #f0c8c4;
 
       --raise:
-        inset 0 1px 0 rgba(255,255,255,.09),
-        inset 0 -1px 0 rgba(0,0,0,.45),
-        0 14px 30px -18px rgba(0,0,0,.55);
-      --shadow-pop: 0 22px 48px -20px rgba(0,0,0,.72);
+        inset 0 1px 0 rgba(255,255,255,.7),
+        0 1px 2px rgba(11,11,15,.06),
+        0 8px 20px -16px rgba(11,11,15,.28);
+      --shadow-pop: 0 18px 44px -20px rgba(11,11,15,.30);
 
       --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
-      --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:28px; --s7:40px; --s8:56px;
-      --gap: 16px;
+      --s1:4px; --s2:8px; --s3:12px; --s4:18px; --s5:24px; --s6:36px; --s7:52px; --s8:72px;
+      --gap: 20px;
       --fs-base: 17px;
     }
-    @media (min-width:1024px){ :root{ --fs-base:13px; } }
+    /* Was 13px, too small to read from the back of a room on a projector. */
+    @media (min-width:1024px){ :root{ --fs-base:15px; } }
 
     *{ box-sizing:border-box; }
     html{ scroll-behavior:smooth; }
@@ -55,7 +61,7 @@
       -webkit-font-smoothing:antialiased;
     }
     .trim{ text-box: trim-both cap alphabetic; }
-    h1,h2,h3,h4{ font-family:"Plus Jakarta Sans","DM Sans",sans-serif; margin:0; letter-spacing:-.02em; line-height:1.2; }
+    h1,h2,h3,h4{ font-family:"Plus Jakarta Sans","DM Sans",sans-serif; margin:0; font-weight:700; letter-spacing:-.02em; line-height:1.2; }
     p{ margin:0; }
     a{ color:inherit; }
     .wrap{ max-width:1120px; margin:0 auto; padding:0 var(--s5); }
@@ -63,7 +69,7 @@
     .with-icon{ display:inline-flex; align-items:center; gap:.5em; }
 
     /* ---------- top bar (matches landing nav) ---------- */
-    nav{ position:sticky; top:0; z-index:100; background:rgba(12,12,14,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
+    nav{ position:sticky; top:0; z-index:100; background:rgba(255,255,255,.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
     .nav-brand{ display:flex; align-items:center; text-decoration:none; }
     .nav-logo{ height:46px; width:auto; display:block; }
     .nav-links{ display:flex; align-items:center; gap:8px; }
@@ -92,9 +98,10 @@
 
     /* ---------- layout ---------- */
     .stage{ padding:var(--s6) 0 var(--s8); }
-    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s6); box-shadow:0 14px 34px -22px rgba(0,0,0,.55); }
+    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s7); box-shadow:0 10px 30px -22px rgba(11,11,15,.35); }
+    @media (max-width:640px){ .card{ padding:var(--s5); } }
     .card + .card{ margin-top:var(--gap); }
-    .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s3); }
+    .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s4); }
     .stitle .n{ display:grid; place-items:center; width:30px; height:30px; flex:none; border-radius:9px; background:var(--surface-2); color:var(--accent); box-shadow:var(--raise); }
     .stitle .n ion-icon{ font-size:18px; }
     .stitle h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
@@ -116,16 +123,19 @@
     .score-actions{ display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s5); }
 
     /* ---------- buttons ---------- */
-    .btn{ font:inherit; font-weight:600; cursor:pointer; color:var(--ink); background:var(--surface-2); border:0; border-radius:var(--r-sm);
-      padding:11px 22px; box-shadow:var(--raise); transition:transform .12s, background .15s; display:inline-flex; align-items:center; gap:.55em; text-decoration:none; }
+    /* Flat, no lit top edge, label on one line. */
+    .btn{ font:inherit; font-weight:600; cursor:pointer; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm);
+      padding:11px 22px; white-space:nowrap; box-shadow:none; transition:transform .12s, background .15s; display:inline-flex; align-items:center; gap:.55em; text-decoration:none; }
     .btn ion-icon{ font-size:1.15em; }
     .btn:hover{ background:var(--surface-3); }
     .btn:active{ transform:translateY(1px) scale(.99); }
     .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
     .btn:disabled{ opacity:.55; cursor:default; pointer-events:none; }
-    .btn-accent{ color:#fff; background:linear-gradient(115deg,#9b3b92 0%,#b84e6f 28%,var(--accent) 72%); }
-    .btn-accent:hover{ background:linear-gradient(115deg,#ad479f 0%,#cc5a7c 28%,var(--accent-2) 72%); }
-    .btn-ghost{ background:transparent; box-shadow:none; color:var(--ink-2); }
+    /* White on the brand orange is about 2.9:1. Near-black on it is about 7:1,
+       and the purple in the old gradient was a second hue carrying no meaning. */
+    .btn-accent{ color:var(--accent-ink); background:var(--accent); border-color:var(--accent); }
+    .btn-accent:hover{ background:var(--accent-2); border-color:var(--accent-2); color:#fff; }
+    .btn-ghost{ background:transparent; border-color:transparent; box-shadow:none; color:var(--ink-2); }
     .btn-ghost:hover{ background:var(--surface-1); color:var(--ink); }
 
     /* ---------- checklist groups ---------- */
@@ -133,19 +143,26 @@
     .grp-head .gnum{ font-family:"Plus Jakarta Sans"; font-weight:700; color:var(--ink-3); font-size:calc(var(--fs-base)*.9); }
     .grp-head h3{ font-size:calc(var(--fs-base)*1.12); font-weight:700; }
     .grp-head .gcount{ margin-left:auto; font-size:calc(var(--fs-base)*.8); color:var(--ink-2); background:var(--surface-2); padding:3px 11px; border-radius:var(--r-pill); }
-    .grp-sub{ color:var(--ink-3); font-size:calc(var(--fs-base)*.88); margin-bottom:var(--s4); line-height:1.55; }
+    .grp-sub{ color:var(--ink-2); font-size:calc(var(--fs-base)*.92); margin-bottom:var(--s5); line-height:1.55; max-width:68ch; }
 
-    .citem{ display:flex; align-items:flex-start; gap:var(--s4); padding:15px 0; border-top:1px solid var(--line); line-height:1.55; }
+    /* Was 15px a side. Each row is a title plus a description, so it needs a
+       full band of its own rather than the gap of a list item. */
+    .citem{ display:flex; align-items:flex-start; gap:var(--s4); padding:var(--s5) 0; border-top:1px solid var(--line); line-height:1.55; }
     .citem:first-child{ border-top:0; }
-    .chk{ width:22px; height:22px; flex:none; margin-top:1px; padding:0; border-radius:6px; border:1.5px solid var(--line-2); background:var(--surface-2); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
+    /* An empty checkbox has to be visible before it is used, so its stroke is
+       its own value rather than the page hairline: at 18% black an unticked box
+       faded out on the projector. */
+    .chk{ width:22px; height:22px; flex:none; margin-top:1px; padding:0; border-radius:6px; border:1.5px solid rgba(11,11,15,.38); background:var(--surface-1); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
     .chk ion-icon{ font-size:15px; color:#fff; opacity:0; transition:opacity .12s; }
     .chk:hover{ border-color:var(--ink-3); }
     .chk:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
     .chk[aria-checked="true"]{ background:var(--success); border-color:var(--success); }
     .chk[aria-checked="true"] ion-icon{ opacity:1; }
     .ctext{ flex:1; }
-    .ctext .ct{ color:var(--ink); font-weight:600; font-size:calc(var(--fs-base)*1.02); display:block; }
-    .ctext .cd{ color:var(--ink-2); font-size:calc(var(--fs-base)*.92); margin-top:3px; }
+    .ctext .ct{ color:var(--ink); font-weight:700; font-size:calc(var(--fs-base)*1.08); line-height:1.4; display:block; }
+    /* 8px minimum between two stacked text blocks: at 3px the description's
+       ascenders were sitting in the title's descenders. */
+    .ctext .cd{ color:var(--ink-2); font-size:calc(var(--fs-base)*.94); margin-top:var(--s2); max-width:68ch; }
     .citem[data-checked="true"] .ct{ color:var(--ink-2); text-decoration:line-through; text-decoration-color:var(--ink-3); }
     .citem[data-checked="true"] .cd{ color:var(--ink-3); }
 
@@ -172,6 +189,14 @@
       padding:11px 18px; border-radius:var(--r-pill); font-size:calc(var(--fs-base)*.9); font-weight:500; display:flex; align-items:center; gap:8px; pointer-events:none; transition:transform .25s, opacity .25s; z-index:60; }
     .toast.show{ opacity:1; transform:translate(-50%,0); }
     .toast ion-icon{ font-size:16px; color:var(--success); }
+
+    /* ---------- accent as ink ----------
+       The brand orange is near 2.9:1 on white, under the 4.5:1 floor and the
+       first thing a projector loses. Fills keep the orange, text steps down. */
+    .eyebrow,
+    .companion ion-icon,
+    .stitle .n,
+    .res ion-icon{ color:var(--accent-text); }
 
     @media print{ nav,.companion,.score-actions,.toast,footer{ display:none!important; } }
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
@@ -228,7 +253,9 @@
 
   <nav>
     <a href="/index.html" class="nav-brand">
-      <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
+      <!-- The dark wordmark: safeai-logo-trim.png is white artwork for a dark
+           bar and disappears entirely on a white one. -->
+      <img src="safeai-logo-print.png" alt="SafeAI.sg" class="nav-logo" />
     </a>
     <div class="nav-right">
       <div class="nav-links">
@@ -237,7 +264,8 @@
         <a href="/index.html#council" class="nav-link">Who We Are</a>
         <a href="/index.html#contact" class="nav-link">Contact Us</a>
       </div>
-      <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-nav" />
+      <!-- 01 is the dark-ink SPARK mark, 02 is the white one for a dark bar. -->
+      <img src="spark-logo-01.svg" alt="SPARK" class="spark-logo-nav" />
     </div>
   </nav>
 

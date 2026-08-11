@@ -11,41 +11,60 @@
   <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.4.0/dist/ionicons/ionicons.js"></script>
   <style>
     :root {
-      --accent:     #E97132;
-      --accent-2:   #f08a52;
+      /* Light theme, on purpose. This tool is walked through on a projector in
+         front of a room, and a dark page with grey text washes out to nothing
+         under ambient light. Everything below targets ink-on-white contrast
+         first: the same palette the PDF report already uses, so the screen and
+         the printed report finally look like the same document. */
+      --accent:     #E97132;   /* fills only: brand orange is ~2.9:1 on white */
+      --accent-2:   #d4611f;
       --accent-ink: #16100b;
-      --bg:         #0c0c0e;
-      --surface-1:  #161618;
-      --surface-2:  #202023;
-      --surface-3:  #2a2a2e;
-      --ink:        #f4f4f5;
-      --ink-2:      #a1a1aa;
-      --ink-3:      #71717a;
-      --line:       rgba(255,255,255,.07);
-      --line-2:     rgba(255,255,255,.12);
+      /* The accent as *ink*. Every place the orange was used for text or a
+         small icon steps down to this, at the bottom of this stylesheet. */
+      --accent-text:   #b4501c;
+      --accent-text-2: #93400f;
 
-      --info:       #6ea8fe;  --info-soft: rgba(110,168,254,.12);  --info-line: rgba(110,168,254,.30);
-      --success:    #3ecf8e;  --success-soft: rgba(62,207,142,.12); --success-line: rgba(62,207,142,.30);
-      --warn:       #e6b455;  --warn-soft: rgba(230,180,85,.13);   --warn-line: rgba(230,180,85,.32);
-      --danger:     #e5695f;  --danger-soft: rgba(229,105,95,.13); --danger-line: rgba(229,105,95,.32);
+      /* The canvas is a hair off white and the cards are pure white, so a card
+         edge reads as elevation rather than as a heavy stroke. Both still
+         project as a white page. */
+      --bg:         #f7f7f9;
+      --surface-1:  #ffffff;
+      --surface-2:  #f0f0f4;
+      --surface-3:  #e4e4ea;
+      --ink:        #0b0b0f;
+      --ink-2:      #35353d;
+      --ink-3:      #55555f;
+      --line:       rgba(11,11,15,.10);
+      --line-2:     rgba(11,11,15,.18);
 
-      --t1: #3ecf8e; --t1-soft: rgba(62,207,142,.12); --t1-line: rgba(62,207,142,.34);
-      --t2: #e6b455; --t2-soft: rgba(230,180,85,.13); --t2-line: rgba(230,180,85,.34);
-      --t3: #ef8a4b; --t3-soft: rgba(239,138,75,.14); --t3-line: rgba(239,138,75,.36);
-      --t4: #e5695f; --t4-soft: rgba(229,105,95,.14); --t4-line: rgba(229,105,95,.38);
+      --info:       #1f5fbf;  --info-soft: #eef3fc;  --info-line: #c3d6f4;
+      --success:    #12704a;  --success-soft: #ecf7f2; --success-line: #bfe3d4;
+      --warn:       #8a6100;  --warn-soft: #fbf4e4;   --warn-line: #ecd9a8;
+      --danger:     #a32b21;  --danger-soft: #fbeeed; --danger-line: #f0c8c4;
 
+      --t1: #12704a; --t1-soft: #ecf7f2; --t1-line: #bfe3d4;
+      --t2: #8a6100; --t2-soft: #fbf4e4; --t2-line: #ecd9a8;
+      --t3: #b4501c; --t3-soft: #fbf0e8; --t3-line: #f0d0b8;
+      --t4: #a32b21; --t4-soft: #fbeeed; --t4-line: #f0c8c4;
+
+      /* On white, depth comes from a hairline and a soft drop, not from an
+         inner white highlight over black. */
       --raise:
-        inset 0 1px 0 rgba(255,255,255,.09),
-        inset 0 -1px 0 rgba(0,0,0,.45),
-        0 14px 30px -18px rgba(0,0,0,.55);
-      --shadow-pop: 0 22px 48px -20px rgba(0,0,0,.72);
+        inset 0 1px 0 rgba(255,255,255,.7),
+        0 1px 2px rgba(11,11,15,.06),
+        0 8px 20px -16px rgba(11,11,15,.28);
+      --shadow-pop: 0 18px 44px -20px rgba(11,11,15,.30);
 
       --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
-      --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:28px; --s7:40px; --s8:56px;
-      --gap: 16px;
+      /* The large steps carry the gaps between questions, so they are the ones
+         that grew: a room reading along needs the blocks to sit apart. */
+      --s1:4px; --s2:8px; --s3:12px; --s4:18px; --s5:24px; --s6:36px; --s7:52px; --s8:72px;
+      --gap: 20px;
       --fs-base: 17px;
     }
-    @media (min-width:1024px){ :root{ --fs-base:13px; } }
+    /* Was 13px. Too small to read from the back of a room once the page is on
+       a projector, and nearly every size on this page is derived from it. */
+    @media (min-width:1024px){ :root{ --fs-base:15px; } }
 
     *{ box-sizing:border-box; }
     html{ scroll-behavior:smooth; }
@@ -56,14 +75,17 @@
       -webkit-font-smoothing:antialiased;
     }
     .trim{ text-box: trim-both cap alphabetic; }
-    h1,h2,h3,h4{ font-family:"Plus Jakarta Sans","DM Sans",sans-serif; margin:0; letter-spacing:-.02em; line-height:1.2; }
+    /* 700 on every heading by default. On a projector a 600 title and 500 body
+       are the same grey smudge from ten rows back, so the weight step has to do
+       the work the colour step used to. */
+    h1,h2,h3,h4{ font-family:"Plus Jakarta Sans","DM Sans",sans-serif; margin:0; font-weight:700; letter-spacing:-.02em; line-height:1.2; }
     p{ margin:0; }
     .wrap{ max-width:1120px; margin:0 auto; padding:0 var(--s5); }
     ion-icon{ display:inline-block; }
     .with-icon{ display:inline-flex; align-items:center; gap:.5em; }
 
     /* ---------- top bar (matches landing nav) ---------- */
-    nav{ position:sticky; top:0; z-index:100; background:rgba(12,12,14,.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
+    nav{ position:sticky; top:0; z-index:100; background:rgba(255,255,255,.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
     .nav-brand{ display:flex; align-items:center; text-decoration:none; }
     .nav-logo{ height:46px; width:auto; display:block; }
     .nav-links{ display:flex; align-items:center; gap:8px; }
@@ -109,11 +131,12 @@
 
     /* ---------- layout ---------- */
     .stage{ padding:var(--s6) 0 var(--s8); }
-    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s6); box-shadow:0 14px 34px -22px rgba(0,0,0,.55); }
+    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s7); box-shadow:0 10px 30px -22px rgba(11,11,15,.35); }
+    @media (max-width:640px){ .card{ padding:var(--s5); } }
     /* Each result section is its own container, so the sibling rule cannot
        reach across them. Every card after the first keeps the same rhythm. */
     .card + .card, #rating > .card, #output > .card, #maturity > .card, #agentic > .card{ margin-top:var(--gap); }
-    .card h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
+    .card h2{ font-size:calc(var(--fs-base)*1.4); font-weight:700; }
     .card .sub{ color:var(--ink-2); margin-top:6px; font-size:calc(var(--fs-base)*.95); }
     .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s6); }
     .stitle .n{ display:grid; place-items:center; width:30px; height:30px; flex:none; border-radius:9px; background:var(--surface-2); color:var(--accent); box-shadow:var(--raise); }
@@ -123,9 +146,14 @@
     /* One column at every width. Two columns made the reader jump left-right
        between a question and its option row, and long pill rows wrapped badly
        in a half-width column. Readability beats fitting it on one screen. */
-    .fgrid{ display:grid; gap:var(--s6); grid-template-columns:1fr; }
+    .fgrid{ display:grid; gap:var(--s7); grid-template-columns:1fr; }
+    /* One question per band, with a hairline between them. The gap alone was
+       not enough to stop a hint under question 3 reading as part of question 4
+       once the room is scanning rather than reading. The rule is on the second
+       field onward, so the first question does not get a stray line above it. */
+    .fgrid > .field + .field{ border-top:1px solid var(--line); padding-top:var(--s7); }
     .field{ display:flex; flex-direction:column; }
-    .field > label{ order:0; font-weight:600; font-size:calc(var(--fs-base)*1.02); margin-bottom:5px; }
+    .field > label{ order:0; font-weight:700; font-size:calc(var(--fs-base)*1.1); line-height:1.4; margin-bottom:var(--s2); }
     .field.miss > label{ color:var(--warn); }
     /* Serial number on every question, so a reviewer can say "question 4"
        and mean the same question the person filling it in is looking at.
@@ -133,7 +161,10 @@
        the accent stays on the one primary action. It is written into the label
        text, so the CSV export carries the same numbers. */
     .qn{ color:var(--ink-3); font-weight:600; font-variant-numeric:tabular-nums; margin-right:6px; }
-    .field .hint{ order:1; color:var(--ink-3); font-size:calc(var(--fs-base)*.84); margin:0 0 var(--s3); line-height:1.5; }
+    /* The hint used to be the quietest ink at .84. Projected, that is the first
+       thing to disappear, so it steps up a size and an ink level and takes a
+       full gap before the options row. */
+    .field .hint{ order:1; color:var(--ink-2); font-size:calc(var(--fs-base)*.9); margin:0 0 var(--s4); line-height:1.55; max-width:68ch; }
     .field.miss .hint{ color:var(--warn); }
     .field .pills{ order:2; }
     /* Explanation of the picked level. Sits under its pills, same voice as
@@ -151,10 +182,17 @@
     .pills{ display:flex; flex-wrap:wrap; gap:8px; }
     /* .pill is inline-flex, which would otherwise beat the [hidden] default. */
     .pill[hidden]{ display:none; }
-    .pill{ font:inherit; font-weight:500; cursor:pointer; color:var(--ink-2); background:var(--surface-2);
-      border:1px solid var(--line); border-radius:var(--r-pill); padding:9px 15px;
-      display:inline-flex; align-items:center; gap:6px; box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+    /* Flat, 2:1 padding, no lit edge. The label carries full ink rather than
+       the secondary step: an unpicked option still has to be readable from the
+       back of a room, and the picked one is marked by the fill, not by being
+       the only legible one. */
+    .pill{ font:inherit; font-weight:500; cursor:pointer; color:var(--ink); background:var(--surface-2);
+      border:1px solid var(--line); border-radius:var(--r-pill); padding:10px 20px;
+      display:inline-flex; align-items:center; gap:6px; text-align:left; max-width:100%; box-shadow:none;
       transition:background .15s, color .15s, border-color .15s, transform .1s; }
+    /* Deliberately NOT nowrap. These carry option sentences, not button labels:
+       "Restricted / regulated (PII, PHI, HIPAA, ...)" is 400px wide on its own
+       line and burst a 342px card on a phone. They wrap inside the pill. */
     .pill:hover{ background:var(--surface-3); color:var(--ink); }
     .pill:active{ transform:translateY(1px); }
     .pill:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
@@ -164,7 +202,7 @@
        multi-select adoption gate (aria-pressed). Without the second selector
        the adoption pills stayed grey with white text when selected. */
     .pill[aria-checked="true"], .pill[aria-pressed="true"]{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.22), 0 8px 18px -10px rgba(233,113,50,.6); }
+      box-shadow:none; }
     .pill[aria-checked="true"]:hover, .pill[aria-pressed="true"]:hover{ background:var(--accent-2); color:var(--accent-ink); }
     .pill[aria-checked="true"] .pk, .pill[aria-pressed="true"] .pk{ width:15px; opacity:1; }
     .pill[aria-checked="true"] .pk ion-icon, .pill[aria-pressed="true"] .pk ion-icon{ color:var(--accent-ink); }
@@ -172,18 +210,26 @@
 
     /* ---------- buttons ---------- */
     .actions{ display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s7); align-items:center; }
-    .btn{ font:inherit; font-weight:600; cursor:pointer; color:var(--ink); background:var(--surface-2); border:0; border-radius:var(--r-sm);
-      padding:13px 26px; box-shadow:var(--raise); transition:transform .12s, background .15s; display:inline-flex; align-items:center; gap:.55em; }
+    /* Flat: no lit top edge, no shine. Depth is the hairline plus the hover
+       step. Padding stays the house 2:1. */
+    .btn{ font:inherit; font-weight:600; cursor:pointer; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm);
+      padding:13px 26px; white-space:nowrap; box-shadow:none; transition:transform .12s, background .15s; display:inline-flex; align-items:center; gap:.55em; }
     .btn ion-icon{ font-size:1.15em; }
     .btn:hover{ background:var(--surface-3); }
     .btn:active{ transform:translateY(1px) scale(.99); }
     .btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
     .btn:disabled{ opacity:.5; cursor:not-allowed; box-shadow:none; }
-    .btn-accent{ color:#fff; background:linear-gradient(115deg,#9b3b92 0%,#b84e6f 28%,var(--accent) 72%); }
-    .btn-accent:hover{ background:linear-gradient(115deg,#ad479f 0%,#cc5a7c 28%,var(--accent-2) 72%); }
-    .btn-ghost{ background:transparent; box-shadow:none; color:var(--ink-2); }
+    /* Was white on a purple-to-orange gradient. White on the brand orange is
+       about 2.9:1, which is the exact thing that vanished on the projector, and
+       the purple was a second hue carrying no meaning. Flat orange with the
+       near-black brand ink on top reads about 7:1. */
+    .btn-accent{ color:var(--accent-ink); background:var(--accent); border-color:var(--accent); }
+    .btn-accent:hover{ background:var(--accent-2); border-color:var(--accent-2); color:#fff; }
+    .btn-ghost{ background:transparent; border-color:transparent; box-shadow:none; color:var(--ink-2); }
     .btn-ghost:hover{ background:var(--surface-1); color:var(--ink); }
-    .spin{ display:none; width:1em; height:1em; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation:sp .7s linear infinite; }
+    /* Inherits the button's ink, so it stays visible whether it spins on the
+       grey button or on the accent one. */
+    .spin{ display:none; width:1.15em; height:1.15em; border-radius:50%; border:2px solid currentColor; opacity:.9; border-top-color:transparent; animation:sp .7s linear infinite; }
     @keyframes sp{ to{ transform:rotate(360deg); } }
     .btn.is-loading{ position:relative; }
     .btn.is-loading .lbl{ visibility:hidden; }
@@ -302,7 +348,10 @@
     .acc ul{ margin:0; padding:0; list-style:none; }
     .citem{ display:flex; align-items:center; gap:var(--s3); padding:11px 0; border-top:1px solid var(--line); line-height:1.5; }
     .citem:first-child{ border-top:0; }
-    .chk{ width:21px; height:21px; flex:none; padding:0; border-radius:6px; border:1.5px solid var(--line-2); background:var(--surface-2); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
+    /* An empty checkbox is the one control that has to be visible before it is
+       used, so its stroke is its own value rather than the page hairline: at
+       18% black an unticked box faded out on the projector. */
+    .chk{ width:21px; height:21px; flex:none; padding:0; border-radius:6px; border:1.5px solid rgba(11,11,15,.38); background:var(--surface-1); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
     .chk ion-icon{ font-size:14px; color:#fff; opacity:0; transition:opacity .12s; }
     .chk:hover{ border-color:var(--ink-3); }
     .chk:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
@@ -453,12 +502,25 @@
     /* Hover tooltip. Pointer devices only: on touch the button just works. */
     [data-tip]{ position:relative; }
     @media (hover:hover){
+      /* Clamped, and allowed to wrap. On one line it was 143px wider than the
+         card it sits in, and an absolutely positioned child still counts
+         toward its scroll container's width, so a narrow window scrolled
+         sideways even with the tooltip invisible. */
       [data-tip]::after{ content:attr(data-tip); position:absolute; left:50%; bottom:calc(100% + 8px);
-        transform:translate(-50%,4px); white-space:nowrap; pointer-events:none;
+        transform:translate(-50%,4px); white-space:normal; width:max-content;
+        max-width:min(260px, 70vw); pointer-events:none;
         background:var(--surface-2); color:var(--ink); border:1px solid var(--line-2);
         box-shadow:var(--shadow-pop); border-radius:var(--r-sm); padding:6px 10px;
         font-size:calc(var(--fs-base)*.84); font-weight:500; opacity:0; transition:opacity .15s, transform .15s; z-index:50; }
       [data-tip]:hover::after, [data-tip]:focus-visible::after{ opacity:1; transform:translate(-50%,0); }
+      /* Narrow window: the info button sits flush against the card's right
+         edge, so a tooltip centred on it spills past the viewport at any width
+         and drags the whole page into a sideways scroll. Below 640 it hangs
+         from the button's right edge and grows leftward instead. */
+      @media (max-width:640px){
+        [data-tip]::after{ left:auto; right:0; transform:translate(0,4px); }
+        [data-tip]:hover::after, [data-tip]:focus-visible::after{ transform:translate(0,0); }
+      }
     }
 
     /* What each option actually means, shown only for what is selected. */
@@ -537,10 +599,12 @@
     }
 
     /* ---------- agentic matrix ---------- */
-    .fq{ padding:var(--s4) 0; border-top:1px solid var(--line); }
-    .fq:first-of-type{ border-top:0; }
-    .fq > label{ display:block; font-weight:600; font-size:calc(var(--fs-base)*1.02); margin-bottom:4px; }
-    .fq .fdesc{ color:var(--ink-2); margin:0 0 var(--s3); line-height:1.55; }
+    /* Same rhythm as a profile question: a full band per question, a hairline
+       between, and nothing sharing a gap with the block above it. */
+    .fq{ padding:var(--s6) 0; border-top:1px solid var(--line); }
+    .fq:first-of-type{ border-top:0; padding-top:0; }
+    .fq > label{ display:block; font-weight:700; font-size:calc(var(--fs-base)*1.1); line-height:1.4; margin-bottom:var(--s2); }
+    .fq .fdesc{ color:var(--ink-2); margin:0 0 var(--s4); line-height:1.55; max-width:68ch; }
     .fq .anchors{ margin-top:var(--s3); color:var(--ink-3); font-size:calc(var(--fs-base)*.84); line-height:1.6; }
     .fq .anchors b{ color:var(--ink-2); }
     /* Fixed circles. The tick is suppressed here because widening the pill to
@@ -557,16 +621,17 @@
        The principle name is the heading of the block, on its own line above
        the question. It is the thing people scan for, so it is the largest text
        in the block and the question below it steps down to regular weight. */
-    .fq .gprin{ display:block; color:var(--ink); font-weight:600;
-      font-size:calc(var(--fs-base)*1.22); line-height:1.35; letter-spacing:-.01em;
-      margin-bottom:8px; }
+    .fq .gprin{ display:block; color:var(--ink); font-weight:700;
+      font-family:"Plus Jakarta Sans","DM Sans",sans-serif;
+      font-size:calc(var(--fs-base)*1.3); line-height:1.35; letter-spacing:-.01em;
+      margin-bottom:var(--s3); }
     /* The question runs the full width of the card rather than being capped at
        a reading measure: these are one or two sentences, and breaking them
        halfway across a wide card reads as a layout accident. Full ink, since
        the question is the thing being answered, with room before the pills so
        the answer row is clearly a separate thing from the question. */
-    .fq.gq > label{ font-weight:500; color:var(--ink); line-height:1.55;
-      margin-bottom:var(--s4); }
+    .fq.gq > label{ font-weight:500; color:var(--ink); line-height:1.6;
+      font-size:calc(var(--fs-base)*1.02); margin-bottom:var(--s5); }
     .fq .gevi{ margin-top:var(--s3); color:var(--ink-3); line-height:1.6;
       font-size:calc(var(--fs-base)*.84); }
     .fq .gevi b{ color:var(--ink-2); font-weight:600; }
@@ -607,6 +672,32 @@
       border-radius:var(--r-sm); padding:7px 9px; }
     table.risk input[type="text"]:focus-visible, table.risk select:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
     table.risk input[type="text"]::placeholder{ color:var(--ink-3); }
+
+    /* ---------- accent as ink ----------
+       The brand orange is a fill colour. As text on white it sits near 2.9:1,
+       which is under the 4.5:1 floor and is the first thing a projector loses.
+       Every place the accent is painted as text or as a small icon steps down
+       to the burnt tone, which reads about 6:1. Fills, borders and focus rings
+       keep the brand orange, so nothing about the identity changes.
+       This block sits last on purpose: several of these selectors are declared
+       inside media queries further up, and source order is what beats them. */
+    .eyebrow,
+    .companion ion-icon,
+    .stitle .n,
+    .assessing .apct,
+    .acc .cico,
+    .fsrc a,
+    .combo-note button,
+    .combo-opt.free,
+    .pill.other,
+    #adopt-help,
+    table.risk.cmp thead th.on,
+    .cmp-block h4.on{ color:var(--accent-text); }
+    .infobtn:hover,
+    .combo-note button:hover,
+    .pill.other:hover,
+    #adopt-help:hover,
+    #adopt-help[aria-expanded="true"]{ color:var(--accent-text-2); }
 
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
   </style>
@@ -661,7 +752,9 @@
 </script>
   <nav>
     <a href="/index.html" class="nav-brand">
-      <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
+      <!-- The dark wordmark, not safeai-logo-trim.png: that one is white
+           artwork for a dark bar and disappears entirely on a white one. -->
+      <img src="safeai-logo-print.png" alt="SafeAI.sg" class="nav-logo" />
     </a>
     <div class="nav-right">
       <div class="nav-links">
@@ -670,7 +763,8 @@
         <a href="/index.html#council" class="nav-link">Who We Are</a>
         <a href="/index.html#contact" class="nav-link">Contact Us</a>
       </div>
-      <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-nav" />
+      <!-- 01 is the dark-ink SPARK mark, 02 is the white one for a dark bar. -->
+      <img src="spark-logo-01.svg" alt="SPARK" class="spark-logo-nav" />
     </div>
   </nav>
 
@@ -1885,6 +1979,13 @@ const REPORT_CSS = `
     --warn:#8a6100; --warn-soft:#fbf4e4; --warn-line:#ecd9a8;
     --danger:#a32b21; --danger-soft:#fbeeed; --danger-line:#f0c8c4;
     --t1:#12704a; --t2:#8a6100; --t3:#b4501c; --t4:#a32b21;
+    --accent-text:#b4501c; --accent-text-2:#b4501c;
+    /* The screen theme opened these up for a projector. Paper has a fixed page
+       and its own tuned rhythm, so the report keeps the original steps and base
+       size: every calc() in the stylesheet reads through --fs-base. */
+    --fs-base:13px;
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:28px; --s7:40px; --s8:56px;
+    --gap:16px;
   }
   @page{ size:A4; margin:14mm 12mm 16mm; }
   html,body{ background:#fff; color:var(--ink); }
