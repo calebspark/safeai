@@ -25,8 +25,13 @@
       --accent:     #E28D34;   /* fill: near-black on it is 7.3:1 */
       --accent-2:   #eda155;   /* hover: brightens, rather than going muddy */
       --accent-ink: #16100b;
-      --accent-text:   #b05e00;  /* 4.7:1 on white */
-      --accent-text-2: #8f4c00;
+      /* About 3.5:1, not 4.5:1, on purpose. These are already 100% saturated,
+         so the only lever is lightness, and a dark orange is just a brown. The
+         4.7:1 version read as mud. This clears the 3:1 bar covering bold text,
+         large text and icons, and sits under the 4.5:1 bar for small body text.
+         A deliberate trade: the tool is presented on a projector at 15px base. */
+      --accent-text:   #cf6d0a;  /* 3.6:1 on white */
+      --accent-text-2: #a85700;
 
       --bg:         #f7f7f9;
       --surface-1:  #ffffff;
@@ -41,12 +46,12 @@
       /* The semantic four, pitched at the accent's vibrancy. The bare token is
          the TEXT tone; `-fill` is the vivid one for graphics and filled
          controls. */
-      --info:       #1d6fe0;  --info-fill:    #3b82f6;  --info-soft: #eaf1fe;  --info-line: #b9d0fb;
-      --success:    #00875a;  --success-fill: #12a150;  --success-soft: #e6f6ef; --success-line: #a9e0c8;
+      --info:       #2f80ed;  --info-fill:    #3b82f6;  --info-soft: #eaf1fe;  --info-line: #b9d0fb;
+      --success:    #0e9d57;  --success-fill: #12a150;  --success-soft: #e6f6ef; --success-line: #a9e0c8;
       /* Amber sits deliberately far from the accent orange: at hue 36 it was
          four degrees off and the same lightness, so the two read as one. */
-      --warn:       #7d6200;  --warn-fill:    #f2b705;  --warn-soft: #fdf7e2;   --warn-line: #f2e0a0;
-      --danger:     #d32f2f;  --danger-fill:  #e5352b;  --danger-soft: #fdedec; --danger-line: #f7c6c3;
+      --warn:       #a88300;  --warn-fill:    #f2b705;  --warn-soft: #fdf7e2;   --warn-line: #f2e0a0;
+      --danger:     #dc2f26;  --danger-fill:  #e5352b;  --danger-soft: #fdedec; --danger-line: #f7c6c3;
 
       --raise:
         inset 0 1px 0 rgba(255,255,255,.7),

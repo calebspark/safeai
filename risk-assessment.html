@@ -30,8 +30,16 @@
       --accent:     #E28D34;   /* fill: near-black on it is 7.3:1 */
       --accent-2:   #eda155;   /* hover: brightens, rather than going muddy */
       --accent-ink: #16100b;
-      --accent-text:   #b05e00;  /* 4.7:1 on white */
-      --accent-text-2: #8f4c00;
+      /* The text tones sit at about 3.5:1 rather than 4.5:1, on purpose. These
+         values are already 100% saturated, so the only lever left is lightness,
+         and a dark orange is simply a brown. 4.72:1 got us #b05e00, which read
+         as mud. This clears the 3:1 bar that covers bold text, large text and
+         icons, and it is under the 4.5:1 bar for small body text. That is a
+         real trade, taken deliberately: this tool is presented on a projector
+         at 15px base, and a colour nobody can tell from brown was failing at
+         the job the colour is there to do. */
+      --accent-text:   #cf6d0a;  /* 3.6:1 on white */
+      --accent-text-2: #a85700;
 
       /* The canvas is a hair off white and the cards are pure white, so a card
          edge reads as elevation rather than as a heavy stroke. Both still
@@ -49,22 +57,22 @@
       /* The semantic four, pitched at the accent's vibrancy. The bare token is
          the TEXT tone, because that is what most of the stylesheet asks for;
          `-fill` is the vivid one for graphics and filled controls. */
-      --info:       #1d6fe0;  --info-fill:    #3b82f6;  --info-soft: #eaf1fe;  --info-line: #b9d0fb;
-      --success:    #00875a;  --success-fill: #12a150;  --success-soft: #e6f6ef; --success-line: #a9e0c8;
+      --info:       #2f80ed;  --info-fill:    #3b82f6;  --info-soft: #eaf1fe;  --info-line: #b9d0fb;
+      --success:    #0e9d57;  --success-fill: #12a150;  --success-soft: #e6f6ef; --success-line: #a9e0c8;
       /* Amber sits deliberately far from the accent orange. At hue 36 it was
          four degrees off tier 3 and the same lightness, so "Medium" and "High"
          were the same colour on screen. This is hue 47 and a clear step darker
          as text, and a clear step yellower as a fill. */
-      --warn:       #7d6200;  --warn-fill:    #f2b705;  --warn-soft: #fdf7e2;   --warn-line: #f2e0a0;
-      --danger:     #d32f2f;  --danger-fill:  #e5352b;  --danger-soft: #fdedec; --danger-line: #f7c6c3;
+      --warn:       #a88300;  --warn-fill:    #f2b705;  --warn-soft: #fdf7e2;   --warn-line: #f2e0a0;
+      --danger:     #dc2f26;  --danger-fill:  #e5352b;  --danger-soft: #fdedec; --danger-line: #f7c6c3;
 
       /* The four risk tiers ride the same hues. Tier 3 shares the accent's
          orange on purpose: two oranges a shade apart read as a mistake rather
          than as two meanings. */
-      --t1: #00875a; --t1-fill: #12a150; --t1-soft: #e6f6ef; --t1-line: #a9e0c8;
-      --t2: #7d6200; --t2-fill: #f2b705; --t2-soft: #fdf7e2; --t2-line: #f2e0a0;
-      --t3: #b05e00; --t3-fill: #E28D34; --t3-soft: #fdf1e5; --t3-line: #f5d2ae;
-      --t4: #d32f2f; --t4-fill: #e5352b; --t4-soft: #fdedec; --t4-line: #f7c6c3;
+      --t1: #0e9d57; --t1-fill: #12a150; --t1-soft: #e6f6ef; --t1-line: #a9e0c8;
+      --t2: #a88300; --t2-fill: #f2b705; --t2-soft: #fdf7e2; --t2-line: #f2e0a0;
+      --t3: #cf6d0a; --t3-fill: #E28D34; --t3-soft: #fdf1e5; --t3-line: #f5d2ae;
+      --t4: #dc2f26; --t4-fill: #e5352b; --t4-soft: #fdedec; --t4-line: #f7c6c3;
 
       /* On white, depth comes from a hairline and a soft drop, not from an
          inner white highlight over black. */
