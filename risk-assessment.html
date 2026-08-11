@@ -16,16 +16,22 @@
          under ambient light. Everything below targets ink-on-white contrast
          first: the same palette the PDF report already uses, so the screen and
          the printed report finally look like the same document. */
-      --accent:     #E97132;   /* fills only: brand orange is ~2.9:1 on white */
-      --accent-2:   #f2854b;   /* hover: brightens, rather than going muddy */
+      /* ---- Every hue below comes in two tones, and the split is the whole
+         trick to a vibrant palette that still reads on white.
+
+         A FILL tone: the vivid one. It is only ever a background, always with
+         near-black ink sitting on it, so its own contrast against the page
+         does not have to carry any text.
+
+         A TEXT tone: the same hue walked down until it clears 4.5:1 on white.
+
+         The two cannot be one colour. The chosen orange is 2.59:1 against
+         white, which is fine as a block of colour and unreadable as a word. */
+      --accent:     #E28D34;   /* fill: near-black on it is 7.3:1 */
+      --accent-2:   #eda155;   /* hover: brightens, rather than going muddy */
       --accent-ink: #16100b;
-      /* The accent as *ink*. Every place the orange was used for text or a
-         small icon steps down to this, at the bottom of this stylesheet.
-         Kept as warm and open as the contrast floor allows: 4.6:1 on a white
-         card, where nearly all of it sits. Anything brighter than this drops
-         under 4.5:1 and starts undoing the readability it is here for. */
-      --accent-text:   #c05517;
-      --accent-text-2: #9d4712;
+      --accent-text:   #b05e00;  /* 4.7:1 on white */
+      --accent-text-2: #8f4c00;
 
       /* The canvas is a hair off white and the cards are pure white, so a card
          edge reads as elevation rather than as a heavy stroke. Both still
@@ -40,17 +46,25 @@
       --line:       rgba(11,11,15,.10);
       --line-2:     rgba(11,11,15,.18);
 
-      --info:       #1f5fbf;  --info-soft: #eef3fc;  --info-line: #c3d6f4;
-      --success:    #12704a;  --success-soft: #ecf7f2; --success-line: #bfe3d4;
-      --warn:       #8a6100;  --warn-soft: #fbf4e4;   --warn-line: #ecd9a8;
-      --danger:     #a32b21;  --danger-soft: #fbeeed; --danger-line: #f0c8c4;
+      /* The semantic four, pitched at the accent's vibrancy. The bare token is
+         the TEXT tone, because that is what most of the stylesheet asks for;
+         `-fill` is the vivid one for graphics and filled controls. */
+      --info:       #1d6fe0;  --info-fill:    #3b82f6;  --info-soft: #eaf1fe;  --info-line: #b9d0fb;
+      --success:    #00875a;  --success-fill: #12a150;  --success-soft: #e6f6ef; --success-line: #a9e0c8;
+      /* Amber sits deliberately far from the accent orange. At hue 36 it was
+         four degrees off tier 3 and the same lightness, so "Medium" and "High"
+         were the same colour on screen. This is hue 47 and a clear step darker
+         as text, and a clear step yellower as a fill. */
+      --warn:       #7d6200;  --warn-fill:    #f2b705;  --warn-soft: #fdf7e2;   --warn-line: #f2e0a0;
+      --danger:     #d32f2f;  --danger-fill:  #e5352b;  --danger-soft: #fdedec; --danger-line: #f7c6c3;
 
-      --t1: #12704a; --t1-soft: #ecf7f2; --t1-line: #bfe3d4;
-      --t2: #8a6100; --t2-soft: #fbf4e4; --t2-line: #ecd9a8;
-      /* Same orange as --accent-text, deliberately: two oranges a shade apart
-         read as a mistake rather than as two meanings. */
-      --t3: #c05517; --t3-soft: #fbf0e8; --t3-line: #f0d0b8;
-      --t4: #a32b21; --t4-soft: #fbeeed; --t4-line: #f0c8c4;
+      /* The four risk tiers ride the same hues. Tier 3 shares the accent's
+         orange on purpose: two oranges a shade apart read as a mistake rather
+         than as two meanings. */
+      --t1: #00875a; --t1-fill: #12a150; --t1-soft: #e6f6ef; --t1-line: #a9e0c8;
+      --t2: #7d6200; --t2-fill: #f2b705; --t2-soft: #fdf7e2; --t2-line: #f2e0a0;
+      --t3: #b05e00; --t3-fill: #E28D34; --t3-soft: #fdf1e5; --t3-line: #f5d2ae;
+      --t4: #d32f2f; --t4-fill: #e5352b; --t4-soft: #fdedec; --t4-line: #f7c6c3;
 
       /* On white, depth comes from a hairline and a soft drop, not from an
          inner white highlight over black. */
@@ -362,7 +376,7 @@
     .chk ion-icon{ font-size:14px; color:#fff; opacity:0; transition:opacity .12s; }
     .chk:hover{ border-color:var(--ink-3); }
     .chk:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-    .chk[aria-checked="true"]{ background:var(--success); border-color:var(--success); }
+    .chk[aria-checked="true"]{ background:var(--success-fill); border-color:var(--success-fill); }
     .chk[aria-checked="true"] ion-icon{ opacity:1; }
     .ctext{ flex:1; color:var(--ink); }
     .citem[data-checked="true"] .ctext{ color:var(--ink-3); text-decoration:line-through; text-decoration-color:var(--ink-3); }
@@ -705,6 +719,12 @@
     .pill.other:hover,
     #adopt-help:hover,
     #adopt-help[aria-expanded="true"]{ color:var(--accent-text-2); }
+
+    /* Focus rings run on the text tone for the same reason. A ring has to clear
+       3:1 against what it sits on to be seen at all, and the fill orange is
+       2.6:1 on white. Setting only the colour leaves each rule's own width and
+       style alone. */
+    *:focus-visible{ outline-color:var(--accent-text); }
 
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
   </style>
@@ -1418,12 +1438,14 @@ function displayName(v){ return label(v).replace(/^[A-V]\s-\s/, ""); }
 function adjustedLabels(d){ return ((d && d.drivers)||[]).filter(x=>x&&x.userSet).map(x=>x.label); }
 
 /* ---------- needle gauge ----------
-   Bands are a parameter so the three-tier agentic gauge reuses this. */
-const GAUGE_BANDS_4=[[1,24,'var(--t1)'],[26,49,'var(--t2)'],[51,77,'var(--t3)'],[79,99,'var(--t4)']];
-const GAUGE_BANDS_3=[[1,32,'var(--t1)'],[34,66,'var(--t2)'],[68,99,'var(--t4)']];
+   Bands are a parameter so the three-tier agentic gauge reuses this.
+   The arcs take the `-fill` tones: an arc is a block of colour with nothing
+   written on it, so it gets the vivid version rather than the text one. */
+const GAUGE_BANDS_4=[[1,24,'var(--t1-fill)'],[26,49,'var(--t2-fill)'],[51,77,'var(--t3-fill)'],[79,99,'var(--t4-fill)']];
+const GAUGE_BANDS_3=[[1,32,'var(--t1-fill)'],[34,66,'var(--t2-fill)'],[68,99,'var(--t4-fill)']];
 /* Readiness runs the other way: a high score is good, so the ramp is reversed.
    Band edges follow assets/genai.mjs (39 / 64 / 84). */
-const GAUGE_BANDS_READY=[[1,38,'var(--t4)'],[40,63,'var(--t3)'],[65,83,'var(--t2)'],[85,99,'var(--t1)']];
+const GAUGE_BANDS_READY=[[1,38,'var(--t4-fill)'],[40,63,'var(--t3-fill)'],[65,83,'var(--t2-fill)'],[85,99,'var(--t1-fill)']];
 
 function gaugeSVG(value, opts={}){
   const { bands=GAUGE_BANDS_4, lo="Low", hi="Severe", aria="Risk gauge" } = opts;

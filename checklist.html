@@ -17,13 +17,16 @@
     :root {
       /* Light theme, matching risk-assessment.html. Both pages get walked
          through on a projector, where a dark page with grey text washes out. */
-      --accent:     #E97132;   /* fills only */
-      --accent-2:   #f2854b;   /* hover: brightens, rather than going muddy */
+      /* Every hue comes in two tones. The FILL tone is the vivid one and is
+         only ever a background, with near-black ink on it. The TEXT tone is the
+         same hue walked down until it clears 4.5:1 on white. They cannot be one
+         colour: the accent orange is 2.59:1 against white, fine as a block of
+         colour and unreadable as a word. */
+      --accent:     #E28D34;   /* fill: near-black on it is 7.3:1 */
+      --accent-2:   #eda155;   /* hover: brightens, rather than going muddy */
       --accent-ink: #16100b;
-      /* The accent as ink, see the block at the end. Kept as warm as the
-         contrast floor allows: 4.6:1 on a white card. */
-      --accent-text:   #c05517;
-      --accent-text-2: #9d4712;
+      --accent-text:   #b05e00;  /* 4.7:1 on white */
+      --accent-text-2: #8f4c00;
 
       --bg:         #f7f7f9;
       --surface-1:  #ffffff;
@@ -35,10 +38,15 @@
       --line:       rgba(11,11,15,.10);
       --line-2:     rgba(11,11,15,.18);
 
-      --info:       #1f5fbf;  --info-soft: #eef3fc;  --info-line: #c3d6f4;
-      --success:    #12704a;  --success-soft: #ecf7f2; --success-line: #bfe3d4;
-      --warn:       #8a6100;  --warn-soft: #fbf4e4;   --warn-line: #ecd9a8;
-      --danger:     #a32b21;  --danger-soft: #fbeeed; --danger-line: #f0c8c4;
+      /* The semantic four, pitched at the accent's vibrancy. The bare token is
+         the TEXT tone; `-fill` is the vivid one for graphics and filled
+         controls. */
+      --info:       #1d6fe0;  --info-fill:    #3b82f6;  --info-soft: #eaf1fe;  --info-line: #b9d0fb;
+      --success:    #00875a;  --success-fill: #12a150;  --success-soft: #e6f6ef; --success-line: #a9e0c8;
+      /* Amber sits deliberately far from the accent orange: at hue 36 it was
+         four degrees off and the same lightness, so the two read as one. */
+      --warn:       #7d6200;  --warn-fill:    #f2b705;  --warn-soft: #fdf7e2;   --warn-line: #f2e0a0;
+      --danger:     #d32f2f;  --danger-fill:  #e5352b;  --danger-soft: #fdedec; --danger-line: #f7c6c3;
 
       --raise:
         inset 0 1px 0 rgba(255,255,255,.7),
@@ -160,7 +168,7 @@
     .chk ion-icon{ font-size:15px; color:#fff; opacity:0; transition:opacity .12s; }
     .chk:hover{ border-color:var(--ink-3); }
     .chk:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-    .chk[aria-checked="true"]{ background:var(--success); border-color:var(--success); }
+    .chk[aria-checked="true"]{ background:var(--success-fill); border-color:var(--success-fill); }
     .chk[aria-checked="true"] ion-icon{ opacity:1; }
     .ctext{ flex:1; }
     .ctext .ct{ color:var(--ink); font-weight:700; font-size:calc(var(--fs-base)*1.08); line-height:1.4; display:block; }
@@ -201,6 +209,10 @@
     .companion ion-icon,
     .stitle .n,
     .res ion-icon{ color:var(--accent-text); }
+    /* A focus ring has to clear 3:1 against what it sits on to be seen, and the
+       fill orange is 2.6:1 on white. Setting only the colour leaves each rule's
+       own width and style alone. */
+    *:focus-visible{ outline-color:var(--accent-text); }
 
     @media print{ nav,.companion,.score-actions,.toast,footer{ display:none!important; } }
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
@@ -322,7 +334,7 @@
         <div class="res-grid" id="resGrid"></div>
       </div>
 
-      <p class="disclaim">This checklist is general guidance to help teams adopt AI responsibly. It is not legal, regulatory, or financial advice, and it is not a formal risk assessment. For a use-case-specific risk tier and mapped controls, use the <a href="/risk-assessment.html" style="color:var(--accent)">AI Risk Assessment</a>. Verify regulatory obligations, such as PDPA duties, with your compliance function.</p>
+      <p class="disclaim">This checklist is general guidance to help teams adopt AI responsibly. It is not legal, regulatory, or financial advice, and it is not a formal risk assessment. For a use-case-specific risk tier and mapped controls, use the <a href="/risk-assessment.html" style="color:var(--accent-text)">AI Risk Assessment</a>. Verify regulatory obligations, such as PDPA duties, with your compliance function.</p>
     </div>
   </main>
 
@@ -419,7 +431,7 @@ function renderList(){
     return `
       <div ${gi>0?'style="margin-top:var(--s7)"':''}>
         <div class="grp-head">
-          <span class="n" style="display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:9px;background:var(--surface-2);color:var(--accent);box-shadow:var(--raise)"><ion-icon name="${g.icon}" style="font-size:18px"></ion-icon></span>
+          <span class="n" style="display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:9px;background:var(--surface-2);color:var(--accent-text);box-shadow:var(--raise)"><ion-icon name="${g.icon}" style="font-size:18px"></ion-icon></span>
           <h3>${escapeHtml(g.title)}</h3>
           <span class="gcount" data-gi="${gi}">${done}/${g.items.length}</span>
         </div>
@@ -446,9 +458,11 @@ function renderResources(){
 /* ---------- score band ---------- */
 const CIRC = 2 * Math.PI * 52;
 function band(n){
-  if(n>=17) return { key:"strong", color:"var(--success)", soft:"var(--success-soft)", line:"var(--success-line)", icon:"shield-checkmark-outline", tag:"Strong position", verdict:"You are in good shape.", note:"Most safeguards are in place. Keep reviewing every quarter, and revisit as you add tools or scale up." };
-  if(n>=9)  return { key:"progress", color:"var(--warn)", soft:"var(--warn-soft)", line:"var(--warn-line)", icon:"construct-outline", tag:"Making progress", verdict:"Close the gaps.", note:"A solid start. Work through the unchecked items, prioritising anything that touches customer data or lets AI act on its own." };
-  return { key:"high", color:"var(--danger)", soft:"var(--danger-soft)", line:"var(--danger-line)", icon:"alert-circle-outline", tag:"High exposure", verdict:"Start now.", note:"Several basics are missing. Pick the three that matter most for your business and close them this week. Do not try to fix everything at once." };
+  // `color` is the text tone, for the badge and the verdict line. `fill` is the
+  // vivid one, and only the ring uses it: an arc carries no words.
+  if(n>=17) return { key:"strong", color:"var(--success)", fill:"var(--success-fill)", soft:"var(--success-soft)", line:"var(--success-line)", icon:"shield-checkmark-outline", tag:"Strong position", verdict:"You are in good shape.", note:"Most safeguards are in place. Keep reviewing every quarter, and revisit as you add tools or scale up." };
+  if(n>=9)  return { key:"progress", color:"var(--warn)", fill:"var(--warn-fill)", soft:"var(--warn-soft)", line:"var(--warn-line)", icon:"construct-outline", tag:"Making progress", verdict:"Close the gaps.", note:"A solid start. Work through the unchecked items, prioritising anything that touches customer data or lets AI act on its own." };
+  return { key:"high", color:"var(--danger)", fill:"var(--danger-fill)", soft:"var(--danger-soft)", line:"var(--danger-line)", icon:"alert-circle-outline", tag:"High exposure", verdict:"Start now.", note:"Several basics are missing. Pick the three that matter most for your business and close them this week. Do not try to fix everything at once." };
 }
 
 function updateScore(){
@@ -458,7 +472,7 @@ function updateScore(){
   const ring = $("#ring");
   ring.style.strokeDasharray = CIRC.toFixed(1);
   ring.style.strokeDashoffset = (CIRC * (1 - n/TOTAL)).toFixed(1);
-  ring.style.stroke = b.color;
+  ring.style.stroke = b.fill;
   const badge = $("#band");
   badge.style.background = b.soft; badge.style.color = b.color; badge.style.border = "1px solid "+b.line;
   badge.querySelector("ion-icon").setAttribute("name", b.icon);
