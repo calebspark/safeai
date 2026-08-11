@@ -18,10 +18,12 @@
       /* Light theme, matching risk-assessment.html. Both pages get walked
          through on a projector, where a dark page with grey text washes out. */
       --accent:     #E97132;   /* fills only */
-      --accent-2:   #d4611f;
+      --accent-2:   #f2854b;   /* hover: brightens, rather than going muddy */
       --accent-ink: #16100b;
-      --accent-text:   #b4501c;  /* the accent as ink, see the block at the end */
-      --accent-text-2: #93400f;
+      /* The accent as ink, see the block at the end. Kept as warm as the
+         contrast floor allows: 4.6:1 on a white card. */
+      --accent-text:   #c05517;
+      --accent-text-2: #9d4712;
 
       --bg:         #f7f7f9;
       --surface-1:  #ffffff;
@@ -134,7 +136,9 @@
     /* White on the brand orange is about 2.9:1. Near-black on it is about 7:1,
        and the purple in the old gradient was a second hue carrying no meaning. */
     .btn-accent{ color:var(--accent-ink); background:var(--accent); border-color:var(--accent); }
-    .btn-accent:hover{ background:var(--accent-2); border-color:var(--accent-2); color:#fff; }
+    /* Hover lifts the fill rather than darkening it, and the ink stays
+       near-black: white on the lighter orange would be about 2.5:1. */
+    .btn-accent:hover{ background:var(--accent-2); border-color:var(--accent-2); }
     .btn-ghost{ background:transparent; border-color:transparent; box-shadow:none; color:var(--ink-2); }
     .btn-ghost:hover{ background:var(--surface-1); color:var(--ink); }
 

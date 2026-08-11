@@ -17,12 +17,15 @@
          first: the same palette the PDF report already uses, so the screen and
          the printed report finally look like the same document. */
       --accent:     #E97132;   /* fills only: brand orange is ~2.9:1 on white */
-      --accent-2:   #d4611f;
+      --accent-2:   #f2854b;   /* hover: brightens, rather than going muddy */
       --accent-ink: #16100b;
       /* The accent as *ink*. Every place the orange was used for text or a
-         small icon steps down to this, at the bottom of this stylesheet. */
-      --accent-text:   #b4501c;
-      --accent-text-2: #93400f;
+         small icon steps down to this, at the bottom of this stylesheet.
+         Kept as warm and open as the contrast floor allows: 4.6:1 on a white
+         card, where nearly all of it sits. Anything brighter than this drops
+         under 4.5:1 and starts undoing the readability it is here for. */
+      --accent-text:   #c05517;
+      --accent-text-2: #9d4712;
 
       /* The canvas is a hair off white and the cards are pure white, so a card
          edge reads as elevation rather than as a heavy stroke. Both still
@@ -44,7 +47,9 @@
 
       --t1: #12704a; --t1-soft: #ecf7f2; --t1-line: #bfe3d4;
       --t2: #8a6100; --t2-soft: #fbf4e4; --t2-line: #ecd9a8;
-      --t3: #b4501c; --t3-soft: #fbf0e8; --t3-line: #f0d0b8;
+      /* Same orange as --accent-text, deliberately: two oranges a shade apart
+         read as a mistake rather than as two meanings. */
+      --t3: #c05517; --t3-soft: #fbf0e8; --t3-line: #f0d0b8;
       --t4: #a32b21; --t4-soft: #fbeeed; --t4-line: #f0c8c4;
 
       /* On white, depth comes from a hairline and a soft drop, not from an
@@ -224,7 +229,9 @@
        the purple was a second hue carrying no meaning. Flat orange with the
        near-black brand ink on top reads about 7:1. */
     .btn-accent{ color:var(--accent-ink); background:var(--accent); border-color:var(--accent); }
-    .btn-accent:hover{ background:var(--accent-2); border-color:var(--accent-2); color:#fff; }
+    /* Hover lifts the fill rather than darkening it, and the ink stays
+       near-black: white on the lighter orange would be about 2.5:1. */
+    .btn-accent:hover{ background:var(--accent-2); border-color:var(--accent-2); }
     .btn-ghost{ background:transparent; border-color:transparent; box-shadow:none; color:var(--ink-2); }
     .btn-ghost:hover{ background:var(--surface-1); color:var(--ink); }
     /* Inherits the button's ink, so it stays visible whether it spins on the
