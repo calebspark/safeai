@@ -200,3 +200,25 @@ company records.
   Grep-guard after bulk edits.
 - **Never paste a line-counted extraction between the two gated pages.** That is
   how an unclosed `<nav>` once swallowed the whole checklist page.
+- **Both gated pages are light themed now** (2026-08-10), because the tool is
+  walked through on a projector and the dark page washed out. The theme is all
+  in `:root`, so a colour written literally rather than as a token is a bug.
+  Three things do not follow from the tokens and had to be fixed by hand, so
+  check them if you add anything: the nav's own `background` is a literal rgba,
+  the nav logos must be the **dark** variants (`safeai-logo-print.png` and
+  `spark-logo-01.svg`; the `-trim` and `-02` files are white artwork for a dark
+  bar and vanish), and the brand orange is a **fill** colour only. As text on
+  white it is about 2.9:1, so every accent-as-ink use goes through
+  `--accent-text`, applied by the block at the very end of the stylesheet.
+- **`REPORT_CSS` re-pins `--fs-base` and the `--s*` steps.** The screen theme
+  runs 15px and wider gaps for the projector; paper keeps the original 13px and
+  spacing. Change a spacing token and the PDF follows unless it is pinned there
+  too.
+- **`.pill` must not be `white-space: nowrap`.** Pills carry option sentences,
+  not button labels. "Restricted / regulated (PII, PHI, ...)" is 400px on one
+  line and bursts a 342px card on a phone.
+- **An absolutely positioned `::after` still counts toward its scroll
+  container's width.** The `[data-tip]` tooltip sits on a button flush with the
+  card's right edge, so centred it dragged the whole page into a sideways
+  scroll even while invisible. Below 640px it hangs from the button's right
+  edge instead.
