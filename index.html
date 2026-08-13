@@ -163,7 +163,6 @@
     .nav-link:active { background: var(--surface-2); }
     .nav-link:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
     .nav-right { display:flex; align-items:center; gap:24px; }
-    .spark-logo-nav { height:30px; width:auto; display:block; opacity:.9; }
 
     /* ── layout shell ── */
     .section { padding: 96px 52px; }
@@ -189,13 +188,7 @@
     .hero-cta .btn { --btn-py: 15px; }
 
     /* ── STAT BAR ── */
-    .community-head { text-align:center; margin-bottom: var(--s5); }
-    .powered-by {
-      display:flex; align-items:center; justify-content:center; gap:16px;
-      font-size: var(--t-lead); color: var(--ink-2); font-weight:500;
-      margin-top: var(--s4); margin-bottom: var(--s8);
-    }
-    .spark-logo-light { height:42px; width:auto; }
+    .community-head { text-align:center; margin-bottom: var(--s8); }
     .stat-bar { display:grid; grid-template-columns: repeat(3,1fr); gap: var(--gap); }
     .stat-item {
       background: var(--surface-1); border-radius: var(--r-lg);
@@ -393,10 +386,7 @@
     /* ── FOOTER ── */
     footer { background: var(--raised); padding: 64px 52px 40px; border-top: 1px solid var(--line); }
     .footer-inner { max-width:1120px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap: var(--s7); align-items:start; }
-    .footer-logo { width:300px; max-width:80%; height:auto; display:block; margin-bottom: var(--s3); }
-    .footer-spark { display:flex; align-items:center; gap:8px; margin-bottom: var(--s4); }
-    .footer-spark span { font-size: var(--t-cap); color: var(--ink-3); }
-    .footer-spark img { height:22px; width:auto; opacity:.85; }
+    .footer-logo { width:300px; max-width:80%; height:auto; display:block; margin-bottom: var(--s4); }
     .footer-desc { font-size: var(--t-body); color: var(--ink-2); line-height:1.7; max-width:400px; }
     .footer-tag { margin-top: var(--s4); font-size: var(--t-cap); color: var(--ink-3); }
     .footer-contact h4 { font-size: var(--t-cap); font-weight:600; color: var(--ink); margin-bottom: var(--s4); letter-spacing:.02em; }
@@ -430,7 +420,6 @@
     @media (max-width:600px){
       nav { padding: 0 16px; height:56px; }
       .nav-logo { height:32px; width:auto; }
-      .spark-logo-nav { display:none; }
       .section { padding: 56px 20px; }
 
       /* dial the new breathing room back to a mobile-proportionate scale */
@@ -446,9 +435,7 @@
       .lead { line-height: 1.7; }
       .lead-gap { margin-bottom: var(--s6); }
 
-      .community-head { margin-bottom: var(--s4); }
-      .powered-by { margin-top: var(--s3); margin-bottom: var(--s6); gap: 12px; }
-      .spark-logo-light { height: 34px; }
+      .community-head { margin-bottom: var(--s6); }
       .stat-num { font-size: calc(var(--fs-base) * 2.1); }
 
       .footer-logo { width:200px; }
@@ -478,7 +465,6 @@
       <a href="#council" class="nav-link">Who We Are</a>
       <a href="#contact" class="nav-link">Contact Us</a>
     </div>
-    <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-nav" />
   </div>
 </nav>
 
@@ -504,10 +490,6 @@
 <section class="section" id="community">
   <div class="section-inner">
     <h2 class="community-head trim">Led by Industry, Driven by Community</h2>
-    <p class="powered-by">
-      Powered by
-      <img src="spark-logo-02.svg" alt="SPARK" class="spark-logo-light" />
-    </p>
     <div class="stat-bar">
       <div class="stat-item">
         <div class="stat-num trim">16,000+</div>
@@ -795,10 +777,6 @@
   <div class="footer-inner">
     <div>
       <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="footer-logo" />
-      <div class="footer-spark">
-        <span>by</span>
-        <img src="spark-logo-02.svg" alt="SPARK" />
-      </div>
       <p class="footer-desc">Singapore's industry-led Centre of Excellence for AI technical safety and practical governance. Anchored at Punggol Digital District with institutional support from government agencies and industry partners.</p>
       <p class="footer-tag">Grounded in proportionality, practicality, and independence</p>
     </div>

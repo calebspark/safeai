@@ -205,9 +205,9 @@ company records.
   in `:root`, so a colour written literally rather than as a token is a bug.
   Three things do not follow from the tokens and had to be fixed by hand, so
   check them if you add anything: the nav's own `background` is a literal rgba,
-  the nav logos must be the **dark** variants (`safeai-logo-print.png` and
-  `spark-logo-01.svg`; the `-trim` and `-02` files are white artwork for a dark
-  bar and vanish), and the brand orange is a **fill** colour only. As text on
+  the nav logo must be the **dark** variant (`safeai-logo-print.png`; the
+  `-trim` file is white artwork for a dark bar and vanishes), and the brand
+  orange is a **fill** colour only. As text on
   white it is about 2.9:1, so every accent-as-ink use goes through
   `--accent-text`, applied by the block at the very end of the stylesheet.
 - **`REPORT_CSS` re-pins `--fs-base` and the `--s*` steps.** The screen theme

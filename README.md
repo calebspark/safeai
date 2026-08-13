@@ -12,7 +12,7 @@ Marketing site for **SafeAI.sg** — Singapore's industry-led Centre of Excellen
 | `SafeAIWebsite.html` | Earlier/alternate page version |
 | `council-preview.html` | Standalone preview of the council section (kept in sync with `index.html`) |
 | `SAFEAI_PHOTO/` | Advisory Council member headshots |
-| `SafeAILogoUpdated.png`, `spark-logo-*.svg` | Brand assets |
+| `SafeAILogoUpdated.png` | Brand assets. SafeAI.sg is presented as its own brand, so no SPARK logo is used anywhere on the site |
 | `*.md`, charter PDF/PPTX | Source documents; the charter deck and briefing note are linked as downloads from the site |
 
 ## Founding Advisory Council
