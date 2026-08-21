@@ -1,5 +1,9 @@
 *.pptx
 *.xlsx
 *.docx
-*.pdf
 _archive
+
+# Unreferenced PDFs. Do NOT add a blanket *.pdf rule: index.html links
+# SafeAI_SG_Charter_Summary_Public.pdf as a download and it must ship.
+SafeAI_Launch_Ministerial_Briefing_Note_1.pdf
+SafeAI_SG_Charter_Deck_v7_1.pdf
