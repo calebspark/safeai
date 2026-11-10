@@ -177,7 +177,7 @@
     .hairline { height:1px; background: var(--line); border:0; max-width:1120px; margin:0 auto; }
 
     /* ── HERO ── */
-    .hero { padding: 104px 52px 96px; }
+    .hero { padding: 104px 52px 56px; }
     .hero-inner { max-width: 780px; }
     .hero-logo { width: 840px; max-width: 100%; height:auto; display:block; margin-bottom: var(--s6); }
     .hero .eyebrow { margin-bottom: var(--s4); }
@@ -186,6 +186,68 @@
     .hero-sub { font-size: var(--t-lead); color: var(--ink-2); line-height:1.85; margin-bottom: var(--s8); max-width: 600px; }
     .hero-cta { display:flex; gap: var(--s4); flex-wrap:wrap; }
     .hero-cta .btn { --btn-py: 15px; }
+
+    /* ── mobile menu toggle (shown under 900px, see TABLET block) ── */
+    .nav-toggle {
+      display:none; width:44px; height:44px; border:0; border-radius: var(--r-sm);
+      background: transparent; color: var(--ink); cursor:pointer;
+      align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent;
+    }
+    .nav-toggle .ico { width:24px; height:24px; }
+    .nav-toggle .close { display:none; }
+    .nav-toggle:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+    /* ── RISK STUDIO SHOWCASE (sits under the hero, copy from the studio mock-up) ── */
+    .studio { padding: 0 52px 96px; }
+    .studio-inner {
+      max-width:1120px; margin:0 auto; position:relative; overflow:hidden;
+      background: var(--surface-1); border-radius: var(--r-lg);
+      box-shadow: var(--raise), var(--shadow-pop);
+      padding: 48px; display:grid; grid-template-columns: 1.1fr .9fr; gap: var(--s7); align-items:center;
+    }
+    .studio-inner::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, #9b3b92 0%, #b84e6f 35%, #E97132 100%); }
+    .studio-copy h2 { font-size: var(--t-h1); line-height:1.12; margin-bottom: var(--s5); max-width: 560px; }
+    .studio-copy .lead { margin-bottom: var(--s6); }
+    .studio-cta { display:flex; gap: var(--s4); flex-wrap:wrap; margin-bottom: var(--s4); }
+    .studio-cta .btn { --btn-py: 15px; }
+    .studio-note { font-size: var(--t-cap); color: var(--ink-3); }
+    .studio-example {
+      background: var(--surface-2); border-radius: var(--r-lg); padding: 28px;
+      box-shadow: var(--raise); display:flex; flex-direction:column; gap: var(--s4);
+    }
+    .ex-top { display:flex; justify-content:space-between; align-items:center; gap: var(--s2); font-size: var(--t-cap); color: var(--ink-3); }
+    .ex-top .label { font-weight:600; color: var(--ink-2); }
+    .ex-name { font-weight:600; color: var(--ink); }
+    .ex-score { display:flex; align-items:flex-end; gap: var(--s3); }
+    .ex-num { font-size: calc(var(--fs-base) * 4.4); font-weight:600; letter-spacing:-.04em; line-height:.9; color: var(--ink); }
+    .ex-of { font-size: var(--t-cap); color: var(--ink-3); padding-bottom: 4px; }
+    .ex-band { margin-left:auto; padding: 5px 12px; border-radius: var(--r-pill); background:#E8742A; color:#16100b; font-weight:700; font-size: var(--t-cap); }
+    .ex-bar { height:10px; border-radius: var(--r-pill); overflow:hidden; display:flex; }
+    .ex-bar span:nth-child(1) { width:35%; background:#2E9E6B; }
+    .ex-bar span:nth-child(2) { width:20%; background:#E0A100; }
+    .ex-bar span:nth-child(3) { width:20%; background:#E8742A; }
+    .ex-bar span:nth-child(4) { width:25%; background:#8E0B22; }
+    .ex-marker { position:relative; height:8px; }
+    .ex-marker::after { content:""; position:absolute; left:71%; top:0; margin-left:-5px; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:7px solid var(--ink); }
+    .ex-labels { display:flex; justify-content:space-between; font-size: var(--t-cap); color: var(--ink-3); }
+    .ex-drivers { border-top:1px solid var(--line-2); padding-top: var(--s4); display:flex; flex-direction:column; gap: var(--s3); }
+    .ex-drivers-title { font-size: var(--t-cap); font-weight:600; color: var(--ink); }
+    .ex-driver { font-size: var(--t-cap); color: var(--ink-2); display:flex; flex-direction:column; gap:4px; }
+    .ex-track { height:6px; border-radius: var(--r-pill); background: var(--surface-3); }
+    .ex-track i { display:block; height:6px; border-radius: var(--r-pill); background: var(--ink); }
+    .ex-actions { display:flex; justify-content:space-between; gap: var(--s2); flex-wrap:wrap; background: var(--surface-1); border-radius: var(--r-md); padding: 12px 14px; font-size: var(--t-cap); }
+    .ex-actions b { color: var(--ink); font-weight:600; }
+    .ex-actions span { color: var(--ink-2); }
+    @media (max-width:900px){
+      .studio { padding: 0 24px 64px; }
+      .studio-inner { grid-template-columns: 1fr; padding: 28px; gap: var(--s6); }
+    }
+    @media (max-width:600px){
+      .studio { padding: 0 20px 56px; }
+      .studio-inner { padding: 20px; }
+      .studio-cta .btn { width:100%; --btn-py: 14px; }
+      .ex-num { font-size: calc(var(--fs-base) * 3.4); }
+    }
 
     /* ── STAT BAR ── */
     .community-head { text-align:center; margin-bottom: var(--s8); }
@@ -415,6 +477,19 @@
       .footer-logo { width:240px; }
       .footer-inner { grid-template-columns: 1fr; gap: var(--s6); }
     }
+    @media (max-width:900px){
+      .nav-toggle { display:inline-flex; }
+      .nav-links {
+        position:absolute; left:0; right:0; top:100%;
+        flex-direction:column; align-items:stretch; gap:0;
+        background: var(--bg); border-bottom:1px solid var(--line);
+        padding: 8px 16px 16px; box-shadow: var(--shadow-pop);
+      }
+      .nav-links .nav-link { padding: 14px 12px; font-size: var(--t-body); }
+      nav.is-open .nav-links { display:flex; }
+      nav.is-open .nav-toggle .open { display:none; }
+      nav.is-open .nav-toggle .close { display:block; }
+    }
 
     /* ── MOBILE ── */
     @media (max-width:600px){
@@ -459,12 +534,18 @@
     <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
   </a>
   <div class="nav-right">
-    <div class="nav-links">
+    <div class="nav-links" id="navLinks">
+      <a href="/risk-studio/" class="nav-link">Risk Studio</a>
+      <a href="/harness/" class="nav-link">Harness</a>
       <a href="#mission" class="nav-link">Mission</a>
       <a href="#downloads" class="nav-link">Resources</a>
       <a href="#council" class="nav-link">Who We Are</a>
       <a href="#contact" class="nav-link">Contact Us</a>
     </div>
+    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+      <svg class="ico open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="ico close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
   </div>
 </nav>
 
@@ -480,6 +561,43 @@
       <!-- "Know my AI Risk" hidden until the assessment is validated. The tool
            stays reachable at /risk-assessment.html for people with the link.
            Restore: <a href="/risk-assessment.html" class="btn" data-tip="Assess your AI risk">Know my AI Risk</a> -->
+    </div>
+  </div>
+</section>
+
+<!-- RISK STUDIO SHOWCASE -->
+<section class="studio" id="risk-studio" aria-labelledby="studioTitle">
+  <div class="studio-inner">
+    <div class="studio-copy">
+      <div class="eyebrow">Free AI risk assessment studio</div>
+      <h2 class="trim" id="studioTitle">Understand How to Build and Run Your AI Agent Safely.</h2>
+      <p class="lead">Describe a problem, share an idea, or upload an AI system you already run. The AI Risk studio provides a clear risk score, an action plan grounded in trusted AI governance frameworks published by Singapore Institutions.</p>
+      <div class="studio-cta">
+        <a href="/risk-studio/" class="btn btn-accent">Start assessing</a>
+        <a href="/risk-studio/#how" class="btn">See how it works</a>
+      </div>
+      <p class="studio-note">Guidance to support your decisions. Not legal advice, and not a certification.</p>
+    </div>
+    <div class="studio-example" aria-label="Example output, illustrative only">
+      <div class="ex-top"><span class="label">Example output</span><span>Illustrative only</span></div>
+      <div class="ex-name">Application intake assistant</div>
+      <div class="ex-score">
+        <span class="ex-num trim">71</span>
+        <span class="ex-of">out of 100</span>
+        <span class="ex-band">High</span>
+      </div>
+      <div>
+        <div class="ex-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <div class="ex-marker" aria-hidden="true"></div>
+        <div class="ex-labels"><span>Low</span><span>Medium</span><span>High</span><span>Critical</span></div>
+      </div>
+      <div class="ex-drivers">
+        <div class="ex-drivers-title">What pushes the score up</div>
+        <div class="ex-driver"><span>Data sensitivity</span><div class="ex-track"><i style="width:82%"></i></div></div>
+        <div class="ex-driver"><span>Autonomy</span><div class="ex-track"><i style="width:64%"></i></div></div>
+        <div class="ex-driver"><span>Deployment exposure</span><div class="ex-track"><i style="width:48%"></i></div></div>
+      </div>
+      <div class="ex-actions"><b>7 ranked actions</b><span>Plan one to see the projected score fall</span></div>
     </div>
   </div>
 </section>
@@ -914,5 +1032,22 @@
   })();
 </script>
 
+<script>
+  // Mobile menu: the hamburger shows the same links as the desktop bar.
+  (function () {
+    var nav = document.querySelector('nav'), btn = document.getElementById('navToggle');
+    if (!nav || !btn) return;
+    btn.addEventListener('click', function () {
+      var open = nav.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+    nav.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('.nav-link')) {
+        nav.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Open menu');
+      }
+    });
+  })();
+</script>
 </body>
 </html>

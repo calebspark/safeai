@@ -8,7 +8,9 @@ Marketing site for **SafeAI.sg** — Singapore's industry-led Centre of Excellen
 
 | Path | Purpose |
 |------|---------|
-| `index.html` | The live single-page site |
+| `index.html` | The live single-page site. The main menu is Risk Studio, Harness, Mission, Resources, Who We Are, Contact Us; under 900px it collapses behind a menu button |
+| `risk-studio/index.html` | AI Risk Studio landing page (safeai.sg/risk-studio/). Copy and design values come from the studio mock-up. The three path buttons read their destinations from `STUDIO_LINKS` at the bottom of the file; until a URL is set they scroll to "Choose your path" |
+| `harness/index.html` | Harness tab (safeai.sg/harness/): the "Governed AI in production, mapped to SafeAI.sg" reference page, served as delivered with the SafeAI.sg menu bar added above its own tab bar |
 | `SafeAIWebsite.html` | Earlier/alternate page version |
 | `council-preview.html` | Standalone preview of the council section (kept in sync with `index.html`) |
 | `SAFEAI_PHOTO/` | Advisory Council member headshots |

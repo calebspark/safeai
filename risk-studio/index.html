@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Risk Studio by SafeAI.sg</title>
+  <meta name="description" content="Describe a problem, share an idea, or upload an AI system you already run. The AI Risk studio provides a clear risk score, an action plan grounded in trusted AI governance frameworks published by Singapore Institutions." />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    /* Design values follow the AI Risk Studio mock-up (Main.dc.html). The accent is the
+       mock-up's default; change --accent alone to re-colour every button, badge and eyebrow. */
+    :root {
+      --accent: #C8102E;
+      --ink: #1B1F27;
+      --ink-2: #3B4250;
+      --ink-3: #5B6472;
+      --surface: #F3F4F6;
+      --line: #E1E4EA;
+      --dark: #1B1F27;
+      --dark-2: #2B3140;
+      --on-dark: #E5E8EE;
+      --on-dark-2: #C9CED8;
+      --low: #2E9E6B; --medium: #E0A100; --high: #E8742A; --critical: #8E0B22;
+      --font: 'Inter', Arial, sans-serif;
+      --display: 'Space Grotesk', Arial, sans-serif;
+      --nav-font: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 96px; }
+    body { background: #FFFFFF; color: var(--ink); font: 400 16px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    a:hover { opacity: .88; }
+    h1, h2, h3 { font-family: var(--display); font-weight: 700; }
+    .wrap { max-width: 1160px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+
+    /* ── SafeAI.sg site menu (same bar as the other light pages) ── */
+    .site-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .site-nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: 16px; }
+    .nav-brand { display: flex; align-items: center; }
+    .nav-logo { height: 40px; width: auto; display: block; }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      font: 600 14px/1 var(--nav-font); color: var(--ink-2);
+      padding: 12px 18px; border-radius: 10px; transition: background .18s ease, color .18s ease;
+    }
+    .nav-link:hover { background: var(--surface); color: var(--ink); opacity: 1; }
+    .nav-link[aria-current="page"] { color: var(--accent); }
+    .nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .nav-toggle {
+      display: none; width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent;
+      color: var(--ink); cursor: pointer; align-items: center; justify-content: center;
+    }
+    .nav-toggle svg { width: 24px; height: 24px; }
+    .nav-toggle .close { display: none; }
+    @media (max-width: 900px) {
+      .site-nav .wrap { height: 64px; }
+      .nav-logo { height: 34px; }
+      .nav-toggle { display: inline-flex; }
+      .nav-links {
+        display: none; position: absolute; left: 0; right: 0; top: 100%;
+        flex-direction: column; align-items: stretch; gap: 0;
+        background: #FFFFFF; border-bottom: 1px solid var(--line); padding: 8px 16px 16px;
+        box-shadow: 0 16px 32px -20px rgba(27,31,39,.35);
+      }
+      .nav-links .nav-link { padding: 14px 12px; border-radius: 10px; font-size: 16px; }
+      .site-nav.is-open .nav-links { display: flex; }
+      .site-nav.is-open .nav-toggle .open { display: none; }
+      .site-nav.is-open .nav-toggle .close { display: block; }
+    }
+
+    /* ── Studio header: brand and in-page anchors, as in the mock-up ── */
+    .studio-head .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 20px; }
+    .studio-brand { display: flex; align-items: center; gap: 12px; }
+    .studio-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+    .studio-mark svg { width: 20px; height: 20px; }
+    .studio-name { display: flex; flex-direction: column; line-height: 1.15; }
+    .studio-name b { font-family: var(--display); font-weight: 700; font-size: 18px; }
+    .studio-name span { font-size: 12px; color: var(--ink-3); }
+    .studio-anchors { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; font-size: 15px; font-weight: 500; }
+    .studio-anchors a { min-height: 44px; display: flex; align-items: center; }
+    .studio-anchors .pill { padding: 0 20px; border-radius: 999px; background: var(--dark); color: #FFFFFF; }
+    @media (max-width: 900px) { .studio-anchors a:not(.pill) { display: none; } }
+
+    /* ── Buttons ── */
+    .btn { min-height: 48px; padding: 0 24px; border-radius: 999px; font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-accent { background: var(--accent); color: #FFFFFF; }
+    .btn-outline { border: 2px solid var(--ink); color: var(--ink); }
+    .btn-white { background: #FFFFFF; color: var(--ink); }
+    .btn-outline-white { border: 2px solid #FFFFFF; color: #FFFFFF; }
+    .btn-lg { min-height: 52px; padding: 0 28px; font-size: 16px; }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    /* ── Section scaffolding ── */
+    .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+    .section { padding: 80px 0; }
+    .section-raised { background: var(--surface); }
+    .section-tight { padding: 88px 0; }
+    .sec-head { display: flex; flex-direction: column; gap: 12px; max-width: 680px; margin-bottom: 40px; }
+    .sec-head h2 { font-size: clamp(30px, 4vw, 42px); line-height: 1.12; letter-spacing: -.01em; }
+    .sec-head p { font-size: 17px; line-height: 1.6; color: var(--ink-2); }
+    .cards { display: flex; flex-wrap: wrap; gap: 20px; }
+    .card { flex: 1 1 240px; min-width: 0; background: #FFFFFF; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px; }
+    .card p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+
+    /* ── Hero ── */
+    .hero .wrap { padding-top: 48px; padding-bottom: 72px; display: flex; flex-wrap: wrap; align-items: center; gap: 48px; }
+    .hero-copy { flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+    .hero h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.08; letter-spacing: -.02em; max-width: 560px; }
+    .hero-sub { font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 540px; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 8px; }
+    .hero-note { font-size: 14px; line-height: 1.5; color: var(--ink-3); }
+
+    /* Example output card */
+    .example { flex: 1 1 400px; min-width: 0; max-width: 520px; background: var(--surface); border-radius: 24px; padding: 20px; }
+    .example-inner { background: #FFFFFF; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 1px 2px rgba(27,31,39,.08); }
+    .example-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); }
+    .example-top .label { font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+    .example-name { font-size: 16px; font-weight: 600; }
+    .score { display: flex; align-items: flex-end; gap: 16px; }
+    .score-num { font-family: var(--display); font-weight: 700; font-size: 72px; line-height: .9; }
+    .score-of { font-size: 14px; color: var(--ink-3); padding-bottom: 6px; }
+    .score-band { margin-left: auto; padding: 6px 14px; border-radius: 999px; background: var(--high); color: var(--ink); font-weight: 700; font-size: 14px; }
+    .scale { display: flex; flex-direction: column; gap: 8px; }
+    .scale-bar { height: 12px; border-radius: 999px; overflow: hidden; display: flex; }
+    .scale-bar span:nth-child(1) { width: 35%; background: var(--low); }
+    .scale-bar span:nth-child(2) { width: 20%; background: var(--medium); }
+    .scale-bar span:nth-child(3) { width: 20%; background: var(--high); }
+    .scale-bar span:nth-child(4) { width: 25%; background: var(--critical); }
+    .scale-marker { position: relative; height: 10px; }
+    .scale-marker::after { content: ""; position: absolute; left: 71%; top: 0; margin-left: -6px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 8px solid var(--ink); }
+    .scale-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); }
+    .drivers { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
+    .drivers-title { font-size: 13px; font-weight: 600; }
+    .driver { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-2); }
+    .driver-bar { height: 8px; border-radius: 999px; background: var(--line); }
+    .driver-bar i { display: block; height: 8px; border-radius: 999px; background: var(--ink); }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface); border-radius: 12px; padding: 12px 16px; font-size: 14px; }
+    .actions b { font-weight: 600; }
+    .actions span { color: var(--ink-2); }
+
+    /* ── How it works ── */
+    .step-num { width: 44px; height: 44px; border-radius: 999px; background: var(--accent); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; font-size: 18px; }
+    .step h3 { font-size: 20px; }
+
+    /* ── Choose your path ── */
+    .paths { display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch; }
+    .group { min-width: 0; border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 24px; }
+    .group-a { flex: 2 1 600px; border: 2px solid var(--ink); }
+    .group-b { flex: 1 1 320px; background: var(--dark); color: #FFFFFF; }
+    .group-intro { display: flex; flex-direction: column; gap: 8px; }
+    .group-intro p { font-size: 16px; line-height: 1.55; color: var(--ink-2); }
+    .group-b .group-intro p { color: var(--on-dark-2); }
+    .tag { align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: var(--accent); color: #FFFFFF; font-size: 13px; font-weight: 600; }
+    .group-b .tag { background: #FFFFFF; color: var(--ink); }
+    .path-grid { display: flex; flex-wrap: wrap; gap: 20px; flex-grow: 1; }
+    .path { flex: 1 1 260px; min-width: 0; background: var(--surface); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .group-b .path { background: var(--dark-2); flex-grow: 1; }
+    .path-label { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+    .group-b .path-label { color: var(--on-dark-2); }
+    .path h3 { font-size: 24px; line-height: 1.2; }
+    .path p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+    .group-b .path p { color: var(--on-dark); }
+    .bring { display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.5; }
+    .group-b .bring { color: var(--on-dark); }
+    .bring b { font-weight: 600; }
+    .group-b .bring b { color: #FFFFFF; }
+    .path .btn { margin-top: auto; align-self: flex-start; }
+
+    /* ── What you get ── */
+    .get .card { flex-basis: 300px; gap: 14px; }
+    .get h3 { font-size: 22px; }
+    .mini-scale { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .mini-scale .scale-bar { height: 10px; }
+    .mini-scale .scale-labels { flex-wrap: wrap; gap: 4px 12px; }
+
+    /* ── Trust ── */
+    .trust-grid { display: flex; flex-wrap: wrap; gap: 32px 28px; }
+    .trust { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 8px; border-top: 3px solid var(--ink); padding-top: 16px; }
+    .trust h3 { font-size: 18px; }
+    .trust p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+
+    /* ── Final call to action ── */
+    .final { background: var(--dark); color: #FFFFFF; }
+    .final .wrap { display: flex; flex-direction: column; gap: 32px; }
+    .final h2 { max-width: 720px; font-size: clamp(30px, 4vw, 42px); line-height: 1.12; letter-spacing: -.01em; }
+    .final-grid { display: flex; flex-wrap: wrap; gap: 24px; }
+    .final-card { flex: 1 1 320px; min-width: 0; background: var(--dark-2); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 16px; }
+    .final-card p { color: var(--on-dark); font-size: 16px; line-height: 1.6; }
+    .final-card .row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .final-card .btn { padding: 0 22px; }
+
+    /* ── Footer ── */
+    .foot .wrap { padding-top: 32px; padding-bottom: 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; line-height: 1.5; color: var(--ink-3); }
+
+    @media (max-width: 600px) {
+      .hero .wrap { padding-top: 32px; padding-bottom: 48px; gap: 32px; }
+      .section, .section-tight { padding: 56px 0; }
+      .sec-head { margin-bottom: 28px; }
+      .group { padding: 20px; border-radius: 22px; }
+      .score-num { font-size: 60px; }
+      .hero-cta .btn, .final-card .btn { width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+  </style>
+</head>
+<body>
+
+<!-- SafeAI.sg main menu -->
+<nav class="site-nav" id="siteNav" aria-label="SafeAI.sg">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <!-- Dark wordmark for a white bar; safeai-logo-trim.png is the white artwork for dark bars. -->
+      <img src="/safeai-logo-print.png" alt="SafeAI.sg" class="nav-logo" />
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a href="/risk-studio/" class="nav-link" aria-current="page">Risk Studio</a>
+      <a href="/harness/" class="nav-link">Harness</a>
+      <a href="/#mission" class="nav-link">Mission</a>
+      <a href="/#downloads" class="nav-link">Resources</a>
+      <a href="/#council" class="nav-link">Who We Are</a>
+      <a href="/#contact" class="nav-link">Contact Us</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+      <svg class="open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- Studio header -->
+<header class="studio-head">
+  <div class="wrap">
+    <a href="#top" class="studio-brand">
+      <span class="studio-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+      </span>
+      <span class="studio-name"><b>AI Risk Studio</b><span>by SafeAI.sg</span></span>
+    </a>
+    <nav class="studio-anchors" aria-label="On this page">
+      <a href="#how">How it works</a>
+      <a href="#paths">Choose your path</a>
+      <a href="#get">What you get</a>
+      <a href="#trust">Trust</a>
+      <a href="#paths" class="pill">Start assessing</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">Free AI risk assessment studio</span>
+      <h1>Understand How to Build and Run Your AI Agent Safely.</h1>
+      <p class="hero-sub">Describe a problem, share an idea, or upload an AI system you already run. The AI Risk studio provides a clear risk score, an action plan grounded in trusted AI governance frameworks published by Singapore Institutions.</p>
+      <div class="hero-cta">
+        <a href="#paths" class="btn btn-accent btn-lg">Choose your path</a>
+        <a href="#how" class="btn btn-outline btn-lg">See how it works</a>
+      </div>
+      <p class="hero-note">Guidance to support your decisions. Not legal advice, and not a certification.</p>
+    </div>
+
+    <div class="example" aria-label="Example output, illustrative only">
+      <div class="example-inner">
+        <div class="example-top"><span class="label">Example output</span><span>Illustrative only</span></div>
+        <div class="example-name">Application intake assistant</div>
+        <div class="score">
+          <span class="score-num">71</span>
+          <span class="score-of">out of 100</span>
+          <span class="score-band">High</span>
+        </div>
+        <div class="scale">
+          <div class="scale-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          <div class="scale-marker" aria-hidden="true"></div>
+          <div class="scale-labels"><span>Low</span><span>Medium</span><span>High</span><span>Critical</span></div>
+        </div>
+        <div class="drivers">
+          <div class="drivers-title">What pushes the score up</div>
+          <div class="driver"><span>Data sensitivity</span><div class="driver-bar"><i style="width:82%"></i></div></div>
+          <div class="driver"><span>Autonomy</span><div class="driver-bar"><i style="width:64%"></i></div></div>
+          <div class="driver"><span>Deployment exposure</span><div class="driver-bar"><i style="width:48%"></i></div></div>
+        </div>
+        <div class="actions"><b>7 ranked actions</b><span>Plan one to see the projected score fall</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how" class="section section-raised">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">How it works</span>
+      <h2>Four steps from a rough thought to a plan.</h2>
+      <p>You do not need a technical background. The studio asks plain questions and shows its working at every step.</p>
+    </div>
+    <div class="cards">
+      <div class="card step">
+        <span class="step-num">1</span>
+        <h3>Discover</h3>
+        <p>Tell the studio about a pain point, a business process, an idea or an AI system you already have.</p>
+      </div>
+      <div class="card step">
+        <span class="step-num">2</span>
+        <h3>Define</h3>
+        <p>Review a short profile of 12 details. Each one is marked Detected, Inferred or Confirmed. Nothing is scored until you confirm.</p>
+      </div>
+      <div class="card step">
+        <span class="step-num">3</span>
+        <h3>Assess</h3>
+        <p>Get a risk score from 0 to 100, with the reasons behind it, checked against five reference sources.</p>
+      </div>
+      <div class="card step">
+        <span class="step-num">4</span>
+        <h3>Act</h3>
+        <p>Work through ranked actions, plan the ones you will take, and export a report to share.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Choose your path -->
+<section id="paths" class="section-tight">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Choose your path</span>
+      <h2>Suited to guide you at every point of your AI journey</h2>
+      <p>Whether you're just starting out, feeling around for ideas, or you've got your AI Plan all figured out, we've got your back.</p>
+    </div>
+
+    <div class="paths">
+      <!-- Group A: citizen builders and business users -->
+      <div class="group group-a">
+        <div class="group-intro">
+          <span class="tag">Recommended for citizen builders and business users</span>
+          <p>Plain language in, no technical knowledge needed. Start from a problem or a rough idea.</p>
+        </div>
+        <div class="path-grid">
+          <div class="path">
+            <span class="path-label">Path 1</span>
+            <h3>Help me find an AI use case</h3>
+            <p>Not sure where AI could help? Describe a daily problem and compare three opportunities side by side.</p>
+            <div class="bring">
+              <div><b>You bring:</b> a problem or frustration, in your own words.</div>
+              <div><b>You get:</b> three compared AI opportunities. Pick one to assess.</div>
+            </div>
+            <a href="#paths" class="btn btn-accent" data-studio="problem">Start with a problem</a>
+          </div>
+          <div class="path">
+            <span class="path-label">Path 2</span>
+            <h3>I have an idea</h3>
+            <p>Already know what you would like to build? Type it in a sentence or two and it becomes a structured concept.</p>
+            <div class="bring">
+              <div><b>You bring:</b> a short description of your idea.</div>
+              <div><b>You get:</b> a clear concept you can review, then a risk score.</div>
+            </div>
+            <a href="#paths" class="btn btn-accent" data-studio="idea">Start with an idea</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group B: CIOs, CTOs, tech leaders -->
+      <div class="group group-b">
+        <div class="group-intro">
+          <span class="tag">Recommended for CIOs, CTOs, CAIOs, CDOs and tech leaders</span>
+          <p>Bring your documentation and skip the questions it already answers.</p>
+        </div>
+        <div class="path">
+          <span class="path-label">Path 3</span>
+          <h3>I know my AI</h3>
+          <p>Upload your system documentation. Attributes are extracted with source citations, and you are only asked about the gaps.</p>
+          <div class="bring">
+            <div><b>You bring:</b> architecture notes, model cards, policies.</div>
+            <div><b>You get:</b> a pre-filled profile with a confidence level on every value.</div>
+          </div>
+          <a href="#paths" class="btn btn-white" data-studio="documents">Upload my documents</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What you get -->
+<section id="get" class="section section-raised get">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">What you get</span>
+      <h2>Get a Full Scope of AI Risk Areas that Matter Most to Your Use-Case</h2>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>Explainable Risk Score<br>in Plain English.</h3>
+        <p>One number from 0 to 100, plus the factors that drove it: data sensitivity, autonomy, who is affected, and more.</p>
+        <div class="mini-scale">
+          <div class="scale-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+          <div class="scale-labels"><span>Low 0-34</span><span>Medium 35-54</span><span>High 55-74</span><span>Critical 75-100</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Ranked Actions</h3>
+        <p>A prioritised list of what to do first. Each action says why it matters and how many points it could take off the score.</p>
+        <p>Tick Plan this action and the projected score updates straight away.</p>
+      </div>
+      <div class="card">
+        <h3>Full AI Risk Report</h3>
+        <p>Export the full assessment as HTML or PDF for your team, your leadership or your risk and compliance colleagues.</p>
+        <p>Optional: a 15-question Data Readiness check adds a separate score for your data and security.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust -->
+<section id="trust" class="section-tight">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Why you can trust the result</span>
+      <h2>Fully Explainable, Fully Transparent.</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust">
+        <h3>Transparent &amp; Explainable Rules Engine</h3>
+        <p>The AI risk score comes from fixed, repeatable rules, not from an AI guess. Same inputs will always produce the result.</p>
+      </div>
+      <div class="trust">
+        <h3>Reference Sources from Global Standards, Legal Frameworks, &amp; Singapore-Only AI Guidelines.</h3>
+        <p>Cross Referenced against the EU AI Act, NIST AI RMF 1.0, ISO/IEC 42001, and GDPR.</p>
+      </div>
+      <div class="trust">
+        <h3>You confirm every quantitative/qualitative metric for risk scoring.</h3>
+        <p>Detected and inferred details are shown with a confidence level. You have full discretion to confirm every risk dimension that contributes to the overall AI risk score.</p>
+      </div>
+      <div class="trust">
+        <h3>Guidance, not a verdict</h3>
+        <p>The studio supports your decisions. It is not legal advice and it does not certify compliance.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final call to action -->
+<section class="section final">
+  <div class="wrap">
+    <h2>Ready to assess your first AI idea?</h2>
+    <div class="final-grid">
+      <div class="final-card">
+        <p>New to AI, or building something yourself? Start with a problem or a rough idea.</p>
+        <div class="row">
+          <a href="#paths" class="btn btn-accent" data-studio="problem">Help me find an AI use case</a>
+          <a href="#paths" class="btn btn-outline-white" data-studio="idea">I have an idea</a>
+        </div>
+      </div>
+      <div class="final-card">
+        <p>Leading a technology team with systems already in place? Go straight to your documentation.</p>
+        <div class="row">
+          <a href="#paths" class="btn btn-white" data-studio="documents">I know my AI</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>AI Risk Studio by SafeAI.sg</span>
+    <span>Guidance only, not legal advice or certification.</span>
+  </div>
+</footer>
+
+<script>
+  // Where each studio path opens. Fill in a URL and every button for that path
+  // (in "Choose your path" and in the closing call to action) points there.
+  // While a value is empty the button scrolls to "Choose your path", as in the mock-up.
+  var STUDIO_LINKS = {
+    problem:   '',   // Path 1, Help me find an AI use case
+    idea:      '',   // Path 2, I have an idea
+    documents: ''    // Path 3, I know my AI
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-studio]'), function (a) {
+    var url = STUDIO_LINKS[a.getAttribute('data-studio')];
+    if (url) a.setAttribute('href', url);
+  });
+
+  // Mobile menu
+  (function () {
+    var nav = document.getElementById('siteNav'), btn = document.getElementById('navToggle');
+    if (!nav || !btn) return;
+    btn.addEventListener('click', function () {
+      var open = nav.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+    nav.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('.nav-link')) {
+        nav.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+</script>
+</body>
+</html>
