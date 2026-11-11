@@ -1,6 +1,6 @@
 # SafeAI, next session
 
-State as of **2026-08-06**. The live site is healthy. Nothing below blocks it.
+State as of **2026-11-11** (anti-vibecode pass on all three pages). The live site is healthy. Nothing below blocks it.
 
 Deploy is `git push` to main; safeai.sg auto-deploys within about a minute from
 the **calebspark** Vercel account. Do not use the local `vercel` CLI: its
@@ -207,9 +207,14 @@ company records.
   check them if you add anything: the nav's own `background` is a literal rgba,
   the nav logo must be the **dark** variant (`safeai-logo-print.png`; the
   `-trim` file is white artwork for a dark bar and vanishes), and the brand
-  orange is a **fill** colour only. As text on
-  white it is about 2.9:1, so every accent-as-ink use goes through
-  `--accent-text`, applied by the block at the very end of the stylesheet.
+  orange is a **fill** colour only, and since 2026-11-11 it is a fill on
+  the one primary action per view and nothing else. Picked options, the
+  stepper's progress and the active maturity track use `--pick` (ink), and
+  eyebrows, icons and links run on the ink ramp. Every font, layer and
+  one-off colour reads through a token in `:root` (`--font-sans`,
+  `--font-display`, `--z-*`, `--nav-bg`, `--on-fill`); do not write a hex
+  or a face name in a rule. Same pass on `index.html`: flat orange buttons
+  (`#FF991C`, matching the tool), no gradient, no lit edge on buttons.
 - **`REPORT_CSS` re-pins `--fs-base` and the `--s*` steps.** The screen theme
   runs 15px and wider gaps for the projector; paper keeps the original 13px and
   spacing. Change a spacing token and the PDF follows unless it is pinned there

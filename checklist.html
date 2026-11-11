@@ -54,7 +54,6 @@
       --danger:     #dc2f26;  --danger-fill:  #e5352b;  --danger-soft: #fdedec; --danger-line: #f7c6c3;
 
       --raise:
-        inset 0 1px 0 rgba(255,255,255,.7),
         0 1px 2px rgba(11,11,15,.06),
         0 8px 20px -16px rgba(11,11,15,.28);
       --shadow-pop: 0 18px 44px -20px rgba(11,11,15,.30);
@@ -63,20 +62,41 @@
       --s1:4px; --s2:8px; --s3:12px; --s4:18px; --s5:24px; --s6:36px; --s7:52px; --s8:72px;
       --gap: 20px;
       --fs-base: 17px;
+
+      /* Locked tokens. Every font, layer and one-off colour below reads
+         through these, so nothing in the stylesheet names a face or a hex. */
+      --font-sans: "DM Sans", system-ui, sans-serif;
+      --font-display: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+      --nav-bg: rgba(255,255,255,.86);
+      --chk-line: rgba(11,11,15,.38);
+      --on-fill: #ffffff;
+      --shadow-card: 0 10px 30px -22px rgba(11,11,15,.35);
+      /* Picked state for options and progress. Ink, not the accent: the
+         orange fill belongs to the one primary action per view, and a page
+         of eight answered questions had eight orange pills competing with it. */
+      --pick: var(--ink);
+      --pick-2: var(--ink-2);
+      --pick-ink: var(--surface-1);
+      --pick-ring: rgba(11,11,15,.12);
+      /* Layer ladder. Values kept from the old literals so stacking is unchanged. */
+      --z-raised: 1; --z-popover: 40; --z-tip: 50; --z-toast: 60; --z-sticky: 100; --z-gate: 120;
     }
     /* Was 13px, too small to read from the back of a room on a projector. */
     @media (min-width:1024px){ :root{ --fs-base:15px; } }
 
     *{ box-sizing:border-box; }
     html{ scroll-behavior:smooth; }
+    /* Hard floor: nothing may widen the page. clip, not hidden, so the
+       sticky nav keeps working. */
+    html, body{ overflow-x:clip; }
     body{
       margin:0; background:var(--bg); color:var(--ink);
-      font-family:"DM Sans", system-ui, sans-serif;
+      font-family:var(--font-sans);
       font-size:var(--fs-base); line-height:1.6;
       -webkit-font-smoothing:antialiased;
     }
     .trim{ text-box: trim-both cap alphabetic; }
-    h1,h2,h3,h4{ font-family:"Plus Jakarta Sans","DM Sans",sans-serif; margin:0; font-weight:700; letter-spacing:-.02em; line-height:1.2; }
+    h1,h2,h3,h4{ font-family:var(--font-display); margin:0; font-weight:700; letter-spacing:-.02em; line-height:1.2; }
     p{ margin:0; }
     a{ color:inherit; }
     .wrap{ max-width:1120px; margin:0 auto; padding:0 var(--s5); }
@@ -84,11 +104,11 @@
     .with-icon{ display:inline-flex; align-items:center; gap:.5em; }
 
     /* ---------- top bar (matches landing nav) ---------- */
-    nav{ position:sticky; top:0; z-index:100; background:rgba(255,255,255,.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
+    nav{ position:sticky; top:0; z-index:var(--z-sticky); background:var(--nav-bg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
     .nav-brand{ display:flex; align-items:center; text-decoration:none; }
     .nav-logo{ height:46px; width:auto; display:block; }
     .nav-links{ display:flex; align-items:center; gap:8px; }
-    .nav-link{ font:600 var(--fs-base)/1 "Plus Jakarta Sans","DM Sans",sans-serif; text-box:trim-both cap alphabetic; color:var(--ink-2); text-decoration:none; padding:12px 24px; border-radius:var(--r-sm); background:transparent; cursor:pointer; transition:background .18s ease, color .18s ease; }
+    .nav-link{ font:600 var(--fs-base)/1 var(--font-display); text-box:trim-both cap alphabetic; color:var(--ink-2); text-decoration:none; padding:12px 24px; border-radius:var(--r-sm); background:transparent; cursor:pointer; transition:background .18s ease, color .18s ease; }
     .nav-link:hover{ background:var(--surface-1); color:var(--ink); }
     .nav-link:active{ background:var(--surface-2); }
     .nav-link:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
@@ -98,7 +118,7 @@
     /* ---------- hero ---------- */
     .hero{ padding:64px 0 var(--s6); }
     @media (min-width:1024px){ .hero{ padding-top:104px; } }
-    .eyebrow{ display:inline-flex; align-items:center; gap:6px; font-family:"Plus Jakarta Sans"; font-size:calc(var(--fs-base)*.86); font-weight:600; color:var(--accent); margin-bottom:var(--s3); }
+    .eyebrow{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-display); font-size:calc(var(--fs-base)*.86); font-weight:600; color:var(--ink-2); margin-bottom:var(--s3); }
     .hero h1{ font-size:calc(var(--fs-base)*2.7); font-weight:700; max-width:760px; }
     .hero p{ color:var(--ink-2); font-size:calc(var(--fs-base)*1.12); line-height:1.75; max-width:640px; margin-top:var(--s4); }
 
@@ -106,18 +126,20 @@
     .companion{ display:inline-flex; align-items:center; gap:10px; margin-top:var(--s5); padding:11px 16px 11px 14px; border-radius:var(--r-pill);
       background:var(--surface-1); border:1px solid var(--line); box-shadow:var(--raise); text-decoration:none; color:var(--ink-2); font-size:calc(var(--fs-base)*.92); transition:background .15s, color .15s; }
     .companion:hover{ background:var(--surface-2); color:var(--ink); }
-    .companion ion-icon{ font-size:1.1em; color:var(--accent); flex:none; }
+    .companion ion-icon{ font-size:1.1em; color:var(--ink-2); flex:none; }
     .companion b{ color:var(--ink); font-weight:600; }
     .companion .arr{ color:var(--ink-3); }
 
     /* ---------- layout ---------- */
     .stage{ padding:var(--s6) 0 var(--s8); }
-    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s7); box-shadow:0 10px 30px -22px rgba(11,11,15,.35); }
+    .card{ background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:var(--s7); box-shadow:var(--shadow-card); }
     @media (max-width:640px){ .card{ padding:var(--s5); } }
     .card + .card{ margin-top:var(--gap); }
-    .stitle{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s4); }
-    .stitle .n{ display:grid; place-items:center; width:30px; height:30px; flex:none; border-radius:9px; background:var(--surface-2); color:var(--accent); box-shadow:var(--raise); }
-    .stitle .n ion-icon{ font-size:18px; }
+    /* Top-aligned: a title that wraps to four lines on a phone left the
+       icon floating at its middle. */
+    .stitle{ display:flex; align-items:flex-start; gap:var(--s3); margin-bottom:var(--s4); }
+    .stitle .n, .grp-head .n{ display:grid; place-items:center; width:30px; height:30px; flex:none; border-radius:9px; background:var(--surface-2); color:var(--ink-2); box-shadow:var(--raise); }
+    .stitle .n ion-icon, .grp-head .n ion-icon{ font-size:18px; }
     .stitle h2{ font-size:calc(var(--fs-base)*1.25); font-weight:700; }
 
     /* ---------- score card (live, sticky-ish summary) ---------- */
@@ -125,14 +147,14 @@
     .score-ring{ position:relative; width:120px; height:120px; flex:none; }
     .score-ring svg{ width:100%; height:100%; transform:rotate(-90deg); }
     .score-ring .track{ fill:none; stroke:var(--surface-3); stroke-width:11; }
-    .score-ring .prog{ fill:none; stroke:var(--accent); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset .5s cubic-bezier(.2,.8,.2,1), stroke .3s; }
+    .score-ring .prog{ fill:none; stroke:var(--ink-3); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset .5s cubic-bezier(.2,.8,.2,1), stroke .3s; }
     .score-ring .ctr{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; }
-    .score-ring .ctr .num{ font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*1.7); line-height:1; }
+    .score-ring .ctr .num{ font-family:var(--font-display); font-weight:700; font-size:calc(var(--fs-base)*1.7); line-height:1; }
     .score-ring .ctr .den{ font-size:calc(var(--fs-base)*.78); color:var(--ink-3); }
     .score-meta{ flex:1; min-width:240px; }
-    .score-band{ display:inline-flex; align-items:center; gap:7px; font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*.86); padding:7px 14px; border-radius:var(--r-pill); }
+    .score-band{ display:inline-flex; align-items:center; gap:7px; font-family:var(--font-display); font-weight:700; font-size:calc(var(--fs-base)*.86); padding:7px 14px; border-radius:var(--r-pill); }
     .score-band ion-icon{ font-size:1.05em; }
-    .score-verdict{ font-family:"Plus Jakarta Sans"; font-weight:700; font-size:calc(var(--fs-base)*1.5); margin-top:var(--s3); line-height:1.25; }
+    .score-verdict{ font-family:var(--font-display); font-weight:700; font-size:calc(var(--fs-base)*1.5); margin-top:var(--s3); line-height:1.25; }
     .score-note{ color:var(--ink-2); font-size:calc(var(--fs-base)*.95); line-height:1.65; margin-top:var(--s2); max-width:520px; }
     .score-actions{ display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s5); }
 
@@ -156,7 +178,7 @@
 
     /* ---------- checklist groups ---------- */
     .grp-head{ display:flex; align-items:center; gap:var(--s3); margin-bottom:var(--s2); }
-    .grp-head .gnum{ font-family:"Plus Jakarta Sans"; font-weight:700; color:var(--ink-3); font-size:calc(var(--fs-base)*.9); }
+    .grp-head .gnum{ font-family:var(--font-display); font-weight:700; color:var(--ink-3); font-size:calc(var(--fs-base)*.9); }
     .grp-head h3{ font-size:calc(var(--fs-base)*1.12); font-weight:700; }
     .grp-head .gcount{ margin-left:auto; font-size:calc(var(--fs-base)*.8); color:var(--ink-2); background:var(--surface-2); padding:3px 11px; border-radius:var(--r-pill); }
     .grp-sub{ color:var(--ink-2); font-size:calc(var(--fs-base)*.92); margin-bottom:var(--s5); line-height:1.55; max-width:68ch; }
@@ -168,8 +190,8 @@
     /* An empty checkbox has to be visible before it is used, so its stroke is
        its own value rather than the page hairline: at 18% black an unticked box
        faded out on the projector. */
-    .chk{ width:22px; height:22px; flex:none; margin-top:1px; padding:0; border-radius:6px; border:1.5px solid rgba(11,11,15,.38); background:var(--surface-1); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
-    .chk ion-icon{ font-size:15px; color:#fff; opacity:0; transition:opacity .12s; }
+    .chk{ width:22px; height:22px; flex:none; margin-top:1px; padding:0; border-radius:6px; border:1.5px solid var(--chk-line); background:var(--surface-1); cursor:pointer; display:grid; place-items:center; transition:background .15s, border-color .15s; }
+    .chk ion-icon{ font-size:15px; color:var(--on-fill); opacity:0; transition:opacity .12s; }
     .chk:hover{ border-color:var(--ink-3); }
     .chk:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
     .chk[aria-checked="true"]{ background:var(--success-fill); border-color:var(--success-fill); }
@@ -183,13 +205,15 @@
     .citem[data-checked="true"] .cd{ color:var(--ink-3); }
 
     /* ---------- resources ---------- */
-    .res-grid{ display:grid; gap:var(--s3); grid-template-columns:1fr; margin-top:var(--s2); }
-    @media (min-width:720px){ .res-grid{ grid-template-columns:1fr 1fr; } }
-    .res{ display:flex; align-items:flex-start; gap:var(--s3); padding:15px 16px; border-radius:var(--r-md); background:var(--surface-2); border:1px solid var(--line); text-decoration:none; transition:background .15s, transform .1s; }
-    .res:hover{ background:var(--surface-3); }
+    .res-grid{ display:grid; gap:var(--s1) var(--s6); grid-template-columns:minmax(0,1fr); margin-top:var(--s2); }
+    @media (min-width:720px){ .res-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        /* Rows on the card surface, not tiles. Six filled, outlined boxes inside a
+       card was a card nested in a card, twice the padding and twice the edges. */
+    .res{ display:flex; align-items:flex-start; gap:var(--s3); padding:var(--s3); margin:0 calc(var(--s3) * -1); border-radius:var(--r-sm); background:transparent; text-decoration:none; transition:background .15s, transform .1s; min-width:0; }
+    .res:hover{ background:var(--surface-2); }
     .res:active{ transform:translateY(1px); }
     .res:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-    .res ion-icon{ font-size:20px; color:var(--accent); flex:none; margin-top:2px; }
+    .res ion-icon{ font-size:20px; color:var(--ink-3); flex:none; margin-top:2px; }
     .res > span{ display:flex; flex-direction:column; min-width:0; }
     .res .rt{ display:block; color:var(--ink); font-weight:600; }
     .res .rd{ display:block; color:var(--ink-3); font-size:calc(var(--fs-base)*.84); margin-top:3px; line-height:1.45; }
@@ -202,17 +226,13 @@
     footer a:hover{ color:var(--ink); }
 
     .toast{ position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0; background:var(--surface-2); color:var(--ink); border:1px solid var(--line-2); box-shadow:var(--shadow-pop);
-      padding:11px 18px; border-radius:var(--r-pill); font-size:calc(var(--fs-base)*.9); font-weight:500; display:flex; align-items:center; gap:8px; pointer-events:none; transition:transform .25s, opacity .25s; z-index:60; }
+      padding:11px 18px; border-radius:var(--r-pill); font-size:calc(var(--fs-base)*.9); font-weight:500; display:flex; align-items:center; gap:8px; pointer-events:none; transition:transform .25s, opacity .25s; z-index:var(--z-toast); }
     .toast.show{ opacity:1; transform:translate(-50%,0); }
     .toast ion-icon{ font-size:16px; color:var(--success); }
 
-    /* ---------- accent as ink ----------
-       The brand orange is near 2.9:1 on white, under the 4.5:1 floor and the
-       first thing a projector loses. Fills keep the orange, text steps down. */
-    .eyebrow,
-    .companion ion-icon,
-    .stitle .n,
-    .res ion-icon{ color:var(--accent-text); }
+    /* Inline text links: ink with a quiet underline, never the accent. */
+    .tlink{ color:var(--ink); text-decoration:underline; text-decoration-color:var(--line-2); text-underline-offset:3px; }
+    .tlink:hover{ text-decoration-color:var(--ink); }
     /* A focus ring has to clear 3:1 against what it sits on to be seen, and the
        fill orange is 2.6:1 on white. Setting only the colour leaves each rule's
        own width and style alone. */
@@ -229,7 +249,7 @@
      source is public). To rotate the password, replace GATE_HASH with the
      SHA-256 hex of the new one: printf 'newpass' | shasum -a 256 -->
 <style>
-  #gate{ position:fixed; inset:0; z-index:120; background:var(--bg); display:grid; place-items:center; padding:24px; }
+  #gate{ position:fixed; inset:0; z-index:var(--z-gate); background:var(--bg); display:grid; place-items:center; padding:24px; }
   #gate[hidden]{ display:none; }
   .gate-card{ width:min(380px,100%); background:var(--surface-1); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; box-shadow:var(--raise); }
   .gate-card h1{ margin:0 0 10px; font-size:calc(var(--fs-base)*1.35); line-height:1.2; }
@@ -283,8 +303,8 @@
         <a href="/harness/" class="nav-link">Harness</a>
         <a href="/index.html#mission" class="nav-link">Mission</a>
         <a href="/index.html#downloads" class="nav-link">Resources</a>
-        <a href="/index.html#council" class="nav-link">Who We Are</a>
-        <a href="/index.html#contact" class="nav-link">Contact Us</a>
+        <a href="/index.html#council" class="nav-link">Who we are</a>
+        <a href="/index.html#contact" class="nav-link">Contact us</a>
       </div>
     </div>
   </nav>
@@ -333,12 +353,12 @@
 
       <!-- ===== SINGAPORE RESOURCES ===== -->
       <div class="card">
-        <div class="stitle"><span class="n"><ion-icon name="library-outline"></ion-icon></span><div><h2>Singapore has your back</h2></div></div>
+        <div class="stitle"><span class="n"><ion-icon name="library-outline"></ion-icon></span><div><h2>Official resources in Singapore</h2></div></div>
         <p class="grp-sub">Free, official resources for AI adoption, data protection, and security in Singapore.</p>
         <div class="res-grid" id="resGrid"></div>
       </div>
 
-      <p class="disclaim">This checklist is general guidance to help teams adopt AI responsibly. It is not legal, regulatory, or financial advice, and it is not a formal risk assessment. For a use-case-specific risk tier and mapped controls, use the <a href="/risk-assessment.html" style="color:var(--accent-text)">AI Risk Assessment</a>. Verify regulatory obligations, such as PDPA duties, with your compliance function.</p>
+      <p class="disclaim">This checklist is general guidance to help teams adopt AI responsibly. It is not legal, regulatory, or financial advice, and it is not a formal risk assessment. For a use-case-specific risk tier and mapped controls, use the <a href="/risk-assessment.html" class="tlink">AI Risk Assessment</a>. Verify regulatory obligations, such as PDPA duties, with your compliance function.</p>
     </div>
   </main>
 
@@ -353,7 +373,7 @@
 
 <script>
 /* ============================================================
-   SafeAI — AI Safety Checklist
+   SafeAI: AI Safety Checklist
    Self-scored, plain-language companion to the risk assessment.
    Ticks persist to localStorage on this device.
    ============================================================ */
@@ -435,7 +455,7 @@ function renderList(){
     return `
       <div ${gi>0?'style="margin-top:var(--s7)"':''}>
         <div class="grp-head">
-          <span class="n" style="display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:9px;background:var(--surface-2);color:var(--accent-text);box-shadow:var(--raise)"><ion-icon name="${g.icon}" style="font-size:18px"></ion-icon></span>
+          <span class="n"><ion-icon name="${g.icon}"></ion-icon></span>
           <h3>${escapeHtml(g.title)}</h3>
           <span class="gcount" data-gi="${gi}">${done}/${g.items.length}</span>
         </div>

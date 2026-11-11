@@ -16,8 +16,8 @@
 
     :root {
       /* ── ONE accent (brand orange). Gradient lives only inside the logo asset. ── */
-      --accent:     #E97132;
-      --accent-2:   #f08a52;            /* hover only */
+      --accent:     #FF991C;            /* same orange as the risk tool and checklist */
+      --accent-2:   #ffab45;            /* hover only */
       --accent-ink: #16100b;            /* text on accent fill */
 
       /* ── neutral ramp, dark canvas ── */
@@ -32,6 +32,7 @@
       --ink-2:      #a1a1aa;
       --ink-3:      #71717a;
       --success:    #3ecf8e;            /* semantic: success/confirm only */
+      --plate:      #ffffff;            /* behind transparent-background headshots */
 
       /* ── shadows: soft, diffuse, never a hard slab ── */
       --shadow:     0 14px 34px -18px rgba(0,0,0,.55);
@@ -67,6 +68,9 @@
     } }
 
     html { scroll-behavior: smooth; -webkit-text-size-adjust:100%; scroll-padding-top: 120px; }
+    /* Hard floor: nothing widens the page. clip, not hidden, so sticky still works. */
+    html, body { overflow-x: clip; }
+    .btn[aria-disabled="true"] { pointer-events:none; opacity:.55; background: var(--surface-2); box-shadow:none; }
     body {
       background: var(--bg);                /* flat, no spotlight */
       color: var(--ink);
@@ -89,7 +93,7 @@
       font-size: var(--t-cap);
       font-weight: 600;
       letter-spacing: .01em;
-      color: var(--accent);
+      color: var(--ink-2);
       margin-bottom: var(--s4);
     }
 
@@ -123,18 +127,18 @@
       color: var(--ink);
       background: var(--surface-1);
       background-clip: padding-box;
-      box-shadow: var(--raise), var(--shadow);
+      box-shadow: var(--shadow);
       text-decoration:none; cursor:pointer;
       -webkit-tap-highlight-color:transparent;
       transition: background .18s ease, transform .12s ease, box-shadow .2s ease;
     }
     .btn:hover { background: var(--surface-2); }
-    .btn:active { transform: translateY(1px) scale(.985); background: var(--surface-3); box-shadow: var(--raise); }
+    .btn:active { transform: translateY(1px) scale(.985); background: var(--surface-3); }
     .btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-    /* accent buttons: slight magenta hue shifting into orange */
-    .btn-accent { background: linear-gradient(115deg, #9b3b92 0%, #b84e6f 28%, #E97132 70%); color: #fff;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.28), var(--shadow); }
-    .btn-accent:hover { background: linear-gradient(115deg, #ad479f 0%, #cc5a7c 28%, #f0853f 70%); }
+    /* Flat brand orange with near-black ink. The old magenta-to-orange
+       gradient was a second hue carrying no meaning, plus a lit top edge. */
+    .btn-accent { background: var(--accent); color: var(--accent-ink); }
+    .btn-accent:hover { background: var(--accent-2); }
     .btn-accent:active { transform: translateY(1px) scale(.985); }
     .btn-sm { --btn-py:9px; border-radius: var(--r-sm); font-size: var(--t-cap); }
 
@@ -182,7 +186,6 @@
     .hero-logo { width: 840px; max-width: 100%; height:auto; display:block; margin-bottom: var(--s6); }
     .hero .eyebrow { margin-bottom: var(--s4); }
     .hero h1 { font-size: var(--t-h1); line-height:1.14; margin-bottom: var(--s6); max-width: 720px; }
-    .hero h1 .accent { color: var(--accent); }
     .hero-sub { font-size: var(--t-lead); color: var(--ink-2); line-height:1.85; margin-bottom: var(--s8); max-width: 600px; }
     .hero-cta { display:flex; gap: var(--s4); flex-wrap:wrap; }
     .hero-cta .btn { --btn-py: 15px; }
@@ -283,7 +286,7 @@
     .solution-body .ico-wrap {
       width:40px; height:40px; flex:none; border-radius: var(--r-md);
       background: var(--surface-2); display:flex; align-items:center; justify-content:center;
-      color: var(--accent);
+      color: var(--ink-2);
     }
     .solution-body .ico-wrap .ico { width:20px; height:20px; }
     .solution-body p { font-size: var(--t-body); color: var(--ink-2); line-height:1.7; }
@@ -311,7 +314,7 @@
       width:48px; height:48px; border-radius:50%; border:1px solid transparent;
       display:flex; align-items:center; justify-content:center;
       background: var(--surface-2); color: var(--ink);
-      box-shadow: var(--raise), var(--shadow-pop); cursor:pointer;
+      box-shadow: var(--shadow-pop); cursor:pointer;
       transition: background .18s ease, transform .12s ease;
     }
     .carousel-arrow:hover { background: var(--surface-3); }
@@ -336,7 +339,7 @@
       display:flex; align-items:center; justify-content:center;
       margin-bottom: var(--s4); box-shadow: var(--raise);
     }
-    .pillar-tag { font-size: var(--t-cap); font-weight:600; color: var(--accent); margin-bottom: var(--s2); }
+    .pillar-tag { font-size: var(--t-cap); font-weight:600; color: var(--ink-3); margin-bottom: var(--s2); }
     .pillar-card h3 { font-size: var(--t-h3); margin-bottom: var(--s3); line-height:1.2; }
     .pillar-outcome { font-size: var(--t-body); color: var(--ink-2); line-height:1.65; }
 
@@ -352,10 +355,10 @@
     .download-icon {
       width:48px; height:48px; border-radius: var(--r-md);
       background: var(--surface-2); display:flex; align-items:center; justify-content:center;
-      color: var(--accent); box-shadow: var(--raise);
+      color: var(--ink-2); box-shadow: var(--raise);
     }
     .download-icon .ico { width:22px; height:22px; }
-    .download-label { font-size: var(--t-cap); font-weight:600; color: var(--accent); }
+    .download-label { font-size: var(--t-cap); font-weight:600; color: var(--ink-3); }
     .download-card h3 { font-size: var(--t-h3); }
     .download-card p { font-size: var(--t-body); color: var(--ink-2); line-height:1.7; max-width:680px; }
 
@@ -376,12 +379,12 @@
     .member-card:hover { transform: translateY(-3px); background: var(--surface-2); }
     .member-photo {
       width:104px; height:104px; border-radius:50%; object-fit:cover; object-position: top center;
-      margin:0 auto var(--s4); display:block; background:#fff;
+      margin:0 auto var(--s4); display:block; background:var(--plate);
       box-shadow: 0 0 0 1px var(--line-2), var(--shadow);
     }
     .member-photo-plate {
       width:104px; height:104px; border-radius:50%;
-      margin:0 auto var(--s4); background:#fff; overflow:hidden;
+      margin:0 auto var(--s4); background:var(--plate); overflow:hidden;
       box-shadow: 0 0 0 1px var(--line-2), var(--shadow);
     }
     .member-photo-plate img { width:100%; height:100%; display:block; object-fit:cover; object-position: top center; }
@@ -540,8 +543,8 @@
       <a href="/harness/" class="nav-link">Harness</a>
       <a href="#mission" class="nav-link">Mission</a>
       <a href="#downloads" class="nav-link">Resources</a>
-      <a href="#council" class="nav-link">Who We Are</a>
-      <a href="#contact" class="nav-link">Contact Us</a>
+      <a href="#council" class="nav-link">Who we are</a>
+      <a href="#contact" class="nav-link">Contact us</a>
     </div>
     <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
       <svg class="ico open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -554,14 +557,14 @@
 <section class="hero">
   <div class="hero-inner">
     <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="hero-logo" />
-    <div class="eyebrow">Coming Soon, 2026 to 2027</div>
-    <h1 class="trim">Singapore's Centre of Excellence for <span class="accent">AI Safety</span> and Governance</h1>
+    <div class="eyebrow">Coming soon, 2026 to 2027</div>
+    <h1 class="trim">Singapore's Centre of Excellence for AI Safety and Governance</h1>
     <p class="hero-sub">SafeAI.sg bridges national AI governance policy and practitioner-level implementation, so every organisation can deploy AI with confidence at the right level of rigour, at any scale.</p>
     <div class="hero-cta">
-      <a href="#contact" class="btn btn-accent" data-tip="Contact Us">Keep me informed</a>
+      <a href="#contact" class="btn btn-accent" data-tip="Jump to contact details">Keep me informed</a>
       <!-- "Know my AI Risk" hidden until the assessment is validated. The tool
            stays reachable at /risk-assessment.html for people with the link.
-           Restore: <a href="/risk-assessment.html" class="btn" data-tip="Assess your AI risk">Know my AI Risk</a> -->
+           Restore: <a href="/risk-assessment.html" class="btn" data-tip="Assess your AI risk">Know my AI risk</a> -->
     </div>
   </div>
 </section>
@@ -749,14 +752,14 @@
         </span>
         <div class="download-label">Interactive tool</div>
         <h3 class="trim">AI Risk Assessment</h3>
-        <p>Answer six quick questions about your AI use case and get an instant risk tier, the key risk scenarios, and a mapped checklist of the controls you should have in place. Aligned to the MindForge AI RMF and CSA Securing AI guidelines.</p>
+        <p>Answer eight questions about your AI use case and get an instant risk tier, the key risk scenarios, and a mapped checklist of the controls you should have in place. Aligned to the MindForge AI RMF and CSA Securing AI guidelines.</p>
         <!-- Coming soon until the assessment is validated. Restore the link below when it is.
-        <a href="/risk-assessment.html" class="btn btn-accent">
+        <a href="/risk-assessment.html" class="btn">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Know my AI Risk
+          Know my AI risk
         </a>
         -->
-        <span class="btn" aria-disabled="true" style="pointer-events:none; opacity:.55">Coming soon</span>
+        <span class="btn" aria-disabled="true">Coming soon</span>
       </div>
       <div class="download-card">
         <span class="download-icon">
@@ -766,12 +769,12 @@
         <h3 class="trim">AI Safety Checklist</h3>
         <p>Twenty-two plain-language steps to run AI safely, from reading the terms of service to keeping a kill switch. Tick what you already do, see where you stand, and start with the gaps that matter most. No technical knowledge needed.</p>
         <!-- Coming soon until the assessment is validated. Restore the link below when it is.
-        <a href="/checklist.html" class="btn btn-accent">
+        <a href="/checklist.html" class="btn">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           Open the checklist
         </a>
         -->
-        <span class="btn" aria-disabled="true" style="pointer-events:none; opacity:.55">Coming soon</span>
+        <span class="btn" aria-disabled="true">Coming soon</span>
       </div>
     </div>
   </div>
@@ -885,7 +888,7 @@
         </div>
       </div>
       <div class="contact-btns">
-        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn btn-accent">Contact Us</a>
+        <a href="mailto:david@wahspark.com?subject=SafeAI.sg Enquiry" class="btn btn-accent">Contact us</a>
       </div>
     </div>
   </div>
