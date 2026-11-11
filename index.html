@@ -33,6 +33,9 @@
       --ink-3:      #71717a;
       --success:    #3ecf8e;            /* semantic: success/confirm only */
       --plate:      #ffffff;            /* behind transparent-background headshots */
+      /* risk tiers, meaning only: low, medium, high, critical. Muted a step for the dark canvas. */
+      --t1-fill: #2fb67a; --t2-fill: #e0aa1a; --t3-fill: #FF991C; --t4-fill: #e0463d;
+      --t3-soft: rgba(255,153,28,.14); --t3-text: #ffb35c; --t3-line: rgba(255,153,28,.32);
 
       /* ── shadows: soft, diffuse, never a hard slab ── */
       --shadow:     0 14px 34px -18px rgba(0,0,0,.55);
@@ -202,21 +205,21 @@
 
     /* ── RISK STUDIO SHOWCASE (sits under the hero, copy from the studio mock-up) ── */
     .studio { padding: 0 52px 96px; }
+    /* Copy on the canvas, the example as the one card. Wrapping both in a card
+       put a card inside a card, and the gradient stripe on top was a side
+       accent in a second hue. */
     .studio-inner {
-      max-width:1120px; margin:0 auto; position:relative; overflow:hidden;
-      background: var(--surface-1); border-radius: var(--r-lg);
-      box-shadow: var(--raise), var(--shadow-pop);
-      padding: 48px; display:grid; grid-template-columns: 1.1fr .9fr; gap: var(--s7); align-items:center;
+      max-width:1120px; margin:0 auto;
+      display:grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); gap: var(--s7); align-items:center;
     }
-    .studio-inner::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, #9b3b92 0%, #b84e6f 35%, #E97132 100%); }
     .studio-copy h2 { font-size: var(--t-h1); line-height:1.12; margin-bottom: var(--s5); max-width: 560px; }
     .studio-copy .lead { margin-bottom: var(--s6); }
     .studio-cta { display:flex; gap: var(--s4); flex-wrap:wrap; margin-bottom: var(--s4); }
     .studio-cta .btn { --btn-py: 15px; }
     .studio-note { font-size: var(--t-cap); color: var(--ink-3); }
     .studio-example {
-      background: var(--surface-2); border-radius: var(--r-lg); padding: 28px;
-      box-shadow: var(--raise); display:flex; flex-direction:column; gap: var(--s4);
+      min-width:0; background: var(--surface-1); border-radius: var(--r-lg); padding: 28px;
+      box-shadow: var(--raise), var(--shadow); display:flex; flex-direction:column; gap: var(--s4);
     }
     .ex-top { display:flex; justify-content:space-between; align-items:center; gap: var(--s2); font-size: var(--t-cap); color: var(--ink-3); }
     .ex-top .label { font-weight:600; color: var(--ink-2); }
@@ -224,12 +227,12 @@
     .ex-score { display:flex; align-items:flex-end; gap: var(--s3); }
     .ex-num { font-size: calc(var(--fs-base) * 4.4); font-weight:600; letter-spacing:-.04em; line-height:.9; color: var(--ink); }
     .ex-of { font-size: var(--t-cap); color: var(--ink-3); padding-bottom: 4px; }
-    .ex-band { margin-left:auto; padding: 5px 12px; border-radius: var(--r-pill); background:#E8742A; color:#16100b; font-weight:700; font-size: var(--t-cap); }
-    .ex-bar { height:10px; border-radius: var(--r-pill); overflow:hidden; display:flex; }
-    .ex-bar span:nth-child(1) { width:35%; background:#2E9E6B; }
-    .ex-bar span:nth-child(2) { width:20%; background:#E0A100; }
-    .ex-bar span:nth-child(3) { width:20%; background:#E8742A; }
-    .ex-bar span:nth-child(4) { width:25%; background:#8E0B22; }
+    .ex-band { margin-left:auto; padding: 5px 12px; border-radius: var(--r-pill); background: var(--t3-soft); color: var(--t3-text); box-shadow: inset 0 0 0 1px var(--t3-line); font-weight:700; font-size: var(--t-cap); }
+    .ex-bar { height:10px; border-radius: var(--r-pill); overflow:hidden; display:flex; gap:2px; }
+    .ex-bar span:nth-child(1) { width:35%; background: var(--t1-fill); }
+    .ex-bar span:nth-child(2) { width:20%; background: var(--t2-fill); }
+    .ex-bar span:nth-child(3) { width:20%; background: var(--t3-fill); }
+    .ex-bar span:nth-child(4) { width:25%; background: var(--t4-fill); }
     .ex-marker { position:relative; height:8px; }
     .ex-marker::after { content:""; position:absolute; left:71%; top:0; margin-left:-5px; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:7px solid var(--ink); }
     .ex-labels { display:flex; justify-content:space-between; font-size: var(--t-cap); color: var(--ink-3); }
@@ -238,16 +241,16 @@
     .ex-driver { font-size: var(--t-cap); color: var(--ink-2); display:flex; flex-direction:column; gap:4px; }
     .ex-track { height:6px; border-radius: var(--r-pill); background: var(--surface-3); }
     .ex-track i { display:block; height:6px; border-radius: var(--r-pill); background: var(--ink); }
-    .ex-actions { display:flex; justify-content:space-between; gap: var(--s2); flex-wrap:wrap; background: var(--surface-1); border-radius: var(--r-md); padding: 12px 14px; font-size: var(--t-cap); }
+    .ex-actions { display:flex; justify-content:space-between; gap: var(--s2); flex-wrap:wrap; border-top:1px solid var(--line-2); padding-top: var(--s4); font-size: var(--t-cap); }
     .ex-actions b { color: var(--ink); font-weight:600; }
     .ex-actions span { color: var(--ink-2); }
     @media (max-width:900px){
       .studio { padding: 0 24px 64px; }
-      .studio-inner { grid-template-columns: 1fr; padding: 28px; gap: var(--s6); }
+      .studio-inner { grid-template-columns: minmax(0,1fr); gap: var(--s6); }
     }
     @media (max-width:600px){
       .studio { padding: 0 20px 56px; }
-      .studio-inner { padding: 20px; }
+      .studio-example { padding: 20px; }
       .studio-cta .btn { width:100%; --btn-py: 14px; }
       .ex-num { font-size: calc(var(--fs-base) * 3.4); }
     }
@@ -574,8 +577,8 @@
   <div class="studio-inner">
     <div class="studio-copy">
       <div class="eyebrow">Free AI risk assessment studio</div>
-      <h2 class="trim" id="studioTitle">Understand How to Build and Run Your AI Agent Safely.</h2>
-      <p class="lead">Describe a problem, share an idea, or upload an AI system you already run. The AI Risk studio provides a clear risk score, an action plan grounded in trusted AI governance frameworks published by Singapore Institutions.</p>
+      <h2 class="trim" id="studioTitle">Understand how to build and run your AI agent safely.</h2>
+      <p class="lead">Describe a problem, share an idea, or upload an AI system you already run. The AI Risk Studio gives you a clear risk score and an action plan grounded in AI governance frameworks published by Singapore institutions.</p>
       <div class="studio-cta">
         <a href="/risk-studio/" class="btn btn-accent">Start assessing</a>
         <a href="/risk-studio/#how" class="btn">See how it works</a>

@@ -4,62 +4,90 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AI Risk Studio by SafeAI.sg</title>
-  <meta name="description" content="Describe a problem, share an idea, or upload an AI system you already run. The AI Risk studio provides a clear risk score, an action plan grounded in trusted AI governance frameworks published by Singapore Institutions." />
+  <meta name="description" content="Describe a problem, share an idea, or upload an AI system you already run. The AI Risk Studio gives a clear risk score and an action plan grounded in AI governance frameworks published by Singapore institutions." />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* Design values follow the AI Risk Studio mock-up (Main.dc.html). The accent is the
-       mock-up's default; change --accent alone to re-colour every button, badge and eyebrow. */
+    /* House look, shared with risk-assessment.html and checklist.html: light
+       canvas, white cards that read as raised, one orange used only as the fill
+       of the primary action in a view. The mock-up's red, its two display faces
+       and its dark panels are gone; every value below is a token. */
     :root {
-      --accent: #C8102E;
-      --ink: #1B1F27;
-      --ink-2: #3B4250;
-      --ink-3: #5B6472;
-      --surface: #F3F4F6;
-      --line: #E1E4EA;
-      --dark: #1B1F27;
-      --dark-2: #2B3140;
-      --on-dark: #E5E8EE;
-      --on-dark-2: #C9CED8;
-      --low: #2E9E6B; --medium: #E0A100; --high: #E8742A; --critical: #8E0B22;
-      --font: 'Inter', Arial, sans-serif;
-      --display: 'Space Grotesk', Arial, sans-serif;
-      --nav-font: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      --accent:      #FF991C;   /* fill only, near-black ink on it */
+      --accent-2:    #ffab45;   /* hover */
+      --accent-ink:  #16100b;
+      --focus:       #d47100;   /* the orange walked down so a ring clears 3:1 on white */
+
+      --bg:          #f7f7f9;
+      --surface-1:   #ffffff;
+      --surface-2:   #f0f0f4;
+      --surface-3:   #e4e4ea;
+      --ink:         #0b0b0f;
+      --ink-2:       #35353d;
+      --ink-3:       #55555f;
+      --line:        rgba(11,11,15,.10);
+      --line-2:      rgba(11,11,15,.18);
+      --nav-bg:      rgba(255,255,255,.86);
+
+      /* Risk tiers carry meaning, so they keep their hues: low green, medium
+         amber, high orange, critical red. Fill tones for bars and chips, text
+         tones for words. Same values as the assessment tool. */
+      --t1-fill: #12a150; --t2-fill: #f2b705; --t3-fill: #FF991C; --t4-fill: #e5352b;
+      --t3: #a85700; --t3-soft: #fff4e6; --t3-line: #ffd9a8;
+
+      --shadow-card: 0 1px 2px rgba(11,11,15,.05), 0 10px 30px -22px rgba(11,11,15,.35);
+      --shadow-pop:  0 18px 44px -20px rgba(11,11,15,.30);
+
+      --font-sans:    "DM Sans", system-ui, sans-serif;
+      --font-display: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+
+      --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-pill: 999px;
+      --s1:4px; --s2:8px; --s3:12px; --s4:18px; --s5:24px; --s6:36px; --s7:52px; --s8:72px;
+      --gap: 20px;
+      --z-sticky: 100;
+
+      /* 17px on a phone, 15px on a desk, like the assessment tool. */
+      --fs-base: 17px;
     }
+    @media (min-width:1024px){ :root{ --fs-base:15px; } }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 96px; }
-    body { background: #FFFFFF; color: var(--ink); font: 400 16px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+    /* Hard floor: nothing widens the page. clip, not hidden, so sticky works. */
+    html, body { overflow-x: clip; }
+    body { background: var(--bg); color: var(--ink); font: 400 var(--fs-base)/1.6 var(--font-sans); -webkit-font-smoothing: antialiased; }
     a { color: inherit; text-decoration: none; }
-    a:hover { opacity: .88; }
-    h1, h2, h3 { font-family: var(--display); font-weight: 700; }
-    .wrap { max-width: 1160px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.02em; line-height: 1.2; overflow-wrap: anywhere; min-width: 0; }
+    p { max-width: 68ch; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding-left: var(--s5); padding-right: var(--s5); }
 
     /* ── SafeAI.sg site menu (same bar as the other light pages) ── */
     .site-nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(255,255,255,.9); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      position: sticky; top: 0; z-index: var(--z-sticky);
+      background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--line);
     }
-    .site-nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: 16px; }
+    .site-nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: var(--s4); }
     .nav-brand { display: flex; align-items: center; }
     .nav-logo { height: 40px; width: auto; display: block; }
-    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-links { display: flex; align-items: center; gap: var(--s1); }
     .nav-link {
-      font: 600 14px/1 var(--nav-font); color: var(--ink-2);
-      padding: 12px 18px; border-radius: 10px; transition: background .18s ease, color .18s ease;
+      font: 600 calc(var(--fs-base)*.93)/1 var(--font-display); color: var(--ink-2); white-space: nowrap;
+      padding: 12px 16px; border-radius: var(--r-sm); transition: background .18s ease, color .18s ease;
     }
-    .nav-link:hover { background: var(--surface); color: var(--ink); opacity: 1; }
-    .nav-link[aria-current="page"] { color: var(--accent); }
-    .nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .nav-link:hover { background: var(--surface-2); color: var(--ink); }
+    .nav-link:active { background: var(--surface-3); }
+    .nav-link[aria-current="page"] { color: var(--ink); background: var(--surface-2); }
     .nav-toggle {
-      display: none; width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent;
+      display: none; width: 44px; height: 44px; border: 0; border-radius: var(--r-sm); background: transparent;
       color: var(--ink); cursor: pointer; align-items: center; justify-content: center;
     }
+    .nav-toggle:hover { background: var(--surface-2); }
     .nav-toggle svg { width: 24px; height: 24px; }
     .nav-toggle .close { display: none; }
     @media (max-width: 900px) {
@@ -69,146 +97,154 @@
       .nav-links {
         display: none; position: absolute; left: 0; right: 0; top: 100%;
         flex-direction: column; align-items: stretch; gap: 0;
-        background: #FFFFFF; border-bottom: 1px solid var(--line); padding: 8px 16px 16px;
-        box-shadow: 0 16px 32px -20px rgba(27,31,39,.35);
+        background: var(--surface-1); border-bottom: 1px solid var(--line); padding: var(--s2) var(--s4) var(--s4);
+        box-shadow: var(--shadow-pop);
       }
-      .nav-links .nav-link { padding: 14px 12px; border-radius: 10px; font-size: 16px; }
+      .nav-links .nav-link { padding: 14px 12px; font-size: var(--fs-base); }
       .site-nav.is-open .nav-links { display: flex; }
       .site-nav.is-open .nav-toggle .open { display: none; }
       .site-nav.is-open .nav-toggle .close { display: block; }
     }
 
-    /* ── Studio header: brand and in-page anchors, as in the mock-up ── */
-    .studio-head .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 20px; }
-    .studio-brand { display: flex; align-items: center; gap: 12px; }
-    .studio-mark { width: 36px; height: 36px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+    /* ── Studio header: brand and in-page anchors ── */
+    .studio-head .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); padding-top: var(--s5); padding-bottom: var(--s5); }
+    .studio-brand { display: flex; align-items: center; gap: var(--s3); border-radius: var(--r-sm); }
+    .studio-mark { width: 36px; height: 36px; border-radius: var(--r-sm); background: var(--surface-1); color: var(--ink); box-shadow: var(--shadow-card); display: flex; align-items: center; justify-content: center; flex: none; }
     .studio-mark svg { width: 20px; height: 20px; }
-    .studio-name { display: flex; flex-direction: column; line-height: 1.15; }
-    .studio-name b { font-family: var(--display); font-weight: 700; font-size: 18px; }
-    .studio-name span { font-size: 12px; color: var(--ink-3); }
-    .studio-anchors { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; font-size: 15px; font-weight: 500; }
-    .studio-anchors a { min-height: 44px; display: flex; align-items: center; }
-    .studio-anchors .pill { padding: 0 20px; border-radius: 999px; background: var(--dark); color: #FFFFFF; }
-    @media (max-width: 900px) { .studio-anchors a:not(.pill) { display: none; } }
+    .studio-name { display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
+    .studio-name b { font-family: var(--font-display); font-weight: 700; font-size: calc(var(--fs-base)*1.1); }
+    .studio-name span { font-size: calc(var(--fs-base)*.8); color: var(--ink-3); }
+    .studio-anchors { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); }
+    .studio-anchors a:not(.btn) { padding: 10px 14px; border-radius: var(--r-sm); color: var(--ink-2); font-weight: 500; white-space: nowrap; transition: background .15s, color .15s; }
+    .studio-anchors a:not(.btn):hover { background: var(--surface-2); color: var(--ink); }
+    @media (max-width: 900px) { .studio-anchors a:not(.btn) { display: none; } }
 
-    /* ── Buttons ── */
-    .btn { min-height: 48px; padding: 0 24px; border-radius: 999px; font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; }
-    .btn-accent { background: var(--accent); color: #FFFFFF; }
-    .btn-outline { border: 2px solid var(--ink); color: var(--ink); }
-    .btn-white { background: #FFFFFF; color: var(--ink); }
-    .btn-outline-white { border: 2px solid #FFFFFF; color: #FFFFFF; }
-    .btn-lg { min-height: 52px; padding: 0 28px; font-size: 16px; }
-    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    /* ── Buttons: flat, grey by default, 2:1 padding, labels on one line ── */
+    .btn {
+      font: 600 var(--fs-base)/1.2 var(--font-sans); cursor: pointer; white-space: nowrap;
+      padding: 13px 26px; border-radius: var(--r-sm); border: 0;
+      color: var(--ink); background: var(--surface-2);
+      display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+      transition: background .15s, transform .12s;
+    }
+    .btn:hover { background: var(--surface-3); }
+    .btn:active { transform: translateY(1px) scale(.99); }
+    /* The single primary action in a view. Near-black on the orange reads 8.8:1. */
+    .btn-accent { background: var(--accent); color: var(--accent-ink); }
+    .btn-accent:hover { background: var(--accent-2); }
+    /* On a white card a surface-2 button sits on a lighter fill, so it lifts
+       with the deeper shadow rather than merging into the card. */
+    .card .btn:not(.btn-accent) { box-shadow: var(--shadow-pop); }
+    .btn-sm { padding: 8px 16px; font-size: calc(var(--fs-base)*.9); }
+    .btn:focus-visible, .nav-link:focus-visible, .nav-toggle:focus-visible,
+    .studio-brand:focus-visible, .studio-anchors a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
     /* ── Section scaffolding ── */
-    .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
-    .section { padding: 80px 0; }
-    .section-raised { background: var(--surface); }
-    .section-tight { padding: 88px 0; }
-    .sec-head { display: flex; flex-direction: column; gap: 12px; max-width: 680px; margin-bottom: 40px; }
-    .sec-head h2 { font-size: clamp(30px, 4vw, 42px); line-height: 1.12; letter-spacing: -.01em; }
-    .sec-head p { font-size: 17px; line-height: 1.6; color: var(--ink-2); }
-    .cards { display: flex; flex-wrap: wrap; gap: 20px; }
-    .card { flex: 1 1 240px; min-width: 0; background: #FFFFFF; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px; }
-    .card p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+    .eyebrow { font: 600 calc(var(--fs-base)*.86)/1.3 var(--font-display); color: var(--ink-3); }
+    .section { padding: var(--s8) 0; }
+    .section-raised { background: var(--surface-2); }
+    .sec-head { display: flex; flex-direction: column; gap: var(--s3); max-width: 680px; margin-bottom: var(--s6); }
+    .sec-head h2 { font-size: calc(var(--fs-base)*2.2); line-height: 1.12; }
+    .sec-head p { font-size: calc(var(--fs-base)*1.08); color: var(--ink-2); }
+
+    /* 12 columns on a desk, 2 on a phone. Cards span what they need. */
+    .grid { display: grid; gap: var(--gap); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (min-width: 900px) { .grid { grid-template-columns: repeat(12, minmax(0, 1fr)); } }
+    .span-full { grid-column: 1 / -1; }
+    @media (min-width: 900px) {
+      .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; }
+      .span-8 { grid-column: span 8; }
+    }
+    @media (max-width: 899px) { .span-3 { grid-column: span 1; } .span-4, .span-8 { grid-column: 1 / -1; } }
+    @media (max-width: 520px) { .span-3 { grid-column: 1 / -1; } }
+
+    .card { min-width: 0; background: var(--surface-1); border-radius: var(--r-lg); padding: var(--s5); box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: var(--s3); }
+    .card h3 { font-size: calc(var(--fs-base)*1.25); }
+    .card p { color: var(--ink-2); }
 
     /* ── Hero ── */
-    .hero .wrap { padding-top: 48px; padding-bottom: 72px; display: flex; flex-wrap: wrap; align-items: center; gap: 48px; }
-    .hero-copy { flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
-    .hero h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.08; letter-spacing: -.02em; max-width: 560px; }
-    .hero-sub { font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 540px; }
-    .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; padding-top: 8px; }
-    .hero-note { font-size: 14px; line-height: 1.5; color: var(--ink-3); }
+    .hero .wrap { padding-top: var(--s7); padding-bottom: var(--s8); display: grid; gap: var(--s7); align-items: center; grid-template-columns: minmax(0, 1fr); }
+    @media (min-width: 960px) { .hero .wrap { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } }
+    .hero-copy { min-width: 0; display: flex; flex-direction: column; gap: var(--s5); }
+    .hero h1 { font-size: calc(var(--fs-base)*3); line-height: 1.06; letter-spacing: -.03em; max-width: 620px; }
+    .hero-sub { font-size: calc(var(--fs-base)*1.15); line-height: 1.6; color: var(--ink-2); max-width: 560px; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: var(--s3); padding-top: var(--s2); }
+    .hero-note { font-size: calc(var(--fs-base)*.88); color: var(--ink-3); }
+    @media (max-width: 600px) { .hero h1 { font-size: calc(var(--fs-base)*2.2); } }
 
-    /* Example output card */
-    .example { flex: 1 1 400px; min-width: 0; max-width: 520px; background: var(--surface); border-radius: 24px; padding: 20px; }
-    .example-inner { background: #FFFFFF; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 1px 2px rgba(27,31,39,.08); }
-    .example-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-3); }
-    .example-top .label { font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-    .example-name { font-size: 16px; font-weight: 600; }
-    .score { display: flex; align-items: flex-end; gap: 16px; }
-    .score-num { font-family: var(--display); font-weight: 700; font-size: 72px; line-height: .9; }
-    .score-of { font-size: 14px; color: var(--ink-3); padding-bottom: 6px; }
-    .score-band { margin-left: auto; padding: 6px 14px; border-radius: 999px; background: var(--high); color: var(--ink); font-weight: 700; font-size: 14px; }
-    .scale { display: flex; flex-direction: column; gap: 8px; }
-    .scale-bar { height: 12px; border-radius: 999px; overflow: hidden; display: flex; }
-    .scale-bar span:nth-child(1) { width: 35%; background: var(--low); }
-    .scale-bar span:nth-child(2) { width: 20%; background: var(--medium); }
-    .scale-bar span:nth-child(3) { width: 20%; background: var(--high); }
-    .scale-bar span:nth-child(4) { width: 25%; background: var(--critical); }
-    .scale-marker { position: relative; height: 10px; }
-    .scale-marker::after { content: ""; position: absolute; left: 71%; top: 0; margin-left: -6px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 8px solid var(--ink); }
-    .scale-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); }
-    .drivers { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
-    .drivers-title { font-size: 13px; font-weight: 600; }
-    .driver { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-2); }
-    .driver-bar { height: 8px; border-radius: 999px; background: var(--line); }
-    .driver-bar i { display: block; height: 8px; border-radius: 999px; background: var(--ink); }
-    .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; background: var(--surface); border-radius: 12px; padding: 12px 16px; font-size: 14px; }
+    /* Example output: one card, not a card inside a tinted card. */
+    .example { gap: var(--s5); padding: var(--s6); }
+    .example-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s2); font-size: calc(var(--fs-base)*.82); color: var(--ink-3); }
+    .example-top .label { font-weight: 600; color: var(--ink-2); }
+    .example-name { font-weight: 600; }
+    .score { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--s2) var(--s4); }
+    .score-num { font-family: var(--font-display); font-weight: 700; font-size: calc(var(--fs-base)*4.4); line-height: .9; letter-spacing: -.04em; }
+    .score-of { font-size: calc(var(--fs-base)*.9); color: var(--ink-3); padding-bottom: 6px; }
+    .score-band { margin-left: auto; padding: 5px 12px; border-radius: var(--r-pill); background: var(--t3-soft); color: var(--t3); box-shadow: inset 0 0 0 1px var(--t3-line); font-weight: 700; font-size: calc(var(--fs-base)*.86); }
+    .scale { display: flex; flex-direction: column; gap: var(--s2); }
+    .scale-bar { height: 10px; border-radius: var(--r-pill); overflow: hidden; display: flex; gap: 2px; }
+    .scale-bar span:nth-child(1) { width: 35%; background: var(--t1-fill); }
+    .scale-bar span:nth-child(2) { width: 20%; background: var(--t2-fill); }
+    .scale-bar span:nth-child(3) { width: 20%; background: var(--t3-fill); }
+    .scale-bar span:nth-child(4) { width: 25%; background: var(--t4-fill); }
+    .scale-marker { position: relative; height: 8px; }
+    .scale-marker::after { content: ""; position: absolute; left: 71%; top: 0; margin-left: -5px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 7px solid var(--ink); }
+    .scale-labels { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s1) var(--s3); font-size: calc(var(--fs-base)*.8); color: var(--ink-3); }
+    .drivers { display: flex; flex-direction: column; gap: var(--s3); border-top: 1px solid var(--line); padding-top: var(--s4); }
+    .drivers-title { font-size: calc(var(--fs-base)*.88); font-weight: 600; }
+    .driver { display: flex; flex-direction: column; gap: 6px; font-size: calc(var(--fs-base)*.86); color: var(--ink-2); }
+    .driver-bar { height: 6px; border-radius: var(--r-pill); background: var(--surface-3); }
+    .driver-bar i { display: block; height: 6px; border-radius: var(--r-pill); background: var(--ink); }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2); border-top: 1px solid var(--line); padding-top: var(--s4); font-size: calc(var(--fs-base)*.9); }
     .actions b { font-weight: 600; }
     .actions span { color: var(--ink-2); }
 
     /* ── How it works ── */
-    .step-num { width: 44px; height: 44px; border-radius: 999px; background: var(--accent); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; font-size: 18px; }
-    .step h3 { font-size: 20px; }
+    .step-num { width: 36px; height: 36px; border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink); display: flex; align-items: center; justify-content: center; font: 700 var(--fs-base)/1 var(--font-display); font-variant-numeric: tabular-nums; }
+    .step { gap: var(--s3); }
 
-    /* ── Choose your path ── */
-    .paths { display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch; }
-    .group { min-width: 0; border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 24px; }
-    .group-a { flex: 2 1 600px; border: 2px solid var(--ink); }
-    .group-b { flex: 1 1 320px; background: var(--dark); color: #FFFFFF; }
-    .group-intro { display: flex; flex-direction: column; gap: 8px; }
-    .group-intro p { font-size: 16px; line-height: 1.55; color: var(--ink-2); }
-    .group-b .group-intro p { color: var(--on-dark-2); }
-    .tag { align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: var(--accent); color: #FFFFFF; font-size: 13px; font-weight: 600; }
-    .group-b .tag { background: #FFFFFF; color: var(--ink); }
-    .path-grid { display: flex; flex-wrap: wrap; gap: 20px; flex-grow: 1; }
-    .path { flex: 1 1 260px; min-width: 0; background: var(--surface); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-    .group-b .path { background: var(--dark-2); flex-grow: 1; }
-    .path-label { font-size: 13px; font-weight: 600; color: var(--ink-3); }
-    .group-b .path-label { color: var(--on-dark-2); }
-    .path h3 { font-size: 24px; line-height: 1.2; }
-    .path p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
-    .group-b .path p { color: var(--on-dark); }
-    .bring { display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.5; }
-    .group-b .bring { color: var(--on-dark); }
-    .bring b { font-weight: 600; }
-    .group-b .bring b { color: #FFFFFF; }
+    /* ── Choose your path ──
+       Two audiences, each a labelled column of cards. The label is a heading,
+       not a container: wrapping the cards in an outlined or dark box made a
+       card inside a card. */
+    .audience { min-width: 0; display: flex; flex-direction: column; gap: var(--s4); }
+    .audience-head { display: flex; flex-direction: column; gap: var(--s2); }
+    .audience-head .who { font: 600 calc(var(--fs-base)*.9)/1.4 var(--font-display); color: var(--ink); }
+    .audience-head p { color: var(--ink-2); font-size: calc(var(--fs-base)*.95); }
+    .audience .grid { flex-grow: 1; }
+    .audience .grid > .card { height: 100%; }
+    @media (min-width: 900px) { .audience-a .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .audience-b .grid { grid-template-columns: minmax(0, 1fr); } }
+    @media (max-width: 899px) { .audience .grid { grid-template-columns: minmax(0, 1fr); } }
+    .path { gap: var(--s4); }
+    .path-label { font-size: calc(var(--fs-base)*.86); font-weight: 600; color: var(--ink-3); }
+    .path h3 { font-size: calc(var(--fs-base)*1.4); }
+    .bring { display: flex; flex-direction: column; gap: var(--s2); font-size: calc(var(--fs-base)*.92); color: var(--ink-2); border-top: 1px solid var(--line); padding-top: var(--s4); }
+    .bring b { font-weight: 600; color: var(--ink); }
     .path .btn { margin-top: auto; align-self: flex-start; }
 
     /* ── What you get ── */
-    .get .card { flex-basis: 300px; gap: 14px; }
-    .get h3 { font-size: 22px; }
-    .mini-scale { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-    .mini-scale .scale-bar { height: 10px; }
-    .mini-scale .scale-labels { flex-wrap: wrap; gap: 4px 12px; }
+    .mini-scale { display: flex; flex-direction: column; gap: var(--s2); margin-top: var(--s1); }
 
-    /* ── Trust ── */
-    .trust-grid { display: flex; flex-wrap: wrap; gap: 32px 28px; }
-    .trust { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 8px; border-top: 3px solid var(--ink); padding-top: 16px; }
-    .trust h3 { font-size: 18px; }
-    .trust p { font-size: 15px; line-height: 1.6; color: var(--ink-2); }
+    /* ── Trust: plain columns under a hairline ── */
+    .trust { min-width: 0; display: flex; flex-direction: column; gap: var(--s2); border-top: 1px solid var(--line-2); padding-top: var(--s4); }
+    .trust h3 { font-size: calc(var(--fs-base)*1.1); }
+    .trust p { color: var(--ink-2); font-size: calc(var(--fs-base)*.95); }
 
-    /* ── Final call to action ── */
-    .final { background: var(--dark); color: #FFFFFF; }
-    .final .wrap { display: flex; flex-direction: column; gap: 32px; }
-    .final h2 { max-width: 720px; font-size: clamp(30px, 4vw, 42px); line-height: 1.12; letter-spacing: -.01em; }
-    .final-grid { display: flex; flex-wrap: wrap; gap: 24px; }
-    .final-card { flex: 1 1 320px; min-width: 0; background: var(--dark-2); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 16px; }
-    .final-card p { color: var(--on-dark); font-size: 16px; line-height: 1.6; }
-    .final-card .row { display: flex; flex-wrap: wrap; gap: 12px; }
-    .final-card .btn { padding: 0 22px; }
+    /* ── Closing call to action ── */
+    .final h2 { font-size: calc(var(--fs-base)*2.2); line-height: 1.12; max-width: 720px; margin-bottom: var(--s6); }
+    .final .card p { font-size: calc(var(--fs-base)*1.02); }
+    .final .row { display: flex; flex-wrap: wrap; gap: var(--s3); margin-top: auto; padding-top: var(--s2); }
 
     /* ── Footer ── */
-    .foot .wrap { padding-top: 32px; padding-bottom: 32px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 13px; line-height: 1.5; color: var(--ink-3); }
+    .foot { border-top: 1px solid var(--line); }
+    .foot .wrap { padding-top: var(--s6); padding-bottom: var(--s6); display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s3); font-size: calc(var(--fs-base)*.86); color: var(--ink-3); }
 
     @media (max-width: 600px) {
-      .hero .wrap { padding-top: 32px; padding-bottom: 48px; gap: 32px; }
-      .section, .section-tight { padding: 56px 0; }
-      .sec-head { margin-bottom: 28px; }
-      .group { padding: 20px; border-radius: 22px; }
-      .score-num { font-size: 60px; }
-      .hero-cta .btn, .final-card .btn { width: 100%; }
+      .section { padding: var(--s7) 0; }
+      .sec-head h2, .final h2 { font-size: calc(var(--fs-base)*1.75); }
+      .example { padding: var(--s5); }
+      .score-num { font-size: calc(var(--fs-base)*3.4); }
+      .hero-cta .btn, .final .row .btn { width: 100%; }
     }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
   </style>
@@ -228,8 +264,8 @@
       <a href="/harness/" class="nav-link">Harness</a>
       <a href="/#mission" class="nav-link">Mission</a>
       <a href="/#downloads" class="nav-link">Resources</a>
-      <a href="/#council" class="nav-link">Who We Are</a>
-      <a href="/#contact" class="nav-link">Contact Us</a>
+      <a href="/#council" class="nav-link">Who we are</a>
+      <a href="/#contact" class="nav-link">Contact us</a>
     </div>
     <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
       <svg class="open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -243,7 +279,7 @@
   <div class="wrap">
     <a href="#top" class="studio-brand">
       <span class="studio-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
       </span>
       <span class="studio-name"><b>AI Risk Studio</b><span>by SafeAI.sg</span></span>
     </a>
@@ -252,7 +288,7 @@
       <a href="#paths">Choose your path</a>
       <a href="#get">What you get</a>
       <a href="#trust">Trust</a>
-      <a href="#paths" class="pill">Start assessing</a>
+      <a href="#paths" class="btn btn-sm">Start assessing</a>
     </nav>
   </div>
 </header>
@@ -264,37 +300,35 @@
   <div class="wrap">
     <div class="hero-copy">
       <span class="eyebrow">Free AI risk assessment studio</span>
-      <h1>Understand How to Build and Run Your AI Agent Safely.</h1>
-      <p class="hero-sub">Describe a problem, share an idea, or upload an AI system you already run. The AI Risk studio provides a clear risk score, an action plan grounded in trusted AI governance frameworks published by Singapore Institutions.</p>
+      <h1>Understand how to build and run your AI agent safely.</h1>
+      <p class="hero-sub">Describe a problem, share an idea, or upload an AI system you already run. The AI Risk Studio gives you a clear risk score and an action plan grounded in AI governance frameworks published by Singapore institutions.</p>
       <div class="hero-cta">
-        <a href="#paths" class="btn btn-accent btn-lg">Choose your path</a>
-        <a href="#how" class="btn btn-outline btn-lg">See how it works</a>
+        <a href="#paths" class="btn btn-accent">Choose your path</a>
+        <a href="#how" class="btn">See how it works</a>
       </div>
       <p class="hero-note">Guidance to support your decisions. Not legal advice, and not a certification.</p>
     </div>
 
-    <div class="example" aria-label="Example output, illustrative only">
-      <div class="example-inner">
-        <div class="example-top"><span class="label">Example output</span><span>Illustrative only</span></div>
-        <div class="example-name">Application intake assistant</div>
-        <div class="score">
-          <span class="score-num">71</span>
-          <span class="score-of">out of 100</span>
-          <span class="score-band">High</span>
-        </div>
-        <div class="scale">
-          <div class="scale-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-          <div class="scale-marker" aria-hidden="true"></div>
-          <div class="scale-labels"><span>Low</span><span>Medium</span><span>High</span><span>Critical</span></div>
-        </div>
-        <div class="drivers">
-          <div class="drivers-title">What pushes the score up</div>
-          <div class="driver"><span>Data sensitivity</span><div class="driver-bar"><i style="width:82%"></i></div></div>
-          <div class="driver"><span>Autonomy</span><div class="driver-bar"><i style="width:64%"></i></div></div>
-          <div class="driver"><span>Deployment exposure</span><div class="driver-bar"><i style="width:48%"></i></div></div>
-        </div>
-        <div class="actions"><b>7 ranked actions</b><span>Plan one to see the projected score fall</span></div>
+    <div class="card example" aria-label="Example output, illustrative only">
+      <div class="example-top"><span class="label">Example output</span><span>Illustrative only</span></div>
+      <div class="example-name">Application intake assistant</div>
+      <div class="score">
+        <span class="score-num">71</span>
+        <span class="score-of">out of 100</span>
+        <span class="score-band">High</span>
       </div>
+      <div class="scale">
+        <div class="scale-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <div class="scale-marker" aria-hidden="true"></div>
+        <div class="scale-labels"><span>Low</span><span>Medium</span><span>High</span><span>Critical</span></div>
+      </div>
+      <div class="drivers">
+        <div class="drivers-title">What pushes the score up</div>
+        <div class="driver"><span>Data sensitivity</span><div class="driver-bar"><i style="width:82%"></i></div></div>
+        <div class="driver"><span>Autonomy</span><div class="driver-bar"><i style="width:64%"></i></div></div>
+        <div class="driver"><span>Deployment exposure</span><div class="driver-bar"><i style="width:48%"></i></div></div>
+      </div>
+      <div class="actions"><b>7 ranked actions</b><span>Plan one to see the projected score fall</span></div>
     </div>
   </div>
 </section>
@@ -307,23 +341,23 @@
       <h2>Four steps from a rough thought to a plan.</h2>
       <p>You do not need a technical background. The studio asks plain questions and shows its working at every step.</p>
     </div>
-    <div class="cards">
-      <div class="card step">
+    <div class="grid">
+      <div class="card step span-3">
         <span class="step-num">1</span>
         <h3>Discover</h3>
         <p>Tell the studio about a pain point, a business process, an idea or an AI system you already have.</p>
       </div>
-      <div class="card step">
+      <div class="card step span-3">
         <span class="step-num">2</span>
         <h3>Define</h3>
         <p>Review a short profile of 12 details. Each one is marked Detected, Inferred or Confirmed. Nothing is scored until you confirm.</p>
       </div>
-      <div class="card step">
+      <div class="card step span-3">
         <span class="step-num">3</span>
         <h3>Assess</h3>
         <p>Get a risk score from 0 to 100, with the reasons behind it, checked against five reference sources.</p>
       </div>
-      <div class="card step">
+      <div class="card step span-3">
         <span class="step-num">4</span>
         <h3>Act</h3>
         <p>Work through ranked actions, plan the ones you will take, and export a report to share.</p>
@@ -333,23 +367,23 @@
 </section>
 
 <!-- Choose your path -->
-<section id="paths" class="section-tight">
+<section id="paths" class="section">
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Choose your path</span>
-      <h2>Suited to guide you at every point of your AI journey</h2>
-      <p>Whether you're just starting out, feeling around for ideas, or you've got your AI Plan all figured out, we've got your back.</p>
+      <h2>A path for every point of your AI journey.</h2>
+      <p>Whether you are just starting out, still exploring ideas, or already have an AI plan, pick the path that matches where you are.</p>
     </div>
 
-    <div class="paths">
-      <!-- Group A: citizen builders and business users -->
-      <div class="group group-a">
-        <div class="group-intro">
-          <span class="tag">Recommended for citizen builders and business users</span>
+    <div class="grid">
+      <!-- Audience A: citizen builders and business users -->
+      <div class="audience audience-a span-8">
+        <div class="audience-head">
+          <span class="who">For citizen builders and business users</span>
           <p>Plain language in, no technical knowledge needed. Start from a problem or a rough idea.</p>
         </div>
-        <div class="path-grid">
-          <div class="path">
+        <div class="grid">
+          <div class="card path">
             <span class="path-label">Path 1</span>
             <h3>Help me find an AI use case</h3>
             <p>Not sure where AI could help? Describe a daily problem and compare three opportunities side by side.</p>
@@ -357,9 +391,9 @@
               <div><b>You bring:</b> a problem or frustration, in your own words.</div>
               <div><b>You get:</b> three compared AI opportunities. Pick one to assess.</div>
             </div>
-            <a href="https://air1.devopslabs.tech" class="btn btn-accent" data-studio="problem">Start with a problem</a>
+            <a href="https://air1.devopslabs.tech" class="btn" data-studio="problem">Start with a problem</a>
           </div>
-          <div class="path">
+          <div class="card path">
             <span class="path-label">Path 2</span>
             <h3>I have an idea</h3>
             <p>Already know what you would like to build? Type it in a sentence or two and it becomes a structured concept.</p>
@@ -367,26 +401,28 @@
               <div><b>You bring:</b> a short description of your idea.</div>
               <div><b>You get:</b> a clear concept you can review, then a risk score.</div>
             </div>
-            <a href="https://air1.devopslabs.tech" class="btn btn-accent" data-studio="idea">Start with an idea</a>
+            <a href="https://air1.devopslabs.tech" class="btn" data-studio="idea">Start with an idea</a>
           </div>
         </div>
       </div>
 
-      <!-- Group B: CIOs, CTOs, tech leaders -->
-      <div class="group group-b">
-        <div class="group-intro">
-          <span class="tag">Recommended for CIOs, CTOs, CAIOs, CDOs and tech leaders</span>
+      <!-- Audience B: CIOs, CTOs, tech leaders -->
+      <div class="audience audience-b span-4">
+        <div class="audience-head">
+          <span class="who">For CIOs, CTOs, CAIOs, CDOs and tech leaders</span>
           <p>Bring your documentation and skip the questions it already answers.</p>
         </div>
-        <div class="path">
-          <span class="path-label">Path 3</span>
-          <h3>I know my AI</h3>
-          <p>Upload your system documentation. Attributes are extracted with source citations, and you are only asked about the gaps.</p>
-          <div class="bring">
-            <div><b>You bring:</b> architecture notes, model cards, policies.</div>
-            <div><b>You get:</b> a pre-filled profile with a confidence level on every value.</div>
+        <div class="grid">
+          <div class="card path">
+            <span class="path-label">Path 3</span>
+            <h3>I know my AI</h3>
+            <p>Upload your system documentation. Attributes are extracted with source citations, and you are only asked about the gaps.</p>
+            <div class="bring">
+              <div><b>You bring:</b> architecture notes, model cards, policies.</div>
+              <div><b>You get:</b> a pre-filled profile with a confidence level on every value.</div>
+            </div>
+            <a href="https://air1.devopslabs.tech" class="btn" data-studio="documents">Upload my documents</a>
           </div>
-          <a href="https://air1.devopslabs.tech" class="btn btn-white" data-studio="documents">Upload my documents</a>
         </div>
       </div>
     </div>
@@ -394,28 +430,28 @@
 </section>
 
 <!-- What you get -->
-<section id="get" class="section section-raised get">
+<section id="get" class="section section-raised">
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">What you get</span>
-      <h2>Get a Full Scope of AI Risk Areas that Matter Most to Your Use-Case</h2>
+      <h2>The AI risk areas that matter most for your use case.</h2>
     </div>
-    <div class="cards">
-      <div class="card">
-        <h3>Explainable Risk Score<br>in Plain English.</h3>
+    <div class="grid">
+      <div class="card span-4">
+        <h3>An explainable risk score in plain English</h3>
         <p>One number from 0 to 100, plus the factors that drove it: data sensitivity, autonomy, who is affected, and more.</p>
         <div class="mini-scale">
           <div class="scale-bar" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
           <div class="scale-labels"><span>Low 0-34</span><span>Medium 35-54</span><span>High 55-74</span><span>Critical 75-100</span></div>
         </div>
       </div>
-      <div class="card">
-        <h3>Ranked Actions</h3>
+      <div class="card span-4">
+        <h3>Ranked actions</h3>
         <p>A prioritised list of what to do first. Each action says why it matters and how many points it could take off the score.</p>
         <p>Tick Plan this action and the projected score updates straight away.</p>
       </div>
-      <div class="card">
-        <h3>Full AI Risk Report</h3>
+      <div class="card span-4">
+        <h3>A full AI risk report</h3>
         <p>Export the full assessment as HTML or PDF for your team, your leadership or your risk and compliance colleagues.</p>
         <p>Optional: a 15-question Data Readiness check adds a separate score for your data and security.</p>
       </div>
@@ -424,26 +460,26 @@
 </section>
 
 <!-- Trust -->
-<section id="trust" class="section-tight">
+<section id="trust" class="section">
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Why you can trust the result</span>
-      <h2>Fully Explainable, Fully Transparent.</h2>
+      <h2>Fully explainable, fully transparent.</h2>
     </div>
-    <div class="trust-grid">
-      <div class="trust">
-        <h3>Transparent &amp; Explainable Rules Engine</h3>
-        <p>The AI risk score comes from fixed, repeatable rules, not from an AI guess. Same inputs will always produce the result.</p>
+    <div class="grid">
+      <div class="trust span-3">
+        <h3>A transparent, explainable rules engine</h3>
+        <p>The AI risk score comes from fixed, repeatable rules, not from an AI guess. The same inputs always produce the same result.</p>
       </div>
-      <div class="trust">
-        <h3>Reference Sources from Global Standards, Legal Frameworks, &amp; Singapore-Only AI Guidelines.</h3>
-        <p>Cross Referenced against the EU AI Act, NIST AI RMF 1.0, ISO/IEC 42001, and GDPR.</p>
+      <div class="trust span-3">
+        <h3>Sources from global standards, legal frameworks and Singapore AI guidelines</h3>
+        <p>Cross-referenced against the EU AI Act, NIST AI RMF 1.0, ISO/IEC 42001, and GDPR.</p>
       </div>
-      <div class="trust">
-        <h3>You confirm every quantitative/qualitative metric for risk scoring.</h3>
+      <div class="trust span-3">
+        <h3>You confirm every metric that feeds the score</h3>
         <p>Detected and inferred details are shown with a confidence level. You have full discretion to confirm every risk dimension that contributes to the overall AI risk score.</p>
       </div>
-      <div class="trust">
+      <div class="trust span-3">
         <h3>Guidance, not a verdict</h3>
         <p>The studio supports your decisions. It is not legal advice and it does not certify compliance.</p>
       </div>
@@ -451,22 +487,22 @@
   </div>
 </section>
 
-<!-- Final call to action -->
-<section class="section final">
+<!-- Closing call to action -->
+<section class="section section-raised final">
   <div class="wrap">
     <h2>Ready to assess your first AI idea?</h2>
-    <div class="final-grid">
-      <div class="final-card">
+    <div class="grid">
+      <div class="card span-8">
         <p>New to AI, or building something yourself? Start with a problem or a rough idea.</p>
         <div class="row">
           <a href="#paths" class="btn btn-accent" data-studio="problem">Help me find an AI use case</a>
-          <a href="#paths" class="btn btn-outline-white" data-studio="idea">I have an idea</a>
+          <a href="#paths" class="btn" data-studio="idea">I have an idea</a>
         </div>
       </div>
-      <div class="final-card">
+      <div class="card span-4">
         <p>Leading a technology team with systems already in place? Go straight to your documentation.</p>
         <div class="row">
-          <a href="#paths" class="btn btn-white" data-studio="documents">I know my AI</a>
+          <a href="#paths" class="btn" data-studio="documents">I know my AI</a>
         </div>
       </div>
     </div>
