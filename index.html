@@ -262,7 +262,10 @@
     .solution-body p strong { color: var(--ink); font-weight:600; }
 
     /* ── PILLARS CAROUSEL — continuously rotating; arrows to pause and browse ── */
-    .pillar-carousel { position: relative; }
+    /* Arrows sit under the cards at every width: over the card edges they
+       covered the first words of each card's text. The track scrolls on its
+       own, so the edges fade rather than cut a card off hard. */
+    .pillar-carousel { position: relative; padding-bottom: 72px; }
     .pillar-viewport {
       overflow: hidden; padding: 4px; margin: -4px;
       -webkit-mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
@@ -279,7 +282,7 @@
     }
     .pillar-card:hover { background: var(--surface-2); }
     .carousel-arrow {
-      position:absolute; top:50%; transform:translateY(-50%); z-index:5;
+      position:absolute; bottom:0; z-index:5;
       width:48px; height:48px; border-radius:50%; border:1px solid transparent;
       display:flex; align-items:center; justify-content:center;
       background: var(--surface-2); color: var(--ink);
@@ -287,19 +290,15 @@
       transition: background .18s ease, transform .12s ease;
     }
     .carousel-arrow:hover { background: var(--surface-3); }
-    .carousel-arrow:active { transform: translateY(-50%) scale(.94); }
+    .carousel-arrow:active { transform: scale(.94); }
     .carousel-arrow:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
     .carousel-arrow .ico { width:20px; height:20px; }
-    .carousel-arrow.prev { left:-16px; }
-    .carousel-arrow.next { right:-16px; }
+    .carousel-arrow.prev { left: calc(50% - 56px); }
+    .carousel-arrow.next { left: calc(50% + 8px); }
     @media (max-width:1023px){ .pillar-slide { flex-basis: calc((100% - var(--gap)) / 2); } }
     @media (max-width:600px){
       .pillar-slide { flex-basis: 100%; }
-      .pillar-carousel { padding-bottom: 68px; }
-      .carousel-arrow { top:auto; bottom:0; transform:none; width:44px; height:44px; }
-      .carousel-arrow:active { transform: scale(.94); }
-      .carousel-arrow.prev { left: calc(50% - 50px); right:auto; }
-      .carousel-arrow.next { right: calc(50% - 50px); left:auto; }
+      .carousel-arrow { width:44px; height:44px; }
     }
     .pillar-num {
       width:40px; height:40px; border-radius: var(--r-md);
@@ -311,6 +310,7 @@
     .pillar-tag { font-size: var(--t-cap); font-weight:600; color: var(--ink-3); margin-bottom: var(--s2); }
     .pillar-card h3 { font-size: var(--t-h3); margin-bottom: var(--s3); line-height:1.2; }
     .pillar-outcome { font-size: var(--t-body); color: var(--ink-2); line-height:1.65; }
+    .pillar-outcome a { color: var(--ink); text-underline-offset: 3px; }
 
     /* ── DOWNLOAD ── */
     .download-grid { display:grid; grid-template-columns: repeat(3,1fr); gap: var(--gap); align-items:stretch; }
@@ -490,7 +490,7 @@
     <a href="/" class="sn-brand" aria-label="SafeAI.sg home"><img src="/safeai-logo-trim.png" alt="SafeAI.sg" class="sn-logo" /></a>
     <nav class="sn-links" id="snLinks" aria-label="SafeAI.sg">
       <a href="/risk-studio/" class="sn-link">Risk Studio</a>
-      <a href="https://pulse-ai-opportunity-pulse.replit.app/" class="sn-link">Pulse AI</a>
+      <a href="https://pulse-ai-opportunity-pulse.replit.app/" class="sn-link sn-ext" target="_blank" rel="noopener" title="Opens Pulse AI, an external site, in a new tab">Pulse AI<svg class="sn-ext-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M8 7h9v9"/></svg><span class="sn-sr"> (external site, opens in a new tab)</span></a>
       <a href="/harness/" class="sn-link">Harness</a>
       <a href="/#council" class="sn-link">Who we are</a>
       <a href="/#contact" class="sn-link">Contact us</a>
@@ -507,9 +507,8 @@
 <section class="hero">
   <div class="hero-inner">
     <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="hero-logo" />
-    <div class="eyebrow">Coming soon, 2026 to 2027</div>
     <h1 class="trim">Singapore's Centre of Excellence for AI Safety and Governance</h1>
-    <p class="hero-sub">SafeAI.sg bridges national AI governance policy and practitioner-level implementation, so every organisation can deploy AI with confidence at the right level of rigour, at any scale.</p>
+    <p class="hero-sub">SafeAI.sg helps organisations in Singapore work out how much governance each AI use case needs, and which controls put it in place. Its tools are free, and they score each use case by risk, so a low-risk tool gets light checks and a high-risk system gets strict ones. The centre launches over 2026 and 2027.</p>
     <div class="hero-cta">
       <a href="#contact" class="btn btn-accent" data-tip="Jump to contact details">Keep me informed</a>
       <!-- "Know my AI Risk" hidden until the assessment is validated. The tool
@@ -523,9 +522,8 @@
 <section class="studio" id="risk-studio" aria-labelledby="studioTitle">
   <div class="studio-inner">
     <div class="studio-copy">
-      <div class="eyebrow">Free AI risk assessment studio</div>
       <h2 class="trim" id="studioTitle">Understand how to build and run your AI agent safely.</h2>
-      <p class="lead">Describe a problem, share an idea, or upload an AI system you already run. The AI Risk Studio gives you a clear risk score and an action plan grounded in AI governance frameworks published by Singapore institutions.</p>
+      <p class="lead">The AI Risk Studio is free. You describe a problem, share an idea or upload an AI system you already run, and it gives you a risk score from 0 to 100 and a ranked list of actions to lower it. The scoring follows AI governance frameworks published by Singapore institutions.</p>
       <div class="studio-cta">
         <a href="/risk-studio/" class="btn btn-accent">Start assessing</a>
         <a href="/risk-studio/#how" class="btn">See how it works</a>
@@ -561,7 +559,7 @@
 <!-- COMMUNITY / STATS -->
 <section class="section" id="community">
   <div class="section-inner">
-    <h2 class="community-head trim">Led by Industry, Driven by Community</h2>
+    <h2 class="community-head trim">Who is behind SafeAI.sg</h2>
     <div class="stat-bar">
       <div class="stat-item">
         <div class="stat-num trim">16,000+</div>
@@ -573,7 +571,7 @@
       </div>
       <div class="stat-item">
         <div class="stat-num trim">5</div>
-        <div class="stat-desc">Delivery pillars: risk scoring, governance tooling, workforce, agentic runtime, and AI cost governance</div>
+        <div class="stat-desc">Programmes: risk assessment, technology showcase, certification, agentic runtime governance and AI cost governance</div>
       </div>
     </div>
   </div>
@@ -582,32 +580,32 @@
 <!-- THE INDUSTRY CHALLENGE -->
 <section class="section section-raised" id="mission">
   <div class="section-inner">
-    <h2 class="trim">The Industry Challenge</h2>
-    <p class="lead lead-gap">Singapore's enterprises are moving from AI pilots to production, but the governance question remains unanswered at the use-case level.</p>
+    <h2 class="trim">The problem SafeAI.sg addresses</h2>
+    <p class="lead lead-gap">Singapore's enterprises are moving AI from pilots into production, but most have no consistent way to decide how much governance a particular use case needs. As a result, they tend to make one of two mistakes.</p>
 
     <div class="problem-grid">
       <div class="card prob-card">
         <div class="prob-label">Under-governed</div>
-        <h3 class="trim">AI Deployed Without Guardrails</h3>
-        <p>Enterprises adopt AI in ways that expose customers, staff, and society to avoidable harm, without adequate technical controls or accountability. The risk is not in moving fast. It is in treating AI governance as something to retrofit once problems emerge.</p>
+        <h3 class="trim">AI deployed without guardrails</h3>
+        <p>Some teams put AI in front of customers and staff without technical controls or a named owner, and plan to add governance once problems appear. By the time they do, the harm to customers, staff or the public has already happened.</p>
       </div>
       <div class="card prob-card">
         <div class="prob-label">Over-governed</div>
-        <h3 class="trim">Innovation Paralysed by Compliance</h3>
-        <p>Blanket compliance processes built for high-stakes scenarios get applied uniformly to low-risk tools. The friction stalls innovation and drives AI initiatives underground, where they are governed even less effectively.</p>
+        <h3 class="trim">Low-risk tools stuck in heavy review</h3>
+        <p>Other organisations put every AI tool through review processes built for high-stakes systems, including tools that carry little risk. Approvals take so long that staff start using AI without telling anyone, and that use then has no governance at all.</p>
       </div>
     </div>
 
     <div class="solution">
       <div class="solution-head">
         <img src="SafeAILogoUpdated.png" alt="SafeAI.sg" />
-        <span class="title trim">Managing the Delicate Governance Balance</span>
+        <span class="title trim">Governance matched to risk</span>
       </div>
       <div class="solution-body">
         <span class="ico-wrap">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </span>
-        <p>SafeAI.sg is established to close this gap. Singapore's industry-led Centre of Excellence provides <strong>risk-weighted, use-case-specific governance</strong> that enables confident AI deployment at the appropriate level of rigour, for any organisation, at any scale.</p>
+        <p>SafeAI.sg scores each AI use case on five risk dimensions and places it in one of three tiers, from standard AI governance up to a full AI safety stack. Each tier comes with its own set of controls, so a team gets <strong>the controls its use case needs</strong>, not one rule for every tool.</p>
       </div>
     </div>
   </div>
@@ -616,9 +614,8 @@
 <!-- FIVE PILLARS -->
 <section class="section" id="pillars">
   <div class="section-inner">
-    <div class="eyebrow">Our Mission</div>
-    <h2 class="trim">Five Pillars. Full-Stack Governance.</h2>
-    <p class="lead lead-gap">SafeAI.sg delivers through five mutually reinforcing pillars, spanning risk assessment, technology demonstration, workforce capability, agentic runtime governance, and AI cost oversight.</p>
+    <h2 class="trim">What SafeAI.sg builds</h2>
+    <p class="lead lead-gap">The work is split into five programmes. Each one covers a different part of running AI safely, from scoring a use case to training the people who govern it.</p>
 
     <div class="pillar-carousel" id="pillarCarousel">
       <div class="pillar-viewport">
@@ -626,41 +623,36 @@
         <div class="pillar-slide">
           <div class="pillar-card">
             <div class="pillar-num trim">01</div>
-            <div class="pillar-tag">Free, open, self-service</div>
-            <h3 class="trim">Open Risk Assessment Toolkit and Governance Standard</h3>
-            <div class="pillar-outcome">Singapore enterprises gain immediate, actionable, cost-free access to calibrated AI governance guidance.</div>
+            <h3 class="trim">Open risk assessment toolkit and governance standard</h3>
+            <div class="pillar-outcome">A free, self-service toolkit that scores any AI use case on autonomy, data sensitivity, attack surface, consequences and error tolerance, then lists the controls for its tier. It is published as an open standard, so any organisation can use it without paying or registering.</div>
           </div>
         </div>
         <div class="pillar-slide">
           <div class="pillar-card">
             <div class="pillar-num trim">02</div>
-            <div class="pillar-tag">Demonstrate, not endorse</div>
-            <h3 class="trim">Technology Associate and Showcase Programme</h3>
-            <div class="pillar-outcome">Singapore becomes a credible regional demonstration environment for enterprise AI governance, supporting MNCs and attracting leading AI companies to leverage the Singapore ecosystem for global growth.</div>
+            <h3 class="trim">Technology associate and showcase programme</h3>
+            <div class="pillar-outcome">Technology companies show how their products meet governance requirements at each risk tier, through events, reference architectures and case studies. SafeAI.sg does not test, certify or endorse these products, so buyers still carry out their own checks.</div>
           </div>
         </div>
         <div class="pillar-slide">
           <div class="pillar-card">
             <div class="pillar-num trim">03</div>
-            <div class="pillar-tag">Level 0 to Level 3</div>
-            <h3 class="trim">Professional Certification and Skills Development</h3>
-            <div class="pillar-outcome">Singapore builds a sustainable, skilled AI governance workforce, making responsible AI deployment an organisational capability.</div>
+            <h3 class="trim">Professional certification and skills development</h3>
+            <div class="pillar-outcome">A certification in four levels, Level 0 to Level 3, developed with NUS, NTU, SMU and SIT. It runs from career conversion for non-technical professionals up to senior certification for enterprise architects and governance leads.</div>
           </div>
         </div>
         <div class="pillar-slide">
           <div class="pillar-card">
             <div class="pillar-num trim">04</div>
-            <div class="pillar-tag">Intent window principle</div>
-            <h3 class="trim">Agentic Runtime Observability and Governance</h3>
-            <div class="pillar-outcome">Singapore takes a first-mover position in agentic AI governance, addressing risks most enterprise security programmes have not yet incorporated.</div>
+            <h3 class="trim">Agentic runtime observability and governance</h3>
+            <div class="pillar-outcome">Guidance for governing AI agents while they run. Checks happen while an agent's action is still only a proposal, before it executes, which SafeAI.sg calls the intent window principle. The <a href="/harness/">Harness</a> page sets out the reference architecture.</div>
           </div>
         </div>
         <div class="pillar-slide">
           <div class="pillar-card">
             <div class="pillar-num trim">05</div>
-            <div class="pillar-tag">Inform, optimise, operate</div>
-            <h3 class="trim">AI FinOps and Cost Governance</h3>
-            <div class="pillar-outcome">Organisations gain the controls to treat AI cost as a shared governance responsibility, not just a billing line item.</div>
+            <h3 class="trim">AI FinOps and cost governance</h3>
+            <div class="pillar-outcome">Controls for tracking and limiting what AI costs, so the teams that use AI own its spending instead of finding it on the monthly bill. The approach follows three steps: inform, optimise and operate.</div>
           </div>
         </div>
       </div>
@@ -680,17 +672,16 @@
 <!-- DOWNLOADS -->
 <section class="section" id="downloads">
   <div class="section-inner">
-    <div class="eyebrow">Resources</div>
-    <h2 class="trim">Framework Documents</h2>
-    <p class="lead lead-gap">Access the foundational documents behind SafeAI.sg, and check where your own AI use case sits with the interactive risk assessment.</p>
+    <h2 class="trim">Documents and tools</h2>
+    <p class="lead lead-gap">Read the documents behind SafeAI.sg, or use the free tools to check your own AI use case.</p>
     <div class="download-grid">
       <div class="download-card">
         <span class="download-icon">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
         </span>
         <div class="download-label">Charter deck, PDF</div>
-        <h3 class="trim">SafeAI.sg Charter Summary</h3>
-        <p>A structured visual overview of the SafeAI.sg Advisory Council Charter, covering the mission, five delivery pillars, council structure, and operating principles. Built for senior stakeholder briefings.</p>
+        <h3 class="trim">SafeAI.sg charter summary</h3>
+        <p>A visual summary of the SafeAI.sg Advisory Council Charter. It covers the mission, the delivery pillars, how the council is structured and the principles it works by.</p>
         <a href="SafeAI_SG_Charter_Summary_Public.pdf" download="SafeAI.sg Charter Summary.pdf" class="btn btn-accent">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M12 15l-4-4M12 15l4-4M5 21h14"/></svg>
           Download charter summary
@@ -701,8 +692,8 @@
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
         </span>
         <div class="download-label">Interactive tool</div>
-        <h3 class="trim">AI Risk Assessment</h3>
-        <p>Answer eight questions about your AI use case and get an instant risk tier, the key risk scenarios, and a mapped checklist of the controls you should have in place. Aligned to the MindForge AI RMF and CSA Securing AI guidelines.</p>
+        <h3 class="trim">AI risk assessment</h3>
+        <p>Answer eight questions about your AI use case to get its risk tier, the main risk scenarios and a checklist of the controls you need. The assessment follows the MindForge AI RMF and the CSA guidelines on securing AI systems.</p>
         <!-- Coming soon until the assessment is validated. Restore the link below when it is.
         <a href="/risk-assessment.html" class="btn">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -716,8 +707,8 @@
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L20 5"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/><path d="M8 7h5M8 11h3"/></svg>
         </span>
         <div class="download-label">Self-scored checklist</div>
-        <h3 class="trim">AI Safety Checklist</h3>
-        <p>Twenty-two plain-language steps to run AI safely, from reading the terms of service to keeping a kill switch. Tick what you already do, see where you stand, and start with the gaps that matter most. No technical knowledge needed.</p>
+        <h3 class="trim">AI safety checklist</h3>
+        <p>Twenty-two plain-language steps for running AI safely, from reading the terms of service to keeping a kill switch. You tick what you already do, and the checklist shows which gaps to close first. No technical knowledge is needed.</p>
         <!-- Coming soon until the assessment is validated. Restore the link below when it is.
         <a href="/checklist.html" class="btn">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -735,9 +726,8 @@
 <!-- ADVISORY COUNCIL -->
 <section class="section section-raised" id="council">
   <div class="section-inner">
-    <div class="eyebrow">Governance Body</div>
     <h2 class="trim">Founding Advisory Council</h2>
-    <p class="lead">The Advisory Council is the primary governance and direction-setting body of the Centre, providing strategic oversight, domain expertise, and institutional credibility across government, enterprise, cybersecurity, academia, and international partnerships.</p>
+    <p class="lead">The Advisory Council sets SafeAI.sg's direction and oversees its work. Its members come from government, enterprise, cybersecurity, academia and international partnerships.</p>
 
     <!-- LinkedIn: add href="https://www.linkedin.com/in/..." target="_blank" rel="noopener" to any card
          below to make it clickable. The "See LinkedIn" tooltip only shows on cards that have an href. -->
@@ -810,9 +800,9 @@
 <!-- CONTACT -->
 <section class="section" id="contact">
   <div class="section-inner">
-    <h2 class="trim" style="text-align:center;">Get In Touch</h2>
+    <h2 class="trim" style="text-align:center;">Get in touch</h2>
     <div class="contact-box">
-      <p>Whether you want to join the Advisory Council, explore a technology associate partnership, or simply stay informed about SafeAI.sg's progress, we would like to hear from you.</p>
+      <p>Contact us if you want to join the Advisory Council, become a technology associate or hear about SafeAI.sg's progress.</p>
       <div class="contact-cards">
         <div class="contact-person" role="button" tabindex="0" data-tip="Click to copy email" data-email="david@wahspark.com">
           <img class="contact-avatar" src="SAFEAI_PHOTO/david-chin.jpg" alt="David Chin" style="transform: scale(0.96) translate(8%, 5%);" />
@@ -849,7 +839,7 @@
   <div class="footer-inner">
     <div>
       <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="footer-logo" />
-      <p class="footer-desc">Singapore's industry-led Centre of Excellence for AI technical safety and practical governance. Anchored at Punggol Digital District with institutional support from government agencies and industry partners.</p>
+      <p class="footer-desc">Singapore's industry-led Centre of Excellence for AI technical safety and governance. It is based at Punggol Digital District and supported by government agencies and industry partners.</p>
       <p class="footer-tag">Grounded in proportionality, practicality, and independence</p>
     </div>
     <div class="footer-contact">

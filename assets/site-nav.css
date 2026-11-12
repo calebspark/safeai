@@ -75,3 +75,12 @@
 }
 
 @media print { .sn-bar { display: none !important; } }
+
+/* External links in the menu (Pulse AI): a small arrow says it leaves the site. */
+.sn-ext { display: inline-flex; align-items: center; gap: .4em; }
+.sn-ext-ico { width: .85em; height: .85em; flex: none; opacity: .65; }
+.sn-ext:hover .sn-ext-ico { opacity: 1; }
+.sn-sr {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
