@@ -1,0 +1,77 @@
+/* SafeAI.sg site menu. One file, linked by every page, so the bar is the
+   same everywhere. It carries its own tokens (--sn-*) and only uses .sn-*
+   classes, so a page's own styles cannot change it and it cannot change them.
+   Markup lives in each page between the "site-nav" comments; edit all five
+   together (index.html, risk-assessment.html, checklist.html,
+   risk-studio/index.html, harness/index.html). */
+:root {
+  --sn-bg: rgba(12,12,14,.86);
+  --sn-solid: #0c0c0e;
+  --sn-surface: #161618;
+  --sn-surface-2: #202023;
+  --sn-ink: #f4f4f5;
+  --sn-ink-2: #a1a1aa;
+  --sn-line: rgba(255,255,255,.06);
+  --sn-ring: #FF991C;
+  --sn-shadow: 0 24px 50px -18px rgba(0,0,0,.72);
+  --sn-font: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+  --sn-h: 88px;
+  --sn-z: 100;
+}
+@media (max-width: 900px) { :root { --sn-h: 64px; } }
+
+.sn-bar {
+  position: sticky; top: 0; z-index: var(--sn-z);
+  background: var(--sn-bg);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--sn-line);
+  font-family: var(--sn-font);
+}
+.sn-wrap {
+  max-width: 1216px; margin: 0 auto; padding: 0 48px;
+  height: var(--sn-h);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.sn-brand { display: flex; align-items: center; flex: none; text-decoration: none; }
+.sn-logo { height: 44px; width: auto; display: block; }
+.sn-links { display: flex; align-items: center; gap: 4px; }
+.sn-link {
+  font: 600 15px/1 var(--sn-font);
+  color: var(--sn-ink-2); text-decoration: none; white-space: nowrap;
+  padding: 12px 18px; border-radius: 10px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .18s ease, color .18s ease;
+}
+.sn-link:hover { background: var(--sn-surface); color: var(--sn-ink); }
+.sn-link:active { background: var(--sn-surface-2); }
+.sn-link[aria-current="page"] { background: var(--sn-surface); color: var(--sn-ink); }
+.sn-link:focus-visible, .sn-toggle:focus-visible, .sn-brand:focus-visible {
+  outline: 2px solid var(--sn-ring); outline-offset: 2px;
+}
+.sn-toggle {
+  display: none; width: 44px; height: 44px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--sn-ink); cursor: pointer;
+  align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;
+}
+.sn-toggle:hover { background: var(--sn-surface); }
+.sn-toggle:active { background: var(--sn-surface-2); }
+.sn-toggle svg { width: 24px; height: 24px; display: block; }
+.sn-toggle .sn-close { display: none; }
+
+@media (max-width: 900px) {
+  .sn-wrap { padding: 0 20px; }
+  .sn-logo { height: 34px; }
+  .sn-toggle { display: inline-flex; }
+  .sn-links {
+    display: none; position: absolute; left: 0; right: 0; top: 100%;
+    flex-direction: column; align-items: stretch; gap: 0;
+    background: var(--sn-solid); border-bottom: 1px solid var(--sn-line);
+    padding: 8px 16px 16px; box-shadow: var(--sn-shadow);
+  }
+  .sn-link { padding: 16px 12px; font-size: 17px; }
+  .sn-bar.is-open .sn-links { display: flex; }
+  .sn-bar.is-open .sn-open { display: none; }
+  .sn-bar.is-open .sn-close { display: block; }
+}
+
+@media print { .sn-bar { display: none !important; } }

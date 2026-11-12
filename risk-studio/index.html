@@ -55,9 +55,25 @@
       --fs-base: 17px;
     }
     @media (min-width:1024px){ :root{ --fs-base:15px; } }
+    /* The site is dark on every page, the same canvas as the homepage and
+       Harness. The light values above stay as the print palette: this block is
+       screen-only, so a printed page still lands on white. */
+    @media screen {
+      :root {
+        color-scheme: dark;
+        --bg:#0c0c0e; --surface-1:#161618; --surface-2:#202023; --surface-3:#2a2a2e;
+        --ink:#f4f4f5; --ink-2:#a1a1aa; --ink-3:#8b8b94;
+        --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.13);
+        --nav-bg:rgba(12,12,14,.86);
+        --shadow-card:0 0 0 1px var(--line), 0 14px 34px -18px rgba(0,0,0,.55);
+        --shadow-pop:0 0 0 1px var(--line-2), 0 24px 50px -18px rgba(0,0,0,.72);
+        --focus:#FF991C; --raised:#121214;
+        --t3:#ffb35c; --t3-soft:rgba(255,153,28,.14); --t3-line:rgba(255,153,28,.36);
+      }
+    }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 96px; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--sn-h) + 24px); }
     /* Hard floor: nothing widens the page. clip, not hidden, so sticky works. */
     html, body { overflow-x: clip; }
     body { background: var(--bg); color: var(--ink); font: 400 var(--fs-base)/1.6 var(--font-sans); -webkit-font-smoothing: antialiased; }
@@ -66,45 +82,6 @@
     p { max-width: 68ch; }
     .wrap { max-width: 1120px; margin: 0 auto; padding-left: var(--s5); padding-right: var(--s5); }
 
-    /* ── SafeAI.sg site menu (same bar as the other light pages) ── */
-    .site-nav {
-      position: sticky; top: 0; z-index: var(--z-sticky);
-      background: var(--nav-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--line);
-    }
-    .site-nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: var(--s4); }
-    .nav-brand { display: flex; align-items: center; }
-    .nav-logo { height: 40px; width: auto; display: block; }
-    .nav-links { display: flex; align-items: center; gap: var(--s1); }
-    .nav-link {
-      font: 600 calc(var(--fs-base)*.93)/1 var(--font-display); color: var(--ink-2); white-space: nowrap;
-      padding: 12px 16px; border-radius: var(--r-sm); transition: background .18s ease, color .18s ease;
-    }
-    .nav-link:hover { background: var(--surface-2); color: var(--ink); }
-    .nav-link:active { background: var(--surface-3); }
-    .nav-link[aria-current="page"] { color: var(--ink); background: var(--surface-2); }
-    .nav-toggle {
-      display: none; width: 44px; height: 44px; border: 0; border-radius: var(--r-sm); background: transparent;
-      color: var(--ink); cursor: pointer; align-items: center; justify-content: center;
-    }
-    .nav-toggle:hover { background: var(--surface-2); }
-    .nav-toggle svg { width: 24px; height: 24px; }
-    .nav-toggle .close { display: none; }
-    @media (max-width: 900px) {
-      .site-nav .wrap { height: 64px; }
-      .nav-logo { height: 34px; }
-      .nav-toggle { display: inline-flex; }
-      .nav-links {
-        display: none; position: absolute; left: 0; right: 0; top: 100%;
-        flex-direction: column; align-items: stretch; gap: 0;
-        background: var(--surface-1); border-bottom: 1px solid var(--line); padding: var(--s2) var(--s4) var(--s4);
-        box-shadow: var(--shadow-pop);
-      }
-      .nav-links .nav-link { padding: 14px 12px; font-size: var(--fs-base); }
-      .site-nav.is-open .nav-links { display: flex; }
-      .site-nav.is-open .nav-toggle .open { display: none; }
-      .site-nav.is-open .nav-toggle .close { display: block; }
-    }
 
     /* ── Studio header: brand and in-page anchors ── */
     .studio-head .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s4); padding-top: var(--s5); padding-bottom: var(--s5); }
@@ -136,13 +113,13 @@
        with the deeper shadow rather than merging into the card. */
     .card .btn:not(.btn-accent) { box-shadow: var(--shadow-pop); }
     .btn-sm { padding: 8px 16px; font-size: calc(var(--fs-base)*.9); }
-    .btn:focus-visible, .nav-link:focus-visible, .nav-toggle:focus-visible,
+    .btn:focus-visible,
     .studio-brand:focus-visible, .studio-anchors a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
     /* ── Section scaffolding ── */
     .eyebrow { font: 600 calc(var(--fs-base)*.86)/1.3 var(--font-display); color: var(--ink-3); }
     .section { padding: var(--s8) 0; }
-    .section-raised { background: var(--surface-2); }
+    .section-raised { background: var(--raised, var(--surface-2)); }
     .sec-head { display: flex; flex-direction: column; gap: var(--s3); max-width: 680px; margin-bottom: var(--s6); }
     .sec-head h2 { font-size: calc(var(--fs-base)*2.2); line-height: 1.12; }
     .sec-head p { font-size: calc(var(--fs-base)*1.08); color: var(--ink-2); }
@@ -248,31 +225,29 @@
     }
     @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
   </style>
+<link rel="stylesheet" href="/assets/site-nav.css" />
 </head>
 <body>
 
 <!-- SafeAI.sg main menu -->
-<nav class="site-nav" id="siteNav" aria-label="SafeAI.sg">
-  <div class="wrap">
-    <a href="/" class="nav-brand">
-      <!-- Dark wordmark for a white bar; safeai-logo-trim.png is the white artwork for dark bars. -->
-      <img src="/safeai-logo-print.png" alt="SafeAI.sg" class="nav-logo" />
-    </a>
-    <div class="nav-links" id="navLinks">
-      <a href="/risk-studio/" class="nav-link" aria-current="page">Risk Studio</a>
-      <a href="https://pulse-ai-opportunity-pulse.replit.app/" class="nav-link">Pulse AI</a>
-      <a href="/harness/" class="nav-link">Harness</a>
-      <a href="/#mission" class="nav-link">Mission</a>
-      <a href="/#downloads" class="nav-link">Resources</a>
-      <a href="/#council" class="nav-link">Who we are</a>
-      <a href="/#contact" class="nav-link">Contact us</a>
-    </div>
-    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
-      <svg class="open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      <svg class="close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+<!-- site-nav: shared markup. Styles in /assets/site-nav.css, behaviour in /assets/site-nav.js. Keep all five pages identical. -->
+<header class="sn-bar" id="snBar">
+  <div class="sn-wrap">
+    <a href="/" class="sn-brand" aria-label="SafeAI.sg home"><img src="/safeai-logo-trim.png" alt="SafeAI.sg" class="sn-logo" /></a>
+    <nav class="sn-links" id="snLinks" aria-label="SafeAI.sg">
+      <a href="/risk-studio/" class="sn-link">Risk Studio</a>
+      <a href="https://pulse-ai-opportunity-pulse.replit.app/" class="sn-link">Pulse AI</a>
+      <a href="/harness/" class="sn-link">Harness</a>
+      <a href="/#council" class="sn-link">Who we are</a>
+      <a href="/#contact" class="sn-link">Contact us</a>
+    </nav>
+    <button class="sn-toggle" id="snToggle" type="button" aria-expanded="false" aria-controls="snLinks" aria-label="Open menu">
+      <svg class="sn-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="sn-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
-</nav>
+</header>
+<!-- /site-nav -->
 
 <!-- Studio header -->
 <header class="studio-head">
@@ -532,21 +507,7 @@
     if (url) a.setAttribute('href', url);
   });
 
-  // Mobile menu
-  (function () {
-    var nav = document.getElementById('siteNav'), btn = document.getElementById('navToggle');
-    if (!nav || !btn) return;
-    btn.addEventListener('click', function () {
-      var open = nav.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    });
-    nav.addEventListener('click', function (e) {
-      if (e.target.closest && e.target.closest('.nav-link')) {
-        nav.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false');
-      }
-    });
-  })();
 </script>
+<script src="/assets/site-nav.js" defer></script>
 </body>
 </html>

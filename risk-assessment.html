@@ -109,6 +109,32 @@
     /* Was 13px. Too small to read from the back of a room once the page is on
        a projector, and nearly every size on this page is derived from it. */
     @media (min-width:1024px){ :root{ --fs-base:15px; } }
+    /* The site is dark on every page, the same canvas as the homepage and
+       Harness. The light values above stay as the print palette: this block is
+       screen-only, so a printed page still lands on white. */
+    @media screen {
+      :root {
+        color-scheme: dark;
+        --bg:#0c0c0e; --surface-1:#161618; --surface-2:#202023; --surface-3:#2a2a2e;
+        --ink:#f4f4f5; --ink-2:#a1a1aa; --ink-3:#8b8b94;
+        --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.13);
+        --nav-bg:rgba(12,12,14,.86);
+        --shadow-card:0 0 0 1px var(--line), 0 14px 34px -18px rgba(0,0,0,.55);
+        --shadow-pop:0 0 0 1px var(--line-2), 0 24px 50px -18px rgba(0,0,0,.72);
+        --accent-text:#ffab45; --accent-text-2:#FF991C;
+        --info:#7cb3ff;    --info-soft:rgba(59,130,246,.14);    --info-line:rgba(59,130,246,.40);
+        --success:#3ecf8e; --success-soft:rgba(18,161,80,.14);  --success-line:rgba(18,161,80,.40);
+        --warn:#f2c14e;    --warn-soft:rgba(242,183,5,.12);     --warn-line:rgba(242,183,5,.36);
+        --danger:#ff8a80;  --danger-soft:rgba(229,53,43,.14);   --danger-line:rgba(229,53,43,.42);
+        --raise:0 0 0 1px var(--line), 0 8px 20px -16px rgba(0,0,0,.60);
+        --chk-line:rgba(255,255,255,.32);
+        --pick-ring:rgba(255,255,255,.16);
+        --t1:#3ecf8e; --t1-soft:rgba(18,161,80,.14);  --t1-line:rgba(18,161,80,.40);
+        --t2:#f2c14e; --t2-soft:rgba(242,183,5,.12);  --t2-line:rgba(242,183,5,.36);
+        --t3:#ffb35c; --t3-soft:rgba(255,153,28,.14); --t3-line:rgba(255,153,28,.36);
+        --t4:#ff8a80; --t4-soft:rgba(229,53,43,.14);  --t4-line:rgba(229,53,43,.42);
+      }
+    }
 
     *{ box-sizing:border-box; }
     html{ scroll-behavior:smooth; }
@@ -131,17 +157,6 @@
     ion-icon{ display:inline-block; }
     .with-icon{ display:inline-flex; align-items:center; gap:.5em; }
 
-    /* ---------- top bar (matches landing nav) ---------- */
-    nav{ position:sticky; top:0; z-index:var(--z-sticky); background:var(--nav-bg); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:104px; }
-    .nav-brand{ display:flex; align-items:center; text-decoration:none; }
-    .nav-logo{ height:46px; width:auto; display:block; }
-    .nav-links{ display:flex; align-items:center; gap:8px; }
-    .nav-link{ font:600 var(--fs-base)/1 var(--font-display); text-box:trim-both cap alphabetic; color:var(--ink-2); text-decoration:none; padding:12px 24px; border-radius:var(--r-sm); background:transparent; cursor:pointer; transition:background .18s ease, color .18s ease; }
-    .nav-link:hover{ background:var(--surface-1); color:var(--ink); }
-    .nav-link:active{ background:var(--surface-2); }
-    .nav-link:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-    .nav-right{ display:flex; align-items:center; gap:24px; }
-    @media (max-width:640px){ nav{ padding:0 20px; height:72px; } .nav-logo{ height:38px; } .nav-links{ display:none; } }
 
     /* ---------- hero ---------- */
     .hero{ padding:64px 0 var(--s6); }
@@ -529,7 +544,8 @@
     .picker-back:hover{ background:var(--surface-3); color:var(--ink); }
     .picker-back:active{ transform:translateY(1px); }
     .picker-back:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-    .pill.group{ font-weight:600; color:var(--ink); }
+    .pill.group{ font-weight:600; }
+    .pill.group:not([aria-checked="true"]):not([aria-pressed="true"]){ color:var(--ink); }
     /* "Not listed" is an escape hatch, not an option. It reads as a quiet text
        link: no fill, no stroke, no padding, so it never competes with the
        real choices sitting next to it. */
@@ -743,6 +759,7 @@
 
     @media (prefers-reduced-motion:reduce){ *{ transition:none!important; animation:none!important; } }
   </style>
+<link rel="stylesheet" href="/assets/site-nav.css" />
 </head>
 <body data-view="main">
 
@@ -792,23 +809,24 @@
   pass.focus();
 })();
 </script>
-  <nav>
-    <a href="/index.html" class="nav-brand">
-      <!-- The dark wordmark, not safeai-logo-trim.png: that one is white
-           artwork for a dark bar and disappears entirely on a white one. -->
-      <img src="safeai-logo-print.png" alt="SafeAI.sg" class="nav-logo" />
-    </a>
-    <div class="nav-right">
-      <div class="nav-links">
-        <a href="/risk-studio/" class="nav-link">Risk Studio</a>
-        <a href="/harness/" class="nav-link">Harness</a>
-        <a href="/index.html#mission" class="nav-link">Mission</a>
-        <a href="/index.html#downloads" class="nav-link">Resources</a>
-        <a href="/index.html#council" class="nav-link">Who we are</a>
-        <a href="/index.html#contact" class="nav-link">Contact us</a>
-      </div>
-    </div>
-  </nav>
+<!-- site-nav: shared markup. Styles in /assets/site-nav.css, behaviour in /assets/site-nav.js. Keep all five pages identical. -->
+<header class="sn-bar" id="snBar">
+  <div class="sn-wrap">
+    <a href="/" class="sn-brand" aria-label="SafeAI.sg home"><img src="/safeai-logo-trim.png" alt="SafeAI.sg" class="sn-logo" /></a>
+    <nav class="sn-links" id="snLinks" aria-label="SafeAI.sg">
+      <a href="/risk-studio/" class="sn-link">Risk Studio</a>
+      <a href="https://pulse-ai-opportunity-pulse.replit.app/" class="sn-link">Pulse AI</a>
+      <a href="/harness/" class="sn-link">Harness</a>
+      <a href="/#council" class="sn-link">Who we are</a>
+      <a href="/#contact" class="sn-link">Contact us</a>
+    </nav>
+    <button class="sn-toggle" id="snToggle" type="button" aria-expanded="false" aria-controls="snLinks" aria-label="Open menu">
+      <svg class="sn-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="sn-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+</header>
+<!-- /site-nav -->
 
   <section class="hero">
     <div class="wrap">
@@ -3498,5 +3516,6 @@ function replay(d){
 
 restoreSession();
 </script>
+<script src="/assets/site-nav.js" defer></script>
 </body>
 </html>

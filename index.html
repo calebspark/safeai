@@ -70,7 +70,7 @@
       --t-h1:   calc(var(--fs-base) * 1.92);
     } }
 
-    html { scroll-behavior: smooth; -webkit-text-size-adjust:100%; scroll-padding-top: 120px; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust:100%; scroll-padding-top: calc(var(--sn-h) + 24px); }
     /* Hard floor: nothing widens the page. clip, not hidden, so sticky still works. */
     html, body { overflow-x: clip; }
     .btn[aria-disabled="true"] { pointer-events:none; opacity:.55; background: var(--surface-2); box-shadow:none; }
@@ -145,31 +145,6 @@
     .btn-accent:active { transform: translateY(1px) scale(.985); }
     .btn-sm { --btn-py:9px; border-radius: var(--r-sm); font-size: var(--t-cap); }
 
-    /* ── NAV ── */
-    nav {
-      position: sticky; top:0; z-index:100;
-      background: rgba(12,12,14,.82);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--line);
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 0 48px; height: 104px;
-    }
-    .nav-brand { display:flex; align-items:center; text-decoration:none; }
-    .nav-logo { height:46px; width:auto; display:block; }
-    .nav-links { display:flex; align-items:center; gap:8px; }
-    .nav-link {
-      font:600 var(--t-body)/1 var(--font);
-      text-box: trim-both cap alphabetic;
-      color: var(--ink-2); text-decoration:none;
-      padding: 12px 24px; border-radius: var(--r-sm);
-      background: transparent; cursor:pointer;
-      -webkit-tap-highlight-color:transparent;
-      transition: background .18s ease, color .18s ease;
-    }
-    .nav-link:hover { background: var(--surface-1); color: var(--ink); }
-    .nav-link:active { background: var(--surface-2); }
-    .nav-link:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-    .nav-right { display:flex; align-items:center; gap:24px; }
 
     /* ── layout shell ── */
     .section { padding: 96px 52px; }
@@ -193,15 +168,6 @@
     .hero-cta { display:flex; gap: var(--s4); flex-wrap:wrap; }
     .hero-cta .btn { --btn-py: 15px; }
 
-    /* ── mobile menu toggle (shown under 900px, see TABLET block) ── */
-    .nav-toggle {
-      display:none; width:44px; height:44px; border:0; border-radius: var(--r-sm);
-      background: transparent; color: var(--ink); cursor:pointer;
-      align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent;
-    }
-    .nav-toggle .ico { width:24px; height:24px; }
-    .nav-toggle .close { display:none; }
-    .nav-toggle:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 
     /* ── RISK STUDIO SHOWCASE (sits under the hero, copy from the studio mock-up) ── */
     .studio { padding: 0 52px 96px; }
@@ -471,9 +437,6 @@
 
     /* ── TABLET ── */
     @media (max-width:900px){
-      nav { padding: 0 20px; height:72px; }
-      .nav-logo { height:38px; width:auto; }
-      .nav-links { display:none; }
       .section { padding: 64px 24px; }
       .hero { padding: 64px 24px 56px; }
       .hero-logo { width: min(380px, 90vw); }
@@ -483,24 +446,9 @@
       .footer-logo { width:240px; }
       .footer-inner { grid-template-columns: 1fr; gap: var(--s6); }
     }
-    @media (max-width:900px){
-      .nav-toggle { display:inline-flex; }
-      .nav-links {
-        position:absolute; left:0; right:0; top:100%;
-        flex-direction:column; align-items:stretch; gap:0;
-        background: var(--bg); border-bottom:1px solid var(--line);
-        padding: 8px 16px 16px; box-shadow: var(--shadow-pop);
-      }
-      .nav-links .nav-link { padding: 14px 12px; font-size: var(--t-body); }
-      nav.is-open .nav-links { display:flex; }
-      nav.is-open .nav-toggle .open { display:none; }
-      nav.is-open .nav-toggle .close { display:block; }
-    }
 
     /* ── MOBILE ── */
     @media (max-width:600px){
-      nav { padding: 0 16px; height:56px; }
-      .nav-logo { height:32px; width:auto; }
       .section { padding: 56px 20px; }
 
       /* dial the new breathing room back to a mobile-proportionate scale */
@@ -531,30 +479,29 @@
 
     @media (prefers-reduced-motion:reduce){ *{ animation-duration:.01ms!important; transition:none!important; } }
   </style>
+<link rel="stylesheet" href="/assets/site-nav.css" />
 </head>
 <body>
 
 <!-- NAV -->
-<nav>
-  <a href="#" class="nav-brand">
-    <img src="safeai-logo-trim.png" alt="SafeAI.sg" class="nav-logo" />
-  </a>
-  <div class="nav-right">
-    <div class="nav-links" id="navLinks">
-      <a href="/risk-studio/" class="nav-link">Risk Studio</a>
-      <a href="https://pulse-ai-opportunity-pulse.replit.app/" class="nav-link">Pulse AI</a>
-      <a href="/harness/" class="nav-link">Harness</a>
-      <a href="#mission" class="nav-link">Mission</a>
-      <a href="#downloads" class="nav-link">Resources</a>
-      <a href="#council" class="nav-link">Who we are</a>
-      <a href="#contact" class="nav-link">Contact us</a>
-    </div>
-    <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
-      <svg class="ico open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      <svg class="ico close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+<!-- site-nav: shared markup. Styles in /assets/site-nav.css, behaviour in /assets/site-nav.js. Keep all five pages identical. -->
+<header class="sn-bar" id="snBar">
+  <div class="sn-wrap">
+    <a href="/" class="sn-brand" aria-label="SafeAI.sg home"><img src="/safeai-logo-trim.png" alt="SafeAI.sg" class="sn-logo" /></a>
+    <nav class="sn-links" id="snLinks" aria-label="SafeAI.sg">
+      <a href="/risk-studio/" class="sn-link">Risk Studio</a>
+      <a href="https://pulse-ai-opportunity-pulse.replit.app/" class="sn-link">Pulse AI</a>
+      <a href="/harness/" class="sn-link">Harness</a>
+      <a href="/#council" class="sn-link">Who we are</a>
+      <a href="/#contact" class="sn-link">Contact us</a>
+    </nav>
+    <button class="sn-toggle" id="snToggle" type="button" aria-expanded="false" aria-controls="snLinks" aria-label="Open menu">
+      <svg class="sn-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="sn-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
-</nav>
+</header>
+<!-- /site-nav -->
 
 <!-- HERO -->
 <section class="hero">
@@ -1039,22 +986,6 @@
   })();
 </script>
 
-<script>
-  // Mobile menu: the hamburger shows the same links as the desktop bar.
-  (function () {
-    var nav = document.querySelector('nav'), btn = document.getElementById('navToggle');
-    if (!nav || !btn) return;
-    btn.addEventListener('click', function () {
-      var open = nav.classList.toggle('is-open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    });
-    nav.addEventListener('click', function (e) {
-      if (e.target.closest && e.target.closest('.nav-link')) {
-        nav.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Open menu');
-      }
-    });
-  })();
-</script>
+<script src="/assets/site-nav.js" defer></script>
 </body>
 </html>
