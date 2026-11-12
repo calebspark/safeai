@@ -84,3 +84,40 @@
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
 }
+
+/* Hover hints on Risk Studio, Pulse AI and Harness. Desktop: a tooltip under
+   the link after a short delay, also on keyboard focus. Phone menu: the same
+   text as a second line under the link, since there is no hover. */
+.sn-link[data-sn-tip] { position: relative; }
+@media (min-width: 901px) {
+  .sn-link[data-sn-tip]::after {
+    content: attr(data-sn-tip);
+    position: absolute; top: calc(100% + 10px); left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    width: max-content; max-width: 260px;
+    padding: 10px 14px; border-radius: 10px;
+    background: var(--sn-surface-2); color: var(--sn-ink);
+    box-shadow: var(--sn-shadow), 0 0 0 1px var(--sn-line);
+    font: 500 13px/1.45 var(--sn-font); white-space: normal; text-align: left;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .15s ease, transform .15s ease, visibility 0s linear .15s;
+    z-index: calc(var(--sn-z) + 1);
+  }
+  .sn-link[data-sn-tip]:hover::after,
+  .sn-link[data-sn-tip]:focus-visible::after {
+    opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+    transition: opacity .15s ease .35s, transform .15s ease .35s, visibility 0s linear .35s;
+  }
+  /* The last tipped link sits near the right edge; keep its tip on screen. */
+  .sn-link[data-sn-tip][href="/harness/"]::after { left: auto; right: 0; transform: translateY(-4px); }
+  .sn-link[data-sn-tip][href="/harness/"]:hover::after,
+  .sn-link[data-sn-tip][href="/harness/"]:focus-visible::after { transform: translateY(0); }
+}
+@media (max-width: 900px) {
+  .sn-link[data-sn-tip] { flex-wrap: wrap; row-gap: 0; }
+  .sn-link[data-sn-tip]::after {
+    content: attr(data-sn-tip);
+    flex-basis: 100%; display: block; margin-top: 6px;
+    font: 400 14px/1.45 var(--sn-font); color: var(--sn-ink-2); white-space: normal;
+  }
+}
